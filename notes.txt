@@ -1,0 +1,13 @@
+Things i might need
+- UML
+- TESTS
+- MVC
+
+
+----IDEA----
+Lets say if there is 10 out of 10 tiles
+the tiles where enemies can move should also split each tile into 10 more
+This is to allow more than one enemy on a single tile
+also to have smoother movement
+
+----IDEA----
