@@ -6,4 +6,4 @@ class TileType(Enum):
     tower = "Tower"
     
     def get_types():
-        return ["None", "Path", "Tower"]
+        return ["None", "Path", "Tower", "Start", "End"]
