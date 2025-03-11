@@ -80,15 +80,37 @@ class Map:
      
      
     # Function validates that From Start tile to End tile, there is a valid path
+    # TODO Might need this for enemy path creation
     def validate_boring_path(self):
         start_tile = self.get_map_start()
         end_tile = self.get_map_end()
         path_tiles = self.get_path_tiles()
         
+        end_reached = False
         
+        if start_tile == None or end_tile == None or path_tiles == None:
+            return end_reached
         
+        while end_reached == False:
+            available_move = [tile for tile in path_tiles if 
+                              abs(tile.x - start_tile.x) == 0 and abs(tile.y - start_tile.y) == 1 or
+                              abs(tile.x - start_tile.x) == 1 and abs(tile.y - start_tile.y) == 0
+                            ]
+            
+            # TODO currently it does not work properly it cant work with 2 paths next to each other
+            if len(available_move) == 1:
+                path_tiles.remove(available_move[0])
+                start_tile = available_move[0]
+            else:
+                return end_reached
+            
+            if len(path_tiles) == 0:
+                if (abs(end_tile.x - start_tile.x) == 0 and abs(end_tile.y - start_tile.y) == 1 or
+                    abs(end_tile.x - start_tile.x) == 1 and abs(end_tile.y - start_tile.y) == 0):
+                    end_reached = True
         
-    
+        return end_reached
+
     
     # TODO Create multiple possible paths
     def validate_chaos_path(self):

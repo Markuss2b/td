@@ -27,3 +27,6 @@ print(end.type, end.x, end.y)
 
 path_tiles = new_map.get_path_tiles()
 print(path_tiles)
+
+valid = new_map.validate_boring_path()
+print(valid)
