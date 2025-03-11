@@ -1,6 +1,7 @@
 from model.tile import Tile
 from model.tile_type_enum import TileType
 import numpy as np
+import ast
 
 class Map:
     def __init__(self, name, x, y):
@@ -68,7 +69,7 @@ class Map:
             
             return lst[0]
         except:
-            print(f'There are {count_of_type} "{type}" tiles \n Invalid {type} usage')
+            print(f'There are {count_of_type} "{type}" tiles \nInvalid {type} usage')
     # Section ends
      
     def get_path_tiles(self):
@@ -120,9 +121,8 @@ class Map:
         f = open(f'./maps/{self.name}.txt', "w")
         for i in self.tiles:
             for j in i:
-                f.write(f'{j.type} ')
+                f.write(f'{j.type},{j.walls[0]},{j.walls[1]},{j.walls[2]},{j.walls[3]} ')
             f.write("\n")
-            
         f.close()
         
     
@@ -134,7 +134,7 @@ class Map:
         
         # Copies a Map object values from a map file
         with open(f'./maps/{name}.txt', "r") as map_file:
-            type_list = [line.split() for line in map_file if line.split() != []]
+            type_list = [[l.split(",") for l in line.split()] for line in map_file if line.split() != []]
             self.x = len(type_list[0])
             self.y = len(type_list)
             
@@ -152,10 +152,14 @@ class Map:
                         raise Exception
 
                     for j in range(len(type_list[i])):
-                        if not type_list[i][j] in all_types:
+                        if not type_list[i][j][0] in all_types:
                             raise Exception
                         
-                        self.tiles[i].append(Tile(type_list[i][j], j, i))
+                        # Example: Start, 0, 0, [False, False, False, False]
+                        self.tiles[i].append(Tile(type_list[i][j][0], j, i, [
+                                ast.literal_eval(type_list[i][j][1]), ast.literal_eval(type_list[i][j][2]), ast.literal_eval(type_list[i][j][3]), ast.literal_eval(type_list[i][j][4])
+                            ]
+                        ))
                 except:
                     corrupt_file = True
                     print("File has been edited")

@@ -9,12 +9,13 @@ Inheritance ?
 # TODO walls are needed for Start/End/Path tiles
 
 class Tile:
-    def __init__(self, type, x, y):
+    def __init__(self, type, x, y, walls):
         self.type = type
         self.x = x
         self.y = y
         #             NORTH  EAST   SOUTH  WEST
-        self.walls = [False, False, False, False]
+        # self.walls = [False, False, False, False]
+        self.walls = walls
         
     def change_type(self, type):
         self.type = type
