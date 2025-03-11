@@ -2,9 +2,6 @@ from model.tile import Tile
 from model.tile_type_enum import TileType
 import numpy as np
 
-# TODO for creating map
-
-
 class Map:
     def __init__(self, name, x, y):
         self.name = name
@@ -98,6 +95,7 @@ class Map:
                             ]
             
             # TODO currently it does not work properly it cant work with 2 paths next to each other
+            # TODO check for walls
             if len(available_move) == 1:
                 path_tiles.remove(available_move[0])
                 start_tile = available_move[0]
@@ -117,6 +115,7 @@ class Map:
         pass
     
     
+    # TODO save walls
     def save_map(self):
         f = open(f'./maps/{self.name}.txt', "w")
         for i in self.tiles:
@@ -126,7 +125,8 @@ class Map:
             
         f.close()
         
-        
+    
+    # TODO add walls    
     def recreate_map_from_file(self, name):
         corrupt_file = False
         all_types = TileType.get_types()

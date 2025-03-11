@@ -28,3 +28,6 @@ Same with End tile
 Create the ability to place multiple Paths next to each other
 One way that probably doesnt work is with a buffer zone between tiles
 Perhaps a better way would be to add the ability to create a ghost wall on tiles NorthESW
+
+----TODO----
+1. Tiles
