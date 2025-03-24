@@ -1,4 +1,4 @@
-from model.path import Path
+from model.map.path import Path
 
 # path1 = Path("testing", 10, 10)
 # path1.make_empty_path()

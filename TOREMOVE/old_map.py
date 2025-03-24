@@ -1,5 +1,5 @@
-from model.tile import Tile
-from model.tile_type_enum import TileType
+from model.map.visual_map import Tile_type
+from model.map.tile_type_enum import TileType
 import numpy as np
 import ast
 
