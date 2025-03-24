@@ -110,8 +110,7 @@ class Path:
                     value = int(txt_file_list[y][x])
                     
                     self.path_tiles[y].append(value)
-                    if value == 1:
-                        self.start_location = Location(x, y)
+
                     if value > 0:
                         dict_sequence[value] = Location(x, y)
                  
@@ -120,9 +119,12 @@ class Path:
             for dict_key in sorted_dict_sequence:
                 self.sequence.append(sorted_dict_sequence.get(dict_key))
             
-            # Prints it
-            for i in self.sequence:
-                print(f'x={i.x}, y={i.y}')
+            self.start_location = self.sequence[0]
+            self.end_location = self.sequence[-1]
+            
+            # Prints sequence coordinates
+            # for i in self.sequence:
+            #     print(f'x={i.x}, y={i.y}')
 
     
     def validate_path(self):

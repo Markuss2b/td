@@ -14,6 +14,10 @@ class Map:
     def create_map_files(self):
         pass    
         
+    def tower_auto_x_path_tiles(self, path):
+        # TODO automatically cross out the possibility to place towers on all path tiles 
+        pass    
+        
     def save_map(self):
         pass   
         
