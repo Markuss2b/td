@@ -38,19 +38,20 @@ class Path:
     
     
     def add_next_step(self, x, y):
-        last_move = self.sequence[-1]
         try:
-            # If statements check if next step is connected with the last move. Also it checks if its out of bounds
-            if abs(last_move.x - x) == 0 and abs(last_move.y - y) == 1 or abs(last_move.x - x) == 1 and abs(last_move.y - y) == 0:
-                if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
-                    self.sequence.append(Location(x, y))
-                    self.path_tiles[y][x] = len(self.sequence)
+            last_move = self.sequence[-1]
+            if not self.start_location == None and not self.end_location != None:
+                # If statements check if next step is connected with the last move. Also it checks if its out of bounds
+                if abs(last_move.x - x) == 0 and abs(last_move.y - y) == 1 or abs(last_move.x - x) == 1 and abs(last_move.y - y) == 0:
+                    if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
+                        self.sequence.append(Location(x, y))
+                        self.path_tiles[y][x] = len(self.sequence)
+                    else:
+                        raise Exception
                 else:
                     raise Exception
             else:
-                raise Exception
-            if self.start_location == None:
-                raise Exception
+                raise Exception                
         except Exception:
             # TODO     
             print("Cant connect moves")
@@ -79,7 +80,7 @@ class Path:
     #TODO add_step
     def set_end(self, x, y):
         if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
-            # Only remove previous value when start_location has not been set
+            # Only remove previous value when end_location has not been set
             if self.end_location != None:
                 self.path_tiles[self.end_location.y][self.end_location.x] = 0
             
@@ -91,7 +92,12 @@ class Path:
     
     
     def save_path(self, map_name):
-        os.mkdir(f'./all_maps/{map_name}/paths')
+        
+        # If paths directory doesn't exist, then create one
+        paths_dir = f'./all_maps/{map_name}/paths'
+        if not os.path.isdir(paths_dir):
+            os.mkdir(paths_dir)
+            
         f = open(f'./all_maps/{map_name}/paths/{self.name}.txt', "w")
         for i in range(len(self.path_tiles)):
             for j in range(len(self.path_tiles[i])):
@@ -129,7 +135,10 @@ class Path:
                 self.sequence.append(sorted_dict_sequence.get(dict_key))
             
             self.start_location = self.sequence[0]
-            self.end_location = self.sequence[-1]
+            
+            # Otherwise the start and end will be at the same location
+            if len(self.sequence) > 1:
+                self.end_location = self.sequence[-1]
             
             # Prints sequence coordinates
             # for i in self.sequence:

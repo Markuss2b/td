@@ -1,3 +1,4 @@
+import os
 from model.map.path import Path, Location
 from model.map.visual_map import Visual_map
 from model.map.tower_availability_map import Tower_availability
@@ -12,6 +13,32 @@ class Map:
         self.paths = []
         self.visual_map = Visual_map(x, y)
         self.tower_availability_map = Tower_availability(x, y)
+        
+        
+    def create_map_folder(self):
+        dir_path = f'./all_maps/{self.name}'
+        
+        # If map directory doesn't exist, then create one
+        if not os.path.isdir(dir_path):
+            os.mkdir(dir_path)
+        
+        
+    def initialize_all_maps(self):
+        self.create_map_folder()
+        self.visual_map.create_empty_visual_map()
+        self.tower_availability_map.create_empty_tower_avail_map()
+        
+        first_path = Path("first_path", self.x, self.y)
+        first_path.make_empty_path()
+        
+        self.paths.append(first_path)
+        
+        
+    def get_visual_map(self):
+        return self.visual_map
+    
+    def get_tower_availability_map(self):
+        return self.tower_availability_map        
         
         
     def add_path(self, path_name):
@@ -42,7 +69,12 @@ class Map:
     def recreate_map_from_folder(self):
         self.visual_map.recreate_visual_map_from_file(self.name)
         
-        # From path folder, get paths
-        
+        # Path
+        all_path_dir = os.listdir(f'./all_maps/{self.name}/paths')
+        for path_i in range(len(all_path_dir)):
+            path_name = all_path_dir[path_i].replace(".txt", "")
+
+            self.paths.append(Path(path_name, self.x, self.y))
+            self.paths[path_i].recreate_path_from_file(self.name, path_name)
         
         self.tower_availability_map.recreate_tower_avail_map_from_file(self.name)
