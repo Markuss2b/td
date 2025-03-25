@@ -1,5 +1,6 @@
-# TODO might need to change indexes
 import os
+
+# TODO path vailidity, do i need it ?
 
 class Path:
     def __init__(self, name, max_x, max_y):
@@ -13,6 +14,13 @@ class Path:
         self.valid_path = False
         
         
+    def get_path_name(self):
+        return self.name
+    
+    def get_sequence(self):
+        return self.sequence
+        
+    
     def make_empty_path(self):
         for i in range(self.max_x):
             self.path_tiles.append([])
@@ -92,8 +100,9 @@ class Path:
         f.close()
 
     
-    def recreate_path_from_file(self, map_name):
-        with open(f'./all_maps/{map_name}/paths/{self.name}.txt', "r") as path_file:
+    # Copy or Load map from file
+    def recreate_path_from_file(self, map_name, path_name):
+        with open(f'./all_maps/{map_name}/paths/{path_name}.txt', "r") as path_file:
             # Predefined first value of sequence that needs to be removed when recreating the path from the file
             self.sequence.remove(None)
             
