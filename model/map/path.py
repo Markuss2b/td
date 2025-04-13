@@ -40,6 +40,7 @@ class Path:
     def add_next_step(self, x, y):
         try:
             last_move = self.sequence[-1]
+            # Can only add a step if start has been set, end has not been set
             if not self.start_location == None and not self.end_location != None:
                 # If statements check if next step is connected with the last move. Also it checks if its out of bounds
                 if abs(last_move.x - x) == 0 and abs(last_move.y - y) == 1 or abs(last_move.x - x) == 1 and abs(last_move.y - y) == 0:
@@ -70,6 +71,14 @@ class Path:
             # Only remove previous value when start_location has not been set
             if self.start_location != None:
                 self.path_tiles[self.start_location.y][self.start_location.x] = 0
+            
+            # If Sequence has been made, then changing start destroys the whole sequence 
+            # TODO Alternative, could lock changing start if the sequence is bigger than 1   
+            if len(self.sequence) > 1:
+                self.sequence.clear()
+                self.sequence.append(None)
+                self.path_tiles[self.end_location.y][self.end_location.x] = 0
+                self.end_location = None
                 
             self.start_location = Location(x, y)
             self.sequence[0] = self.start_location
