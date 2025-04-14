@@ -25,18 +25,34 @@ class MapCreator:
         self.td_map_creator_loop()
 
     def td_map_creator_loop(self):
-        
+        counter = 0
         while self.running:
+            counter += 1
+
             self.screen.fill((0,0,0))
             self.all_maps = os.listdir("all_maps")
 
             self.mx, self.my = pygame.mouse.get_pos()
 
             # TODO: NOT STATIC
-            # TODO: create Grid of all tiles 9x16 (144 buttons ?)
+            # TODO: create Grid of all tiles 16x9 (144 buttons ?)
             mapimg = pygame.image.load("images/Scenery2.png")
-            mapimg = pygame.transform.scale(mapimg, (1360, 870))
-            self.screen.blit(mapimg, (0, 30))
+            mapimg = pygame.transform.scale(mapimg, (1360, 765))
+            self.screen.blit(mapimg, (0, 80))
+
+            # Creating the tile map
+            tile_map = []
+            for y in range(9):
+                tile_y = y * 85 + 80
+                tile_size = 85
+                tile_map.append([])
+                for x in range(16):
+                    tile_x = x * 85
+                    if counter == 1:
+                        print(tile_y, tile_x)
+                    tile_rect = pygame.Rect(tile_x, tile_y, tile_size, tile_size)
+                    tile_map[y].append(tile_rect)
+
 
             top_border = pygame.Rect(0, 0, 1600, 30)
             pygame.draw.rect(self.screen, (0, 0, 255), top_border)
@@ -50,7 +66,7 @@ class MapCreator:
             pygame.draw.rect(self.screen, (122, 0, 0), seq2)
             pygame.draw.rect(self.screen, (122, 0, 0), seq3)
             pygame.draw.rect(self.screen, (122, 0, 0), seq4)
-
+            
             # minimize_top = pygame.Rect(0, 0, 30, 30)
             # pygame.draw.rect(screen, (0, 0, 0), minimize_top)
 
@@ -80,7 +96,7 @@ class MapCreator:
 
 
             # For now, have to manually add if i add any buttons
-            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence)
+            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map)
 
 
             draw_text("CREATOR", self.font, (255, 255, 255), self.screen, 900, 20)
@@ -112,9 +128,10 @@ class MapCreator:
             self.clock.tick(60)
 
 
-    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence):
+    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map):
 
         # Map menu pop up and its functionality
+        # FIXME: MAX 10 MAPS
         if self.load_map_menu == True:
             map_menu_left, map_menu_top, map_menu_width, map_menu_length = self.select_map_menu() 
             self.create_new_map(map_menu_left, map_menu_top, map_menu_width, map_menu_length)     
@@ -150,7 +167,14 @@ class MapCreator:
                     # TODO: Create sequence view
                     # Clicking tile either adds a number if possible, or removes a number if number already exists
                     pass
+            
 
+            # For selecting tiles in the map
+            for y in range(len(tile_map)):
+                for x in range(len(tile_map[y])):
+                    if tile_map[y][x].collidepoint(self.mx, self.my):
+                        if self.click:
+                            print(f'Selected: X = {x}, Y = {y}')
 
             self.click = False
 
