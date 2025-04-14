@@ -1,7 +1,7 @@
 import pygame
 from OpenGL.GL import *
 from td_game import td_game_loop
-from td_map_creator import td_map_creator_loop
+from td_map_creator import MapCreator
 
 
 class MainMenu:
@@ -44,7 +44,7 @@ class MainMenu:
 
 
             self.click = False
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -72,4 +72,5 @@ class MainMenu:
         td_game_loop(self.clock, self.screen)
 
     def map_creator(self):
-        td_map_creator_loop(self.clock, self.screen)
+        MapCreator(self.clock, self.screen)
+        
