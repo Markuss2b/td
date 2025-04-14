@@ -44,6 +44,7 @@ class MainMenu:
 
 
             self.click = False
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False

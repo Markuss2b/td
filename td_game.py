@@ -22,6 +22,7 @@ def td_game_loop(clock, screen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                screen.fill((0,0,0))
             
             # Inputs 
             if event.type == pygame.KEYDOWN:
