@@ -127,10 +127,10 @@ class Path:
             
             dict_sequence = {} 
             
-            for y in range(self.max_x):
+            for y in range(self.max_y):
                 self.path_tiles.append([])
                 
-                for x in range(self.max_y):
+                for x in range(self.max_x):
                     value = int(txt_file_list[y][x])
                     
                     self.path_tiles[y].append(value)
