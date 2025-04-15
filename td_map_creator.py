@@ -2,6 +2,7 @@ import pygame
 import os
 from func import draw_text
 from model.map.map import Map, Location
+from model.map.tile_type_enum import get_tile_types
 
 # Check img
 
@@ -32,12 +33,16 @@ class MapCreator:
 
         # Boolean for selecting tiles in menu
         self.load_tile_menu = False
+        
+        # Function in tile_type_enum. Returns Dict  Example={"Grass": ["Grass1", "Grass2"]}
+        self.all_tile_types = get_tile_types()
+        self.selected_visual_tile_type = "None"
 
         # Boolean for on click actions
         self.click = False
 
         # Which editing view has been selected, Path, Tower availability, Visual tiles
-        self.selected_view_mode = ""
+        self.selected_view_mode = "Tiles"
 
         self.selected_tile = None
 
@@ -66,9 +71,12 @@ class MapCreator:
             self.mx, self.my = pygame.mouse.get_pos()
 
             # TODO: NOT STATIC
-            mapimg = pygame.image.load("images/PremadeMaps/Scenery2.png")
-            mapimg = pygame.transform.scale(mapimg, (1360, 765))
-            self.screen.blit(mapimg, (0, 80))
+            # mapimg = pygame.image.load("images/PremadeMaps/Scenery2.png")
+            # mapimg = pygame.transform.scale(mapimg, (1360, 765))
+            # self.screen.blit(mapimg, (0, 80))
+            main_map_rect = pygame.Rect(0, 80, 1360, 765)
+            pygame.draw.rect(self.screen, (0, 0, 0), main_map_rect)
+
 
             # Creating the tile map 16x9 (144 buttons)
             tile_map = []
@@ -290,22 +298,40 @@ class MapCreator:
 
 
     def open_tile_menu(self):
-        tile_menu_left = 450
+        tile_menu_left = 370
         tile_menu_top = 100
-        tile_menu_width = 465
+        tile_menu_width = 545
         tile_menu_length = 700
         tile_menu = pygame.Rect(tile_menu_left, tile_menu_top, tile_menu_width, tile_menu_length)
         pygame.draw.rect(self.screen, (0, 0, 0), tile_menu)
 
-        base_x = tile_menu_left + 20
-        base_y = tile_menu_top + 60
+        all_tile_type_rect = []
 
-        # Creates a rect for every map
-        # all_maps_rect = []
-        # for i in range(len(self.all_maps)):
-        #     map_rect = pygame.Rect(base_x, base_y + 40 * (i + 1), 260, 30)
-        #     all_maps_rect.append(map_rect)
-        #     pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
+        base_x = tile_menu_left + 20
+        base_y = tile_menu_top + 20
+
+        for key in self.all_tile_types.keys():
+            for tile_type in self.all_tile_types.get(key):
+                # Draws the tile type images
+                tile_img = pygame.image.load(f'images/Tiles/{key}/{tile_type}')
+                tile_img = pygame.transform.scale(tile_img, (self.tile_size, self.tile_size))
+                self.screen.blit(tile_img, (base_x, base_y))
+
+                tile_type_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
+
+                # Example = [[Rect, Type], [Rect, Type]]
+                all_tile_type_rect.append([tile_type_rect, tile_type])
+
+                base_x += self.tile_size + 20
+            base_y += self.tile_size + 20
+            base_x = tile_menu_left + 20
+
+
+        # For selecting which visual tile will be used for placement
+        for tile_type in all_tile_type_rect:
+            if tile_type[0].collidepoint(self.mx, self.my):
+                if self.click:
+                    self.selected_visual_tile_type = tile_type[1]
 
         # If Click outside of Map menu, close map menu
         if not tile_menu.collidepoint(self.mx, self.my):
@@ -325,8 +351,9 @@ class MapCreator:
         y = self.selected_tile.y
 
         if self.selected_view_mode == "Tiles":
-            # Need tile type buttons
-            pass
+            visual_map = self.map_selected.get_visual_map()
+
+            visual_map.change_tile_type(x, y, self.selected_visual_tile_type)
 
 
         elif self.selected_view_mode == "Tower":
@@ -348,14 +375,27 @@ class MapCreator:
 
 
     def draw_tile_img(self):
-        if self.selected_view_mode == "Tiles":
-            # Need tile type buttons
-            pass
+
+        visual_tile = self.map_selected.get_visual_map()
+        visual_tile_map = visual_tile.get_visual_tile_map()
+
+        for y in range(len(visual_tile_map)):
+            for x in range(len(visual_tile_map[y])):
+
+                tile_x, tile_y = self.get_rect_param(x, y)
+                tile = visual_tile.get_tile_type(x, y)
+
+                folder_name = tile.split("_")[1]
+
+                if tile != "None":
+                    tile_img = pygame.image.load(f'images/Tiles/{folder_name}/{tile}')
+                    tile_img = pygame.transform.scale(tile_img, (85, 85))
+                    self.screen.blit(tile_img, (tile_x, tile_y))
 
 
-        elif self.selected_view_mode == "Tower":
+        if self.selected_view_mode == "Tower":
             tow_avail = self.map_selected.get_tower_availability_map()
-            tow_avail_map = self.map_selected.get_tower_availability_map().get_tower_availability()
+            tow_avail_map = tow_avail.get_tower_availability()
             
             for y in range(len(tow_avail_map)):
                 for x in range(len(tow_avail_map[y])):
