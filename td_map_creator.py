@@ -6,7 +6,7 @@ from model.map.map import Map, Location
 # Check img
 
 # FIXME: Clicking on X returns to menu (Should quit the program)
-# FIXME: Crashes if map not selected
+# FIXME: Creating new map doesnt work ?!?!?!?!?!??!!?!?
 
 # Tile size 16 x 9
 class MapCreator:
@@ -30,11 +30,14 @@ class MapCreator:
         # Boolean for selecting map menu pop up
         self.load_map_menu = False
 
+        # Boolean for selecting tiles in menu
+        self.load_tile_menu = False
+
         # Boolean for on click actions
         self.click = False
 
         # Which editing view has been selected, Path, Tower availability, Visual tiles
-        self.selected_view_mode = "Tiles"
+        self.selected_view_mode = ""
 
         self.selected_tile = None
 
@@ -111,16 +114,22 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), select_map)
 
             see_tiles = pygame.Rect(1400, 190, 160, 50)
-            see_tower_avail = pygame.Rect(1400, 260, 160, 50)
-            see_sequence = pygame.Rect(1400, 330, 160, 50)
+            open_tile_menu_button = pygame.Rect(1400, 260, 160, 50)
             pygame.draw.rect(self.screen, (255, 255, 255), see_tiles)
+            pygame.draw.rect(self.screen, (150, 150, 50), open_tile_menu_button)
+
+            see_tower_avail = pygame.Rect(1400, 360, 160, 50)
+            see_sequence = pygame.Rect(1400, 430, 160, 50)
             pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
             pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
 
-            self.draw_tile_img()
+
+            # Stops Map Creator crashing when map is no selected
+            if self.map_selected != None:
+                self.draw_tile_img()
 
             # For now, have to manually add if i add any buttons
-            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map)
+            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button)
 
 
             draw_text("CREATOR", self.font, (255, 255, 255), self.screen, 900, 20)
@@ -133,6 +142,7 @@ class MapCreator:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.load_map_menu = False
+                        self.load_tile_menu = False
 
                         # Without this click would stay TRUE (if clicked on anything) and would click on anything hovered after closing the POP-UP
                         self.click = False
@@ -155,13 +165,15 @@ class MapCreator:
             self.clock.tick(60)
 
 
-    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map):
+    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button):
 
         # Map menu pop up and its functionality
         # FIXME: MAX 10 MAPS
         if self.load_map_menu == True:
             map_menu_left, map_menu_top, map_menu_width, map_menu_length = self.select_map_menu() 
             self.create_new_map(map_menu_left, map_menu_top, map_menu_width, map_menu_length)     
+        elif self.load_tile_menu == True:
+            self.open_tile_menu()
 
         # Main Map Creator UI Buttons
         else:
@@ -171,6 +183,8 @@ class MapCreator:
 
             if save_button.collidepoint(self.mx, self.my):
                 if self.click:
+
+                    # FIXME: If Map not selected will crash
                     self.map_selected.save_map()
 
             if exit_button.collidepoint(self.mx, self.my):
@@ -182,12 +196,14 @@ class MapCreator:
                 if self.click:
                     self.selected_view_mode = "Tiles"
                     # TODO: Change tile visually:
+            
+            if open_tile_menu_button.collidepoint(self.mx, self.my):
+                if self.click:
+                    self.load_tile_menu = True
 
             if see_tower_avail.collidepoint(self.mx, self.my):
                 if self.click:
                     self.selected_view_mode = "Tower"
-                    # TODO: Add or remove the ability to place towers
-                    # Clicking tile either adds or removes this 
 
             if see_sequence.collidepoint(self.mx, self.my):
                 if self.click:
@@ -206,7 +222,7 @@ class MapCreator:
 
                             self.interacting_with_tiles()
 
-            self.click = False
+        self.click = False
 
 
     def select_map_menu(self):
@@ -238,6 +254,11 @@ class MapCreator:
 
                     self.map_selected.recreate_map_from_folder()
 
+        # If Click outside of Map menu, close map menu
+        if not map_menu.collidepoint(self.mx, self.my):
+            if self.click:
+                self.load_map_menu = False
+
         return map_menu_left, map_menu_top, map_menu_width, map_menu_length
 
 
@@ -265,17 +286,43 @@ class MapCreator:
                     self.map_selected = Map(self.new_map_name, 9, 16)
                     self.map_selected.create_map_folder()
                     self.map_selected.initialize_all_maps()
+                    self.map_selected.save_map()
 
 
+    def open_tile_menu(self):
+        tile_menu_left = 450
+        tile_menu_top = 100
+        tile_menu_width = 465
+        tile_menu_length = 700
+        tile_menu = pygame.Rect(tile_menu_left, tile_menu_top, tile_menu_width, tile_menu_length)
+        pygame.draw.rect(self.screen, (0, 0, 0), tile_menu)
+
+        base_x = tile_menu_left + 20
+        base_y = tile_menu_top + 60
+
+        # Creates a rect for every map
+        # all_maps_rect = []
+        # for i in range(len(self.all_maps)):
+        #     map_rect = pygame.Rect(base_x, base_y + 40 * (i + 1), 260, 30)
+        #     all_maps_rect.append(map_rect)
+        #     pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
+
+        # If Click outside of Map menu, close map menu
+        if not tile_menu.collidepoint(self.mx, self.my):
+            if self.click:
+                self.load_tile_menu = False
+
+
+    # Gets accurate UI Location for Tile
     def get_rect_param(self, x, y):
         # LEFT, TOP
         return x * 85, y * 85 + 80
 
 
+    # On Tile Click
     def interacting_with_tiles(self):
         x = self.selected_tile.x
         y = self.selected_tile.y
-        tile_x, tile_y = self.get_rect_param(x, y)
 
         if self.selected_view_mode == "Tiles":
             # Need tile type buttons

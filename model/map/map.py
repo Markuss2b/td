@@ -13,6 +13,10 @@ class Map:
         self.paths = []
         self.visual_map = Visual_map(x, y)
         self.tower_availability_map = Tower_availability(x, y)
+
+    
+    def get_map_name(self):
+        return self.name
         
         
     def create_map_folder(self):
