@@ -143,7 +143,8 @@ class Path:
             for dict_key in sorted_dict_sequence:
                 self.sequence.append(sorted_dict_sequence.get(dict_key))
             
-            self.start_location = self.sequence[0]
+            if len(self.sequence) > 0:
+                self.start_location = self.sequence[0]
             
             # Otherwise the start and end will be at the same location
             if len(self.sequence) > 1:

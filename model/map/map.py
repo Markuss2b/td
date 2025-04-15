@@ -55,13 +55,15 @@ class Map:
     def get_all_paths(self):
         return self.paths
     
-    
+
     def delete_path(self, path_name):
         try:
-            os.remove(f'all_maps/{self.name()}/paths/{path_name}')
+            if len([path for path in os.listdir(f'all_maps/{self.name}/paths/') if path == f'{path_name}.txt']) == 1:
+                os.remove(f'all_maps/{self.name()}/paths/{path_name}.txt')
+
             potential_path = next((path for path in self.paths if path.name == path_name), None)
             self.paths.remove(potential_path)
-        except:
+        except Exception:
             print("No path found")    
         
         

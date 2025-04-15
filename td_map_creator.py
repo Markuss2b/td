@@ -4,10 +4,8 @@ from func import draw_text
 from model.map.map import Map, Location
 from model.map.tile_type_enum import get_tile_types
 
-# Check img
-
 # FIXME: Clicking on X returns to menu (Should quit the program)
-
+# FIXME: Do i want map_menu to be centered around the screen or the map
 # Tile size 16 x 9
 class MapCreator:
 
@@ -50,6 +48,9 @@ class MapCreator:
         # List containing of all maps from all_maps folder
         self.all_maps = []
 
+        self.path_names = ["second_path", "third_path", "fourth_path"]
+
+        # Tiles are 85x85
         self.tile_size = 85
 
         self.td_map_creator_loop()
@@ -120,10 +121,11 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
             pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
 
-
             # Stops Map Creator crashing when map is no selected
             if self.map_selected != None:
                 self.draw_tile_img()
+
+                self.handle_path_buttons(add_path_button, remove_path_button)
 
             # For now, have to manually add if i add any buttons
             self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button)
@@ -219,6 +221,21 @@ class MapCreator:
                             self.interacting_with_tiles()
 
         self.click = False
+
+
+    def handle_path_buttons(self, add_path_button, remove_path_button):
+        # Max 4
+
+        if len(self.map_selected.get_all_paths()) < 4:
+            if add_path_button.collidepoint(self.mx, self.my):
+                if self.click:
+                    self.map_selected.add_path(self.path_names[len(self.map_selected.get_all_paths())-1])
+
+        # Min 1
+        if len(self.map_selected.get_all_paths()) > 1:
+            if remove_path_button.collidepoint(self.mx, self.my):
+                if self.click:
+                    self.map_selected.delete_path(self.map_selected.get_all_paths()[-1].get_path_name()) 
 
 
     def select_map_menu(self):
