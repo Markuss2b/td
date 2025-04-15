@@ -52,9 +52,13 @@ class Map:
     def get_path(self, path_name):
         return next((path for path in self.paths if path.name == path_name), None)
     
+    def get_all_paths(self):
+        return self.paths
+    
     
     def delete_path(self, path_name):
         try:
+            os.remove(f'all_maps/{self.name()}/paths/{path_name}')
             potential_path = next((path for path in self.paths if path.name == path_name), None)
             self.paths.remove(potential_path)
         except:

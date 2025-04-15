@@ -7,7 +7,6 @@ from model.map.tile_type_enum import get_tile_types
 # Check img
 
 # FIXME: Clicking on X returns to menu (Should quit the program)
-# FIXME: Creating new map doesnt work ?!?!?!?!?!??!!?!?
 
 # Tile size 16 x 9
 class MapCreator:
@@ -65,15 +64,10 @@ class MapCreator:
 
             self.screen.fill((0,0,0))
 
-            # FIXME: REMOVE PREMADE MAPS
             self.all_maps = os.listdir("all_maps")
 
             self.mx, self.my = pygame.mouse.get_pos()
 
-            # TODO: NOT STATIC
-            # mapimg = pygame.image.load("images/PremadeMaps/Scenery2.png")
-            # mapimg = pygame.transform.scale(mapimg, (1360, 765))
-            # self.screen.blit(mapimg, (0, 80))
             main_map_rect = pygame.Rect(0, 80, 1360, 765)
             pygame.draw.rect(self.screen, (0, 0, 0), main_map_rect)
 
@@ -91,27 +85,22 @@ class MapCreator:
             top_border = pygame.Rect(0, 0, 1600, 30)
             pygame.draw.rect(self.screen, (0, 0, 255), top_border)
 
-            # TODO: Dynamic like loading maps
-            seq1 = pygame.Rect(40, 0, 60, 30)
-            seq2 = pygame.Rect(105, 0, 60, 30)
-            seq3 = pygame.Rect(170, 0, 60, 30)
-            seq4 = pygame.Rect(235, 0, 60, 30)
-            pygame.draw.rect(self.screen, (122, 0, 0), seq1)
-            pygame.draw.rect(self.screen, (122, 0, 0), seq2)
-            pygame.draw.rect(self.screen, (122, 0, 0), seq3)
-            pygame.draw.rect(self.screen, (122, 0, 0), seq4)
-            
-            # minimize_top = pygame.Rect(0, 0, 30, 30)
-            # pygame.draw.rect(screen, (0, 0, 0), minimize_top)
+            seq_rec = []
+            if self.map_selected != None:
+                # Draws sequence blocks(=Amount of Paths) at the top
+                for i in range(len(self.map_selected.get_all_paths())):
+                    seq = pygame.Rect(40 + i * 70, 0, 60, 30)
+                    pygame.draw.rect(self.screen, (180, 0, 0), seq)
+                    seq_rec.append(seq)
 
-            # tile_map = pygame.Rect(0, 30, 1360, 870)
-            # pygame.draw.rect(screen, (255, 255, 255), tile_map)
+                # Buttons for adding and removing paths    
+                add_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70, 0, 30, 30)
+                remove_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5, 0, 30, 30)
+                pygame.draw.rect(self.screen, (255, 255, 255), add_path_button)
+                pygame.draw.rect(self.screen, (255, 255, 255), remove_path_button)
 
-            map_creator_ui = pygame.Rect(1360, 30, 240, 900)
+            map_creator_ui = pygame.Rect(1360, 30, 240, 870)
             pygame.draw.rect(self.screen, (0, 122, 122), map_creator_ui)
-
-            # minimize_mc_ui = pygame.Rect(1570, 30, 30, 30)
-            # pygame.draw.rect(screen, (0, 0, 0), minimize_mc_ui)
 
             save_button = pygame.Rect(1360, 850, 120, 50)
             exit_button = pygame.Rect(1480, 850, 120, 50)
@@ -203,7 +192,6 @@ class MapCreator:
             if see_tiles.collidepoint(self.mx, self.my):
                 if self.click:
                     self.selected_view_mode = "Tiles"
-                    # TODO: Change tile visually:
             
             if open_tile_menu_button.collidepoint(self.mx, self.my):
                 if self.click:
@@ -332,6 +320,12 @@ class MapCreator:
             if tile_type[0].collidepoint(self.mx, self.my):
                 if self.click:
                     self.selected_visual_tile_type = tile_type[1]
+
+            # Adds a border on the selected Tile
+            if tile_type[1] == self.selected_visual_tile_type:
+                selected_tile_img = pygame.image.load(f'images/Assets/select.png')
+                selected_tile_img = pygame.transform.scale(selected_tile_img, (self.tile_size, self.tile_size))
+                self.screen.blit(selected_tile_img, (tile_type[0].x, tile_type[0].y))
 
         # If Click outside of Map menu, close map menu
         if not tile_menu.collidepoint(self.mx, self.my):
