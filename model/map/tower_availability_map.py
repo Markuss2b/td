@@ -1,6 +1,3 @@
-import os
-from model.map.path import Location
-
 class Tower_availability:
     def __init__(self, max_x, max_y):
         self.tower_avail = []

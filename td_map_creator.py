@@ -1,28 +1,52 @@
 import pygame
 import os
 from func import draw_text
-from model.map.map import Map
+from model.map.map import Map, Location
 
 # Check img
 
-# Tile size 9 x 16
+# FIXME: Clicking on X returns to menu (Should quit the program)
+# FIXME: Crashes if map not selected
+
+# Tile size 16 x 9
 class MapCreator:
 
     def __init__(self, clock, screen):
         self.clock = clock
         self.screen = screen
 
+        # Map Creator pygame loop
         self.running = True
+
+        # Map selected for editing/creating
         self.map_selected = None
+
+        # Boolean for being able to interact with the input field
         self.naming_new_map = False
+
+        # Input field text
         self.new_map_name = ""
-        self.tile_map = []
+
+        # Boolean for selecting map menu pop up
         self.load_map_menu = False
+
+        # Boolean for on click actions
         self.click = False
+
+        # Which editing view has been selected, Path, Tower availability, Visual tiles
+        self.selected_view_mode = "Tiles"
+
+        self.selected_tile = None
+
         self.font = pygame.font.SysFont(None, 20)
+
+        # List containing of all maps from all_maps folder
         self.all_maps = []
 
+        self.tile_size = 85
+
         self.td_map_creator_loop()
+
 
     def td_map_creator_loop(self):
         counter = 0
@@ -32,26 +56,24 @@ class MapCreator:
             counter += 1
 
             self.screen.fill((0,0,0))
+
+            # FIXME: REMOVE PREMADE MAPS
             self.all_maps = os.listdir("all_maps")
 
             self.mx, self.my = pygame.mouse.get_pos()
 
             # TODO: NOT STATIC
-            mapimg = pygame.image.load("images/Scenery2.png")
+            mapimg = pygame.image.load("images/PremadeMaps/Scenery2.png")
             mapimg = pygame.transform.scale(mapimg, (1360, 765))
             self.screen.blit(mapimg, (0, 80))
 
             # Creating the tile map 16x9 (144 buttons)
             tile_map = []
             for y in range(9):
-                tile_y = y * 85 + 80
-                tile_size = 85
                 tile_map.append([])
                 for x in range(16):
-                    tile_x = x * 85
-                    if counter == 1:
-                        print(tile_y, tile_x)
-                    tile_rect = pygame.Rect(tile_x, tile_y, tile_size, tile_size)
+                    tile_x, tile_y = self.get_rect_param(x, y)
+                    tile_rect = pygame.Rect(tile_x, tile_y, self.tile_size, self.tile_size)
                     tile_map[y].append(tile_rect)
 
 
@@ -95,6 +117,7 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
             pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
 
+            self.draw_tile_img()
 
             # For now, have to manually add if i add any buttons
             self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map)
@@ -110,6 +133,9 @@ class MapCreator:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.load_map_menu = False
+
+                        # Without this click would stay TRUE (if clicked on anything) and would click on anything hovered after closing the POP-UP
+                        self.click = False
 
                     if self.naming_new_map == True:
                         if event.key == pygame.K_BACKSPACE:
@@ -154,20 +180,20 @@ class MapCreator:
 
             if see_tiles.collidepoint(self.mx, self.my):
                 if self.click:
+                    self.selected_view_mode = "Tiles"
                     # TODO: Change tile visually:
-                    pass
 
             if see_tower_avail.collidepoint(self.mx, self.my):
                 if self.click:
+                    self.selected_view_mode = "Tower"
                     # TODO: Add or remove the ability to place towers
                     # Clicking tile either adds or removes this 
-                    pass
 
             if see_sequence.collidepoint(self.mx, self.my):
                 if self.click:
+                    self.selected_view_mode = "Sequence"
                     # TODO: Create sequence view
                     # Clicking tile either adds a number if possible, or removes a number if number already exists
-                    pass
             
 
             # For selecting tiles in the map
@@ -175,7 +201,10 @@ class MapCreator:
                 for x in range(len(tile_map[y])):
                     if tile_map[y][x].collidepoint(self.mx, self.my):
                         if self.click:
-                            print(f'Selected: X = {x}, Y = {y}')
+                            self.selected_tile = Location(x, y)
+                            print(f'Selected: X = {self.selected_tile.x}, Y = {self.selected_tile.y}')
+
+                            self.interacting_with_tiles()
 
             self.click = False
 
@@ -237,3 +266,63 @@ class MapCreator:
                     self.map_selected.create_map_folder()
                     self.map_selected.initialize_all_maps()
 
+
+    def get_rect_param(self, x, y):
+        # LEFT, TOP
+        return x * 85, y * 85 + 80
+
+
+    def interacting_with_tiles(self):
+        x = self.selected_tile.x
+        y = self.selected_tile.y
+        tile_x, tile_y = self.get_rect_param(x, y)
+
+        if self.selected_view_mode == "Tiles":
+            # Need tile type buttons
+            pass
+
+
+        elif self.selected_view_mode == "Tower":
+            tow_avail = self.map_selected.get_tower_availability_map()
+            tile_avail = tow_avail.get_tile_tower_avail(x, y)
+
+            # REMOVE X
+            if tile_avail == "X":
+                tow_avail.add_tower_avail(x, y)
+
+            # ADD X
+            elif tile_avail == "O":
+                tow_avail.remove_tile_tower_avail(x, y)
+
+
+        elif self.selected_view_mode == "Sequence":
+            # Need to finish sequence buttons and logic 
+            pass
+
+
+    def draw_tile_img(self):
+        if self.selected_view_mode == "Tiles":
+            # Need tile type buttons
+            pass
+
+
+        elif self.selected_view_mode == "Tower":
+            tow_avail = self.map_selected.get_tower_availability_map()
+            tow_avail_map = self.map_selected.get_tower_availability_map().get_tower_availability()
+            
+            for y in range(len(tow_avail_map)):
+                for x in range(len(tow_avail_map[y])):
+
+                    tile_x, tile_y = self.get_rect_param(x, y)
+                    tile_avail = tow_avail.get_tile_tower_avail(x, y)
+
+                    # ADD X
+                    if tile_avail == "X":
+                        x_img = pygame.image.load("images/Assets/X.png")
+                        x_img = pygame.transform.scale(x_img, (85, 85))
+                        self.screen.blit(x_img, (tile_x, tile_y))
+
+
+        elif self.selected_view_mode == "Sequence":
+            # Need to finish sequence buttons and logic 
+            pass
