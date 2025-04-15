@@ -12,7 +12,9 @@ class Path:
         self.sequence = [None]
         self.path_tiles = []
         self.valid_path = False
-        
+
+    def get_2d_path(self):
+        return self.path_tiles
         
     def get_path_name(self):
         return self.name

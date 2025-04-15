@@ -6,6 +6,7 @@ from model.map.tile_type_enum import get_tile_types
 
 # FIXME: Clicking on X returns to menu (Should quit the program)
 # FIXME: Do i want map_menu to be centered around the screen or the map
+# FIXME: Overlapping path
 # Tile size 16 x 9
 class MapCreator:
 
@@ -41,6 +42,8 @@ class MapCreator:
         # Which editing view has been selected, Path, Tower availability, Visual tiles
         self.selected_view_mode = "Tiles"
 
+        self.selected_sequence = "first_path"
+
         self.selected_tile = None
 
         self.font = pygame.font.SysFont(None, 20)
@@ -59,7 +62,6 @@ class MapCreator:
     def td_map_creator_loop(self):
         counter = 0
 
-        # TODO: Could consider taking some buttons out of while loop
         while self.running:
             counter += 1
 
@@ -125,7 +127,7 @@ class MapCreator:
             if self.map_selected != None:
                 self.draw_tile_img()
 
-                self.handle_path_buttons(add_path_button, remove_path_button)
+                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec)
 
             # For now, have to manually add if i add any buttons
             self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button)
@@ -223,19 +225,31 @@ class MapCreator:
         self.click = False
 
 
-    def handle_path_buttons(self, add_path_button, remove_path_button):
+    def handle_path_buttons(self, add_path_button, remove_path_button, seq_rec):
         # Max 4
-
         if len(self.map_selected.get_all_paths()) < 4:
             if add_path_button.collidepoint(self.mx, self.my):
                 if self.click:
                     self.map_selected.add_path(self.path_names[len(self.map_selected.get_all_paths())-1])
+                    self.map_selected.get_all_paths()[-1].make_empty_path()
 
         # Min 1
         if len(self.map_selected.get_all_paths()) > 1:
             if remove_path_button.collidepoint(self.mx, self.my):
                 if self.click:
-                    self.map_selected.delete_path(self.map_selected.get_all_paths()[-1].get_path_name()) 
+                    self.selected_sequence = "first_path"
+                    self.map_selected.delete_path(self.map_selected.get_all_paths()[-1].get_path_name())
+
+        # Checks if any of the sequence buttons have been selected
+        for i in range(len(seq_rec)):
+            seq_button = seq_rec[i]
+
+            if seq_button.collidepoint(self.mx, self.my):
+                if self.click:
+                    if i == 0:
+                        self.selected_sequence = "first_path"
+                    else:
+                        self.selected_sequence = self.path_names[i-1]
 
 
     def select_map_menu(self):
@@ -257,7 +271,6 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
 
         # Selects any previously made maps
-        # FIXME: The lack of Start tile is making the code crash
         for i in range(len(all_maps_rect)):
             map_rect = all_maps_rect[i]
 
@@ -379,10 +392,17 @@ class MapCreator:
             elif tile_avail == "O":
                 tow_avail.remove_tile_tower_avail(x, y)
 
-
+        # FIXME: BUGGY MESS
         elif self.selected_view_mode == "Sequence":
-            # Need to finish sequence buttons and logic 
-            pass
+            sel_path = self.map_selected.get_path(self.selected_sequence)
+            seq = sel_path.get_sequence()
+
+            if sel_path.get_start() == None:
+                sel_path.set_start(x, y)
+            elif seq[-1].x == x and seq[-1].y == y:
+                sel_path.remove_step()
+            else:
+                sel_path.add_next_step(x, y)
 
 
     def draw_tile_img(self):
@@ -422,5 +442,15 @@ class MapCreator:
 
 
         elif self.selected_view_mode == "Sequence":
-            # Need to finish sequence buttons and logic 
-            pass
+            sel_path = self.map_selected.get_path(self.selected_sequence)
+            path_2d = sel_path.get_2d_path()
+
+            for y in range(len(path_2d)):
+                for x in range(len(path_2d[y])):
+                    tile_x, tile_y = self.get_rect_param(x, y)
+                    tile_num = path_2d[y][x]
+
+                    num_img = pygame.image.load(f'images/Numbers/{tile_num}.png')
+                    num_img = pygame.transform.scale(num_img, (85, 85))
+                    self.screen.blit(num_img, (tile_x, tile_y))
+                    
