@@ -26,6 +26,8 @@ class MapCreator:
 
     def td_map_creator_loop(self):
         counter = 0
+
+        # TODO: Could consider taking some buttons out of while loop
         while self.running:
             counter += 1
 
@@ -35,12 +37,11 @@ class MapCreator:
             self.mx, self.my = pygame.mouse.get_pos()
 
             # TODO: NOT STATIC
-            # TODO: create Grid of all tiles 16x9 (144 buttons ?)
             mapimg = pygame.image.load("images/Scenery2.png")
             mapimg = pygame.transform.scale(mapimg, (1360, 765))
             self.screen.blit(mapimg, (0, 80))
 
-            # Creating the tile map
+            # Creating the tile map 16x9 (144 buttons)
             tile_map = []
             for y in range(9):
                 tile_y = y * 85 + 80
