@@ -77,7 +77,7 @@ class Map:
         
         
     def recreate_map_from_folder(self):
-        self.visual_map.recreate_visual_map_from_file(self.name)
+        self.x, self.y = self.visual_map.recreate_visual_map_from_file(self.name)
         
         # Path
         all_path_dir = os.listdir(f'./all_maps/{self.name}/paths')

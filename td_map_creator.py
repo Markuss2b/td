@@ -7,6 +7,7 @@ from model.map.tile_type_enum import get_tile_types
 # FIXME: Clicking on X returns to menu (Should quit the program)
 # FIXME: Do i want map_menu to be centered around the screen or the map
 # FIXME: Overlapping path
+# FIXME: Weird bug when creating new map
 # Tile size 16 x 9
 class MapCreator:
 
@@ -232,6 +233,7 @@ class MapCreator:
                 if self.click:
                     self.map_selected.add_path(self.path_names[len(self.map_selected.get_all_paths())-1])
                     self.map_selected.get_all_paths()[-1].make_empty_path()
+                    print(self.map_selected.x, self.map_selected.y)
 
         # Min 1
         if len(self.map_selected.get_all_paths()) > 1:
@@ -309,7 +311,7 @@ class MapCreator:
         if add_new_map_rect.collidepoint(self.mx, self.my):
             if self.click:
                 if self.new_map_name != "":
-                    self.map_selected = Map(self.new_map_name, 9, 16)
+                    self.map_selected = Map(self.new_map_name, 16, 9)
                     self.map_selected.create_map_folder()
                     self.map_selected.initialize_all_maps()
                     self.map_selected.save_map()
@@ -416,9 +418,9 @@ class MapCreator:
                 tile_x, tile_y = self.get_rect_param(x, y)
                 tile = visual_tile.get_tile_type(x, y)
 
-                folder_name = tile.split("_")[1]
+                if tile != None:
+                    folder_name = tile.split("_")[1]
 
-                if tile != "None":
                     tile_img = pygame.image.load(f'images/Tiles/{folder_name}/{tile}')
                     tile_img = pygame.transform.scale(tile_img, (85, 85))
                     self.screen.blit(tile_img, (tile_x, tile_y))

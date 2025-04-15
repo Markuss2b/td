@@ -12,10 +12,10 @@ class Visual_map:
 
 
     def create_empty_visual_map(self):
-        for i in range(self.max_x):
+        for i in range(self.max_y):
             self.visual_tile_map.append([])
-            for j in range(self.max_y):
-                self.visual_tile_map[i].append(TileType.none.value)
+            for j in range(self.max_x):
+                self.visual_tile_map[i].append("T_Grass_BG.png")
                 
     
     def change_tile_type(self, x, y, tile_type):
@@ -46,5 +46,6 @@ class Visual_map:
         with open(f'./all_maps/{map_name}/visual_map.txt', "r") as path_file:
             self.visual_tile_map = [line.split() for line in path_file]
             self.max_x = len(self.visual_tile_map[0])
-            self.max_y = len(self.visual_tile_map)           
+            self.max_y = len(self.visual_tile_map)
+        return self.max_x, self.max_y           
     

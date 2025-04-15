@@ -10,9 +10,9 @@ class Tower_availability:
     
     
     def create_empty_tower_avail_map(self):
-        for i in range(self.max_x):
+        for i in range(self.max_y):
             self.tower_avail.append([])
-            for j in range(self.max_y):
+            for j in range(self.max_x):
                 self.tower_avail[i].append("O")
     
     
