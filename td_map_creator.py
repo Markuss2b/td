@@ -1,13 +1,14 @@
 import pygame
 import os
+import sys
 from func import draw_text
 from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
-# FIXME: Clicking on X returns to menu (Should quit the program)
-# FIXME: Do i want map_menu to be centered around the screen or the map
 # FIXME: Overlapping path
 # TODO: Obstacles
+# TODO: Naming new map should be visible
+# TODO: Buttons should have names
 # Tile size 16 x 9
 class MapCreator:
 
@@ -146,6 +147,7 @@ class MapCreator:
                 if event.type == pygame.QUIT:
                     self.running = False
                     self.screen.fill((0, 0, 0))
+                    sys.exit()
                 
                 # Inputs 
                 if event.type == pygame.KEYDOWN:
@@ -178,7 +180,6 @@ class MapCreator:
     def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles):
 
         # Map menu pop up and its functionality
-        # FIXME: MAX 10 MAPS
         if self.load_map_menu == True:
             map_menu_left, map_menu_top, map_menu_width, map_menu_length = self.select_map_menu() 
             self.create_new_map(map_menu_left, map_menu_top, map_menu_width, map_menu_length)     
@@ -193,11 +194,11 @@ class MapCreator:
                 if self.click:
                     self.load_map_menu = True
 
-            if save_button.collidepoint(self.mx, self.my):
-                if self.click:
-
-                    # FIXME: If Map not selected will crash
-                    self.map_selected.save_map()
+            # Stops Save button from crashing before loading a map
+            if self.map_selected != None:
+                if save_button.collidepoint(self.mx, self.my):
+                    if self.click:
+                        self.map_selected.save_map()
 
             if exit_button.collidepoint(self.mx, self.my):
                 if self.click:
@@ -272,7 +273,7 @@ class MapCreator:
 
 
     def select_map_menu(self):
-        map_menu_left = 650
+        map_menu_left = 530
         map_menu_top = 100
         map_menu_width = 300
         map_menu_length = 700
@@ -313,22 +314,25 @@ class MapCreator:
         new_map_inputfield = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 80, map_menu_width - 60, 50)
         pygame.draw.rect(self.screen, (255, 255, 255), new_map_inputfield)
 
-        # Activating input field
-        if new_map_inputfield.collidepoint(self.mx, self.my):
-            if self.click:
-                self.naming_new_map = True
-                self.new_map_name = ""
-        elif self.click:
-            self.naming_new_map = False 
+        # Max 10 custom maps
+        # TODO: Add option to remove maps
+        if len(self.all_maps) < 10:
+            # Activating input field
+            if new_map_inputfield.collidepoint(self.mx, self.my):
+                if self.click:
+                    self.naming_new_map = True
+                    self.new_map_name = ""
+            elif self.click:
+                self.naming_new_map = False 
 
-        # Creating a new map
-        if add_new_map_rect.collidepoint(self.mx, self.my):
-            if self.click:
-                if self.new_map_name != "":
-                    self.map_selected = Map(self.new_map_name, 16, 9)
-                    self.map_selected.create_map_folder()
-                    self.map_selected.initialize_all_maps()
-                    self.map_selected.save_map()
+            # Creating a new map
+            if add_new_map_rect.collidepoint(self.mx, self.my):
+                if self.click:
+                    if self.new_map_name != "":
+                        self.map_selected = Map(self.new_map_name, 16, 9)
+                        self.map_selected.create_map_folder()
+                        self.map_selected.initialize_all_maps()
+                        self.map_selected.save_map()
 
 
     def open_tile_menu(self):
@@ -472,7 +476,7 @@ class MapCreator:
             if self.click:
                 if self.selected_obstacle != "None":
                     # FIXME: Bit hard to control placement
-                    # FIXME: Taller than tile size
+                    # TODO: Size dynamic
                     self.map_selected.add_obstacle(self.selected_obstacle, self.mx, self.my, 170, 284)
 
 
