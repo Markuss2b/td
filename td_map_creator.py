@@ -1,7 +1,7 @@
 import pygame
 import os
 from func import draw_text
-from model.map.map import Map, Location
+from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
 # FIXME: Clicking on X returns to menu (Should quit the program)
@@ -29,18 +29,21 @@ class MapCreator:
 
         # Boolean for selecting map menu pop up
         self.load_map_menu = False
-
-        # Boolean for selecting tiles in menu
+        # Boolean for selecting tiles and obstacles in menu
         self.load_tile_menu = False
+        self.load_obstacle_menu = False
         
         # Function in tile_type_enum. Returns Dict  Example={"Grass": ["Grass1", "Grass2"]}
         self.all_tile_types = get_tile_types()
         self.selected_visual_tile_type = "None"
 
+        self.all_obstacles = self.get_obstacles_from_image_folder()
+        self.selected_obstacle = "None"
+
         # Boolean for on click actions
         self.click = False
 
-        # Which editing view has been selected, Path, Tower availability, Visual tiles
+        # Which editing view has been selected, Path, Tower availability, Visual tiles, Obstacles
         self.selected_view_mode = "Tiles"
 
         self.selected_sequence = "first_path"
@@ -57,14 +60,13 @@ class MapCreator:
         # Tiles are 85x85
         self.tile_size = 85
 
+        self.counter = 0
         self.td_map_creator_loop()
 
 
     def td_map_creator_loop(self):
-        counter = 0
-
         while self.running:
-            counter += 1
+            self.counter += 1
 
             self.screen.fill((0,0,0))
 
@@ -119,8 +121,13 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), see_tiles)
             pygame.draw.rect(self.screen, (150, 150, 50), open_tile_menu_button)
 
-            see_tower_avail = pygame.Rect(1400, 360, 160, 50)
-            see_sequence = pygame.Rect(1400, 430, 160, 50)
+            see_obstacles = pygame.Rect(1400, 360, 160, 50)
+            open_obstacle_menu = pygame.Rect(1400, 430, 160, 50)
+            pygame.draw.rect(self.screen, (255, 255, 255), see_obstacles)
+            pygame.draw.rect(self.screen, (50, 150, 50), open_obstacle_menu)
+
+            see_tower_avail = pygame.Rect(1400, 530, 160, 50)
+            see_sequence = pygame.Rect(1400, 600, 160, 50)
             pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
             pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
 
@@ -131,7 +138,7 @@ class MapCreator:
                 self.handle_path_buttons(add_path_button, remove_path_button, seq_rec)
 
             # For now, have to manually add if i add any buttons
-            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button)
+            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles)
 
 
             draw_text("CREATOR", self.font, (255, 255, 255), self.screen, 900, 20)
@@ -145,6 +152,7 @@ class MapCreator:
                     if event.key == pygame.K_ESCAPE:
                         self.load_map_menu = False
                         self.load_tile_menu = False
+                        self.load_obstacle_menu = False
 
                         # Without this click would stay TRUE (if clicked on anything) and would click on anything hovered after closing the POP-UP
                         self.click = False
@@ -167,7 +175,7 @@ class MapCreator:
             self.clock.tick(60)
 
 
-    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button):
+    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles):
 
         # Map menu pop up and its functionality
         # FIXME: MAX 10 MAPS
@@ -176,6 +184,8 @@ class MapCreator:
             self.create_new_map(map_menu_left, map_menu_top, map_menu_width, map_menu_length)     
         elif self.load_tile_menu == True:
             self.open_tile_menu()
+        elif self.load_obstacle_menu == True:
+            self.open_obstacle_menu()
 
         # Main Map Creator UI Buttons
         else:
@@ -200,7 +210,17 @@ class MapCreator:
             
             if open_tile_menu_button.collidepoint(self.mx, self.my):
                 if self.click:
-                    self.load_tile_menu = True
+                    if self.selected_view_mode == "Tiles":
+                        self.load_tile_menu = True
+
+            if see_obstacles.collidepoint(self.mx, self.my):
+                if self.click:
+                    self.selected_view_mode = "Obstacles"
+
+            if open_obstacle_menu.collidepoint(self.mx, self.my):
+                if self.click:
+                    if self.selected_view_mode == "Obstacles":
+                        self.load_obstacle_menu = True
 
             if see_tower_avail.collidepoint(self.mx, self.my):
                 if self.click:
@@ -209,8 +229,6 @@ class MapCreator:
             if see_sequence.collidepoint(self.mx, self.my):
                 if self.click:
                     self.selected_view_mode = "Sequence"
-                    # TODO: Create sequence view
-                    # Clicking tile either adds a number if possible, or removes a number if number already exists
             
 
             # For selecting tiles in the map
@@ -281,10 +299,7 @@ class MapCreator:
 
                     self.map_selected.recreate_map_from_folder()
 
-        # If Click outside of Map menu, close map menu
-        if not map_menu.collidepoint(self.mx, self.my):
-            if self.click:
-                self.load_map_menu = False
+        self.click_outside_menu(map_menu)
 
         return map_menu_left, map_menu_top, map_menu_width, map_menu_length
 
@@ -345,23 +360,70 @@ class MapCreator:
             base_y += self.tile_size + 20
             base_x = tile_menu_left + 20
 
+        self.select_menu_functionality(self.selected_view_mode, all_tile_type_rect, tile_menu)
 
-        # For selecting which visual tile will be used for placement
-        for tile_type in all_tile_type_rect:
-            if tile_type[0].collidepoint(self.mx, self.my):
+        
+    # TODO: Maybe try to make a function for similar menus
+    def open_obstacle_menu(self):
+        obstacle_menu_left = 370
+        obstacle_menu_top = 100
+        obstacle_menu_width = 545
+        obstacle_menu_length = 700
+        obstacle_menu = pygame.Rect(obstacle_menu_left, obstacle_menu_top, obstacle_menu_width, obstacle_menu_length)
+        pygame.draw.rect(self.screen, (0, 0, 0), obstacle_menu)
+
+        all_obstacle_rect = []
+        base_x = obstacle_menu_left + 20
+        base_y = obstacle_menu_top + 20
+
+        for i in range(len(self.all_obstacles)):
+            # 5 in a row
+            if (i+1) % 6 == 0:
+                base_x = obstacle_menu_left + 20
+                base_y += (i+1) / 5 * self.tile_size + 20
+
+            obstacle_name = self.all_obstacles[i]
+            # Draws the obstacle images
+            obstacle_img = pygame.image.load(f'images/Obstacles/{obstacle_name}')
+            obstacle_img = pygame.transform.scale(obstacle_img, (self.tile_size, self.tile_size))
+            self.screen.blit(obstacle_img, (base_x, base_y))
+
+            obstacle_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
+
+            all_obstacle_rect.append([obstacle_rect, obstacle_name])
+
+            base_x += self.tile_size + 20
+
+        self.select_menu_functionality(self.selected_view_mode, all_obstacle_rect, obstacle_menu)
+
+        
+    def select_menu_functionality(self, menu_type, all_something_rect, something_menu):
+
+        # For selecting which obstacle will be used for placement
+        for something_rect in all_something_rect:
+            if something_rect[0].collidepoint(self.mx, self.my):
                 if self.click:
-                    self.selected_visual_tile_type = tile_type[1]
+                    if menu_type == "Obstacles":
+                        self.selected_obstacle = something_rect[1]
+                    elif menu_type == "Tiles":
+                        self.selected_visual_tile_type = something_rect[1]
 
             # Adds a border on the selected Tile
-            if tile_type[1] == self.selected_visual_tile_type:
-                selected_tile_img = pygame.image.load(f'images/Assets/select.png')
-                selected_tile_img = pygame.transform.scale(selected_tile_img, (self.tile_size, self.tile_size))
-                self.screen.blit(selected_tile_img, (tile_type[0].x, tile_type[0].y))
+            if menu_type == "Obstacles" and something_rect[1] == self.selected_obstacle or menu_type == "Tiles" and something_rect[1] == self.selected_visual_tile_type:
+                selected_img = pygame.image.load(f'images/Assets/select.png')
+                selected_img = pygame.transform.scale(selected_img, (self.tile_size, self.tile_size))
+                self.screen.blit(selected_img, (something_rect[0].x, something_rect[0].y))
 
-        # If Click outside of Map menu, close map menu
-        if not tile_menu.collidepoint(self.mx, self.my):
+            self.click_outside_menu(something_menu)
+
+        
+    def click_outside_menu(self, something_menu):
+        # If Click outside of menu, close menu
+        if not something_menu.collidepoint(self.mx, self.my):
             if self.click:
+                self.load_obstacle_menu = False
                 self.load_tile_menu = False
+                self.load_map_menu = False
 
 
     # Gets accurate UI Location for Tile
@@ -455,3 +517,6 @@ class MapCreator:
                     num_img = pygame.transform.scale(num_img, (85, 85))
                     self.screen.blit(num_img, (tile_x, tile_y))
                     
+
+    def get_obstacles_from_image_folder(self):
+        return os.listdir("images/Obstacles")

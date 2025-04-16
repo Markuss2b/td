@@ -5,3 +5,5 @@ Map Creator
 Game
 - Lighting
 - Vibrant
+
+- Collision between bullets and enemies (simple squares most likely)
