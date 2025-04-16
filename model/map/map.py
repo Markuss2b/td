@@ -78,7 +78,7 @@ class Map:
         
         self.tower_availability_map.save_tower_avail_map(self.name)
 
-        if len(self.obstacles > 0):
+        if len(self.obstacles) > 0:
             for obstacle in self.obstacles:
                 f = open(f'./all_maps/{self.name}/obstacles.txt', "w")
                 f.write(f'{obstacle.get_name()},{obstacle.get_left()},{obstacle.get_top()},{obstacle.get_length()},{obstacle.get_width()}\n')
@@ -86,7 +86,7 @@ class Map:
         else:
             f = open(f'./all_maps/{self.name}/obstacles.txt', "w").close()
         
-        
+
     def recreate_map_from_folder(self):
         self.x, self.y = self.visual_map.recreate_visual_map_from_file(self.name)
         
@@ -102,8 +102,8 @@ class Map:
 
         # Obstacles
         f = open(f'./all_maps/{self.name}/obstacles.txt', "r")
-        lines = f.readlines
-        if len(lines > 1):
+        lines = f.readlines()
+        if len(lines) > 1:
             for line in lines:
                 line.split(",")
                 line = [el.replace("\n", "") for el in line]

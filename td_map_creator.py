@@ -7,6 +7,7 @@ from model.map.tile_type_enum import get_tile_types
 # FIXME: Clicking on X returns to menu (Should quit the program)
 # FIXME: Do i want map_menu to be centered around the screen or the map
 # FIXME: Overlapping path
+# TODO: Obstacles
 # Tile size 16 x 9
 class MapCreator:
 
