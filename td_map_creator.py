@@ -363,7 +363,6 @@ class MapCreator:
         self.select_menu_functionality(self.selected_view_mode, all_tile_type_rect, tile_menu)
 
         
-    # TODO: Maybe try to make a function for similar menus
     def open_obstacle_menu(self):
         obstacle_menu_left = 370
         obstacle_menu_top = 100
@@ -467,6 +466,14 @@ class MapCreator:
             else:
                 sel_path.add_next_step(x, y)
 
+        # TODO:
+        elif self.selected_view_mode == "Obstacles":
+            if self.click:
+                if self.selected_obstacle != "None":
+                    # FIXME: Bit hard to control placement
+                    # FIXME: Taller than tile size
+                    self.map_selected.add_obstacle(self.selected_obstacle, self.mx, self.my, 85, 85)
+
 
     def draw_tile_img(self):
 
@@ -485,6 +492,13 @@ class MapCreator:
                     tile_img = pygame.image.load(f'images/Tiles/{folder_name}/{tile}')
                     tile_img = pygame.transform.scale(tile_img, (85, 85))
                     self.screen.blit(tile_img, (tile_x, tile_y))
+
+        
+        obstacles = self.map_selected.get_obstacles()
+        for obstacle in obstacles:
+            obstacle_img = pygame.image.load(f'images/Obstacles/{obstacle.get_name()}')
+            obstacle_img = pygame.transform.scale(obstacle_img, (obstacle.get_width(), obstacle.get_length()) )
+            self.screen.blit(obstacle_img, (obstacle.get_left(), obstacle.get_top()))
 
 
         if self.selected_view_mode == "Tower":

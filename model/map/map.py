@@ -68,6 +68,16 @@ class Map:
             self.paths.remove(potential_path)
         except Exception:
             print("No path found")    
+
+
+    def get_obstacles(self):
+        return self.obstacles
+    
+    def add_obstacle(self, name, left, top, length, width):
+        self.obstacles.append(Obstacle(name, left, top, length, width))
+    
+    def remove_obstacle(self):
+        self.obstacles.remove(self.obstacles[-1])
         
         
     def save_map(self):
