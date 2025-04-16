@@ -1,11 +1,11 @@
 class Obstacle:
     
-    def __init__(self, name, left, top, length, width):
+    def __init__(self, name, left, top, width, height):
         self.name = name
         self.left = left
         self.top = top
-        self.length = length
         self.width = width
+        self.height = height
 
     def get_name(self):
         return self.name
@@ -13,7 +13,7 @@ class Obstacle:
         return self.left
     def get_top(self):
         return self.top
-    def get_length(self):
-        return self.length
     def get_width(self):
         return self.width
+    def get_height(self):
+        return self.height

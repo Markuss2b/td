@@ -468,11 +468,12 @@ class MapCreator:
 
         # TODO:
         elif self.selected_view_mode == "Obstacles":
+            print(self.map_selected.get_obstacles())
             if self.click:
                 if self.selected_obstacle != "None":
                     # FIXME: Bit hard to control placement
                     # FIXME: Taller than tile size
-                    self.map_selected.add_obstacle(self.selected_obstacle, self.mx, self.my, 85, 85)
+                    self.map_selected.add_obstacle(self.selected_obstacle, self.mx, self.my, 170, 284)
 
 
     def draw_tile_img(self):
@@ -497,7 +498,7 @@ class MapCreator:
         obstacles = self.map_selected.get_obstacles()
         for obstacle in obstacles:
             obstacle_img = pygame.image.load(f'images/Obstacles/{obstacle.get_name()}')
-            obstacle_img = pygame.transform.scale(obstacle_img, (obstacle.get_width(), obstacle.get_length()) )
+            obstacle_img = pygame.transform.scale(obstacle_img, (obstacle.get_width(), obstacle.get_height()) )
             self.screen.blit(obstacle_img, (obstacle.get_left(), obstacle.get_top()))
 
 
@@ -530,7 +531,6 @@ class MapCreator:
                     num_img = pygame.image.load(f'images/Numbers/{tile_num}.png')
                     num_img = pygame.transform.scale(num_img, (85, 85))
                     self.screen.blit(num_img, (tile_x, tile_y))
-                    
-
+                     
     def get_obstacles_from_image_folder(self):
         return os.listdir("images/Obstacles")

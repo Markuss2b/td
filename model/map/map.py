@@ -73,8 +73,8 @@ class Map:
     def get_obstacles(self):
         return self.obstacles
     
-    def add_obstacle(self, name, left, top, length, width):
-        self.obstacles.append(Obstacle(name, left, top, length, width))
+    def add_obstacle(self, name, left, top, width, height):
+        self.obstacles.append(Obstacle(name, left, top, width, height))
     
     def remove_obstacle(self):
         self.obstacles.remove(self.obstacles[-1])
@@ -89,10 +89,10 @@ class Map:
         self.tower_availability_map.save_tower_avail_map(self.name)
 
         if len(self.obstacles) > 0:
+            f = open(f'./all_maps/{self.name}/obstacles.txt', "w")
             for obstacle in self.obstacles:
-                f = open(f'./all_maps/{self.name}/obstacles.txt', "w")
-                f.write(f'{obstacle.get_name()},{obstacle.get_left()},{obstacle.get_top()},{obstacle.get_length()},{obstacle.get_width()}\n')
-                f.close()
+                f.write(f'{obstacle.get_name()},{obstacle.get_left()},{obstacle.get_top()},{obstacle.get_width()},{obstacle.get_height()}\n')
+            f.close()
         else:
             f = open(f'./all_maps/{self.name}/obstacles.txt', "w").close()
         
@@ -115,8 +115,14 @@ class Map:
         lines = f.readlines()
         if len(lines) > 1:
             for line in lines:
-                line.split(",")
+                line = line.split(",")
                 line = [el.replace("\n", "") for el in line]
 
-                self.obstacles.append(line)
+                name = line[0]
+                left = int(line[1])
+                top = int(line[2])
+                width = int(line[3])
+                height = int(line[4])
+
+                self.obstacles.append(Obstacle(name, left, top, width, height))
         f.close()
