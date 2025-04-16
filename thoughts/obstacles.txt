@@ -1,0 +1,7 @@
+create a class in map
+they have variables: name, top, left, width, height
+They get placed with mouse cursor
+Save all obstacles in a list
+With arrow key left remove obstacle from list
+Recreating path from file would probably have to have all obstacles with all variables
+

@@ -1,6 +1,6 @@
 import os
 
-# TODO path vailidity, do i need it ?
+# TODO: THIS JUST DOES NOT WORK
 
 class Path:
     def __init__(self, name, max_x, max_y):

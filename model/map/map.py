@@ -2,8 +2,10 @@ import os
 from model.map.path import Path, Location
 from model.map.visual_map import Visual_map
 from model.map.tower_availability_map import Tower_availability
+from model.map.obstacle import Obstacle
 
-# TODO there can be multiple paths
+# TODO: Finish obstacles logic in map
+# TODO: Probably need to add deleting a map
 
 class Map:
     def __init__(self, name, x, y):
@@ -13,6 +15,7 @@ class Map:
         self.paths = []
         self.visual_map = Visual_map(x, y)
         self.tower_availability_map = Tower_availability(x, y)
+        self.obstacles = []
 
     
     def get_map_name(self):
@@ -74,6 +77,14 @@ class Map:
             path.save_path(self.name)
         
         self.tower_availability_map.save_tower_avail_map(self.name)
+
+        if len(self.obstacles > 0):
+            for obstacle in self.obstacles:
+                f = open(f'./all_maps/{self.name}/obstacles.txt', "w")
+                f.write(f'{obstacle.get_name()},{obstacle.get_left()},{obstacle.get_top()},{obstacle.get_length()},{obstacle.get_width()}\n')
+                f.close()
+        else:
+            f = open(f'./all_maps/{self.name}/obstacles.txt', "w").close()
         
         
     def recreate_map_from_folder(self):
@@ -88,3 +99,14 @@ class Map:
             self.paths[path_i].recreate_path_from_file(self.name, path_name)
         
         self.tower_availability_map.recreate_tower_avail_map_from_file(self.name)
+
+        # Obstacles
+        f = open(f'./all_maps/{self.name}/obstacles.txt', "r")
+        lines = f.readlines
+        if len(lines > 1):
+            for line in lines:
+                line.split(",")
+                line = [el.replace("\n", "") for el in line]
+
+                self.obstacles.append(line)
+        f.close()

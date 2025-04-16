@@ -7,7 +7,6 @@ from model.map.tile_type_enum import get_tile_types
 # FIXME: Clicking on X returns to menu (Should quit the program)
 # FIXME: Do i want map_menu to be centered around the screen or the map
 # FIXME: Overlapping path
-# FIXME: Weird bug when creating new map
 # Tile size 16 x 9
 class MapCreator:
 
@@ -233,7 +232,6 @@ class MapCreator:
                 if self.click:
                     self.map_selected.add_path(self.path_names[len(self.map_selected.get_all_paths())-1])
                     self.map_selected.get_all_paths()[-1].make_empty_path()
-                    print(self.map_selected.x, self.map_selected.y)
 
         # Min 1
         if len(self.map_selected.get_all_paths()) > 1:

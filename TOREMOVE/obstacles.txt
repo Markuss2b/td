@@ -1,0 +1,8 @@
+name,left,top,length,width
+name,left,top,length,width
+name,left,top,length,width
+name,left,top,length,width
+name,left,top,length,width
+name,left,top,length,width
+name,left,top,length,width
+name,left,top,length,width

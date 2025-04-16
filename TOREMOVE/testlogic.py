@@ -1,5 +1,7 @@
-from model.map.map import Map
-from model.map.tile_type_enum import TileType
+import os
+print(os.getcwd())
+# from model.map.map import Map
+# from model.map.tile_type_enum import TileType
 
 # first_map = Map("test_map", 10, 10)
 # first_map.initialize_all_maps()
@@ -23,3 +25,16 @@ from model.map.tile_type_enum import TileType
 # second_map.get_path("first_path").add_next_step(0, 1)
 # second_map.get_path("first_path").draw_path()
 
+f = open("TOREMOVE/obstacles.txt", "r")
+lines = f.readlines()
+f.close()
+obstacles = []
+
+for line in lines:
+    line = line.split(",")
+    line = [el.replace("\n", "") for el in line]
+
+    obstacles.append(line)
+
+
+print(obstacles)
