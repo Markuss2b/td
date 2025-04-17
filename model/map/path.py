@@ -41,14 +41,17 @@ class Path:
     
     def add_next_step(self, x, y):
         try:
-            already_in_sequence = False
-            for location in self.sequence:
-                if location.x == x and location.y == y:
-                    already_in_sequence = True
+            if self.sequence[0] == None:
+                self.sequence[0] = Location(x, y)
+                self.path_tiles[y][x] = len(self.sequence)
+            else:
+                already_in_sequence = False
+                for location in self.sequence:
+                    if location.x == x and location.y == y:
+                        already_in_sequence = True
 
-            last_move = self.sequence[-1]       
-            # Can only add a step if start has been set
-            if not self.start_location == None:
+                last_move = self.sequence[-1]       
+
                 # If statements check if next step is connected with the last move. Also it checks if its out of bounds
                 if abs(last_move.x - x) == 0 and abs(last_move.y - y) == 1 or abs(last_move.x - x) == 1 and abs(last_move.y - y) == 0:
                     if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
@@ -61,15 +64,14 @@ class Path:
                         raise Exception
                 else:
                     raise Exception
-            else:
-                raise Exception                
+             
         except Exception:
             # TODO     
             print("Cant connect moves")
             
             
     def remove_step(self):
-        if len(self.sequence) > 1:
+        if len(self.sequence) > 0:
             self.path_tiles[self.sequence[-1].y][self.sequence[-1].x] = 0
             self.sequence.remove(self.sequence[-1])
         else:

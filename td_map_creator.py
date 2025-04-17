@@ -497,17 +497,21 @@ class MapCreator:
             sel_path = self.map_selected.get_path(self.selected_sequence)
             seq = sel_path.get_sequence()
 
-            if sel_path.get_start() == None:
-                sel_path.set_start(x, y)
-            elif seq[-1].x == x and seq[-1].y == y:
-                sel_path.remove_step()
+            # if sel_path.get_start() == None:
+            #     sel_path.set_start(x, y)
+            if seq[0] != None:
+                if seq[-1].x == x and seq[-1].y == y:
+                    sel_path.remove_step()
+                else:
+                    sel_path.add_next_step(x, y)
+
+                    # Draws X for a moment to show that next step cannot be at that xy
+                    if sel_path.get_2d_path()[y][x] == 0:
+                        left, top = self.get_rect_param(x, y)
+                        self.draw_img_on_rect("images/Assets/X.png", left, top, self.tile_size, self.tile_size)
             else:
                 sel_path.add_next_step(x, y)
 
-                # Draws X for a moment to show that next step cannot be at that xy
-                if sel_path.get_2d_path()[y][x] == 0:
-                    left, top = self.get_rect_param(x, y)
-                    self.draw_img_on_rect("images/Assets/X.png", left, top, self.tile_size, self.tile_size)
 
         # TODO:
         elif self.selected_view_mode == "Obstacles":
