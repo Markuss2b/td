@@ -9,6 +9,7 @@ from model.map.tile_type_enum import get_tile_types
 # TODO: Obstacles
 # TODO: Naming new map should be visible
 # TODO: Buttons should have names
+# TODO: Draw X, when adding step fails
 # Tile size 16 x 9
 class MapCreator:
 
@@ -78,20 +79,10 @@ class MapCreator:
             main_map_rect = pygame.Rect(0, 80, 1360, 765)
             pygame.draw.rect(self.screen, (0, 0, 0), main_map_rect)
 
-
-            # Creating the tile map 16x9 (144 buttons)
-            tile_map = []
-            for y in range(9):
-                tile_map.append([])
-                for x in range(16):
-                    tile_x, tile_y = self.get_rect_param(x, y)
-                    tile_rect = pygame.Rect(tile_x, tile_y, self.tile_size, self.tile_size)
-                    tile_map[y].append(tile_rect)
-
-
             top_border = pygame.Rect(0, 0, 1600, 30)
             pygame.draw.rect(self.screen, (0, 0, 255), top_border)
 
+            # Draws first so the obstacles do not get drawn outside the map
             seq_rec = []
             if self.map_selected != None:
                 # Draws sequence blocks(=Amount of Paths) at the top
@@ -103,8 +94,32 @@ class MapCreator:
                 # Buttons for adding and removing paths    
                 add_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70, 0, 30, 30)
                 remove_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5, 0, 30, 30)
-                pygame.draw.rect(self.screen, (255, 255, 255), add_path_button)
-                pygame.draw.rect(self.screen, (255, 255, 255), remove_path_button)
+
+                self.draw_img_on_rect("images/Assets/Plus.png", add_path_button.left, add_path_button.top, add_path_button.width, add_path_button.height)
+                self.draw_img_on_rect("images/Assets/Minus.png", remove_path_button.left, remove_path_button.top, remove_path_button.width, remove_path_button.height)
+
+            # Stops Map Creator crashing when map is no selected
+            if self.map_selected != None:
+                self.draw_tile_img()
+
+                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec)
+
+
+            # Creating the tile map 16x9 (144 buttons)
+            tile_map = []
+            for y in range(9):
+                tile_map.append([])
+                for x in range(16):
+                    tile_x, tile_y = self.get_rect_param(x, y)
+                    tile_rect = pygame.Rect(tile_x, tile_y, self.tile_size, self.tile_size)
+                    tile_map[y].append(tile_rect)
+
+
+            # Stops from obstacles being drawn outside of map
+            map_top_border = pygame.Rect(0, 30, 1360, 50)
+            map_bot_border = pygame.Rect(0, 845, 1360, 55)
+            pygame.draw.rect(self.screen, (0, 0, 0), map_top_border)
+            pygame.draw.rect(self.screen, (0, 0, 0), map_bot_border)
 
             map_creator_ui = pygame.Rect(1360, 30, 240, 870)
             pygame.draw.rect(self.screen, (0, 122, 122), map_creator_ui)
@@ -132,12 +147,6 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
             pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
 
-            # Stops Map Creator crashing when map is no selected
-            if self.map_selected != None:
-                self.draw_tile_img()
-
-                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec)
-
             # For now, have to manually add if i add any buttons
             self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles)
 
@@ -164,6 +173,16 @@ class MapCreator:
                             self.new_map_name = self.new_map_name[:-1]
                         else:
                             self.new_map_name += event.unicode
+
+                    # For Removing or Returning Obstacles
+                    if self.map_selected != None:
+                        if len(self.map_selected.get_obstacles()) > 0:
+                            if event.key == pygame.K_LEFT:
+                                self.map_selected.remove_obstacle()
+                        
+                        if len(self.map_selected.get_removed_obstacles()) > 0:
+                            if event.key == pygame.K_RIGHT:
+                                self.map_selected.return_removed_obstacle()
 
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -350,12 +369,10 @@ class MapCreator:
 
         for key in self.all_tile_types.keys():
             for tile_type in self.all_tile_types.get(key):
-                # Draws the tile type images
-                tile_img = pygame.image.load(f'images/Tiles/{key}/{tile_type}')
-                tile_img = pygame.transform.scale(tile_img, (self.tile_size, self.tile_size))
-                self.screen.blit(tile_img, (base_x, base_y))
-
                 tile_type_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
+
+                # Draws the tile type images
+                self.draw_img_on_rect(f'images/Tiles/{key}/{tile_type}', base_x, base_y, self.tile_size, self.tile_size)
 
                 # Example = [[Rect, Type], [Rect, Type]]
                 all_tile_type_rect.append([tile_type_rect, tile_type])
@@ -386,12 +403,10 @@ class MapCreator:
                 base_y += (i+1) / 5 * self.tile_size + 20
 
             obstacle_name = self.all_obstacles[i]
-            # Draws the obstacle images
-            obstacle_img = pygame.image.load(f'images/Obstacles/{obstacle_name}')
-            obstacle_img = pygame.transform.scale(obstacle_img, (self.tile_size, self.tile_size))
-            self.screen.blit(obstacle_img, (base_x, base_y))
 
             obstacle_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
+            # Draws the obstacle images
+            self.draw_img_on_rect(f'images/Obstacles/{obstacle_name}', base_x, base_y, self.tile_size, self.tile_size)
 
             all_obstacle_rect.append([obstacle_rect, obstacle_name])
 
@@ -413,9 +428,7 @@ class MapCreator:
 
             # Adds a border on the selected Tile
             if menu_type == "Obstacles" and something_rect[1] == self.selected_obstacle or menu_type == "Tiles" and something_rect[1] == self.selected_visual_tile_type:
-                selected_img = pygame.image.load(f'images/Assets/select.png')
-                selected_img = pygame.transform.scale(selected_img, (self.tile_size, self.tile_size))
-                self.screen.blit(selected_img, (something_rect[0].x, something_rect[0].y))
+                self.draw_img_on_rect(f'images/Assets/select.png', something_rect[0].x, something_rect[0].y, self.tile_size, self.tile_size)
 
             self.click_outside_menu(something_menu)
 
@@ -494,16 +507,12 @@ class MapCreator:
                 if tile != None:
                     folder_name = tile.split("_")[1]
 
-                    tile_img = pygame.image.load(f'images/Tiles/{folder_name}/{tile}')
-                    tile_img = pygame.transform.scale(tile_img, (85, 85))
-                    self.screen.blit(tile_img, (tile_x, tile_y))
+                    self.draw_img_on_rect(f'images/Tiles/{folder_name}/{tile}', tile_x, tile_y, self.tile_size, self.tile_size)
 
         
         obstacles = self.map_selected.get_obstacles()
         for obstacle in obstacles:
-            obstacle_img = pygame.image.load(f'images/Obstacles/{obstacle.get_name()}')
-            obstacle_img = pygame.transform.scale(obstacle_img, (obstacle.get_width(), obstacle.get_height()) )
-            self.screen.blit(obstacle_img, (obstacle.get_left(), obstacle.get_top()))
+            self.draw_img_on_rect(f'images/Obstacles/{obstacle.get_name()}', obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height())
 
 
         if self.selected_view_mode == "Tower":
@@ -518,9 +527,7 @@ class MapCreator:
 
                     # ADD X
                     if tile_avail == "X":
-                        x_img = pygame.image.load("images/Assets/X.png")
-                        x_img = pygame.transform.scale(x_img, (85, 85))
-                        self.screen.blit(x_img, (tile_x, tile_y))
+                        self.draw_img_on_rect("images/Assets/X.png", tile_x, tile_y, self.tile_size, self.tile_size)
 
 
         elif self.selected_view_mode == "Sequence":
@@ -532,9 +539,15 @@ class MapCreator:
                     tile_x, tile_y = self.get_rect_param(x, y)
                     tile_num = path_2d[y][x]
 
-                    num_img = pygame.image.load(f'images/Numbers/{tile_num}.png')
-                    num_img = pygame.transform.scale(num_img, (85, 85))
-                    self.screen.blit(num_img, (tile_x, tile_y))
+                    self.draw_img_on_rect(f'images/Numbers/{tile_num}.png', tile_x, tile_y, self.tile_size, self.tile_size)
+
                      
     def get_obstacles_from_image_folder(self):
         return os.listdir("images/Obstacles")
+    
+    
+    def draw_img_on_rect(self, path_to_img, left, top, width, height):
+        img = pygame.image.load(path_to_img)
+        img = pygame.transform.scale(img, (width, height))
+        self.screen.blit(img, (left, top))
+

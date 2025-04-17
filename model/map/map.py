@@ -16,6 +16,7 @@ class Map:
         self.visual_map = Visual_map(x, y)
         self.tower_availability_map = Tower_availability(x, y)
         self.obstacles = []
+        self.removed_obstacles = []
 
     
     def get_map_name(self):
@@ -73,11 +74,19 @@ class Map:
     def get_obstacles(self):
         return self.obstacles
     
+    def get_removed_obstacles(self):
+        return self.removed_obstacles
+    
     def add_obstacle(self, name, left, top, width, height):
         self.obstacles.append(Obstacle(name, left, top, width, height))
     
     def remove_obstacle(self):
+        self.removed_obstacles.append(self.obstacles[-1])
         self.obstacles.remove(self.obstacles[-1])
+
+    def return_removed_obstacle(self):
+        self.obstacles.append(self.removed_obstacles[-1])
+        self.removed_obstacles.remove(self.removed_obstacles[-1])
         
         
     def save_map(self):
