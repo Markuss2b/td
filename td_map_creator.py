@@ -295,12 +295,12 @@ class MapCreator:
         map_menu_left = 530
         map_menu_top = 100
         map_menu_width = 300
-        map_menu_length = 700
+        map_menu_length = 720
         map_menu = pygame.Rect(map_menu_left, map_menu_top, map_menu_width, map_menu_length)
         pygame.draw.rect(self.screen, (0, 0, 0), map_menu)
 
         base_x = map_menu_left + 20
-        base_y = map_menu_top + 60
+        base_y = map_menu_top + 10
 
         # Creates a rect for every map
         all_maps_rect = []
@@ -319,7 +319,8 @@ class MapCreator:
 
                     self.map_selected.recreate_map_from_folder()
 
-        self.click_outside_menu(map_menu)
+        checkmark_rect = self.draw_checkmark_on_menu(map_menu)
+        self.click_outside_menu(map_menu, checkmark_rect)
 
         return map_menu_left, map_menu_top, map_menu_width, map_menu_length
 
@@ -327,10 +328,10 @@ class MapCreator:
     def create_new_map(self, map_menu_left, map_menu_top, map_menu_width, map_menu_length):
 
         # Create buttons
-        add_new_map_rect = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 150, map_menu_width - 60, 50)
+        add_new_map_rect = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 220, map_menu_width - 60, 50)
         pygame.draw.rect(self.screen, (255, 255, 255), add_new_map_rect)
 
-        new_map_inputfield = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 80, map_menu_width - 60, 50)
+        new_map_inputfield = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 150, map_menu_width - 60, 50)
         pygame.draw.rect(self.screen, (255, 255, 255), new_map_inputfield)
 
         # Max 10 custom maps
@@ -381,7 +382,9 @@ class MapCreator:
             base_y += self.tile_size + 20
             base_x = tile_menu_left + 20
 
-        self.select_menu_functionality(self.selected_view_mode, all_tile_type_rect, tile_menu)
+        checkmark_rect = self.draw_checkmark_on_menu(tile_menu)
+
+        self.select_menu_functionality(self.selected_view_mode, all_tile_type_rect, tile_menu,checkmark_rect)
 
         
     def open_obstacle_menu(self):
@@ -412,10 +415,13 @@ class MapCreator:
 
             base_x += self.tile_size + 20
 
-        self.select_menu_functionality(self.selected_view_mode, all_obstacle_rect, obstacle_menu)
+
+        checkmark_rect = self.draw_checkmark_on_menu(obstacle_menu)
+
+        self.select_menu_functionality(self.selected_view_mode, all_obstacle_rect, obstacle_menu, checkmark_rect)
 
         
-    def select_menu_functionality(self, menu_type, all_something_rect, something_menu):
+    def select_menu_functionality(self, menu_type, all_something_rect, something_menu, checkmark_rect):
 
         # For selecting which obstacle will be used for placement
         for something_rect in all_something_rect:
@@ -430,12 +436,12 @@ class MapCreator:
             if menu_type == "Obstacles" and something_rect[1] == self.selected_obstacle or menu_type == "Tiles" and something_rect[1] == self.selected_visual_tile_type:
                 self.draw_img_on_rect(f'images/Assets/select.png', something_rect[0].x, something_rect[0].y, self.tile_size, self.tile_size)
 
-            self.click_outside_menu(something_menu)
+            self.click_outside_menu(something_menu, checkmark_rect)
 
         
-    def click_outside_menu(self, something_menu):
+    def click_outside_menu(self, something_menu, checkmark_rect):
         # If Click outside of menu, close menu
-        if not something_menu.collidepoint(self.mx, self.my):
+        if not something_menu.collidepoint(self.mx, self.my) or checkmark_rect.collidepoint(self.mx, self.my):
             if self.click:
                 self.load_obstacle_menu = False
                 self.load_tile_menu = False
@@ -545,9 +551,14 @@ class MapCreator:
     def get_obstacles_from_image_folder(self):
         return os.listdir("images/Obstacles")
     
-    
+
     def draw_img_on_rect(self, path_to_img, left, top, width, height):
         img = pygame.image.load(path_to_img)
         img = pygame.transform.scale(img, (width, height))
         self.screen.blit(img, (left, top))
 
+    def draw_checkmark_on_menu(self, menu_rect):
+        confirm_rect = pygame.Rect(menu_rect.left + menu_rect.width / 2 - 25, menu_rect.top + menu_rect.height - 70, 50, 50)
+        self.draw_img_on_rect(f'images/Assets/CheckMark.png', confirm_rect.left, confirm_rect.top, confirm_rect.width, confirm_rect.height)
+
+        return confirm_rect
