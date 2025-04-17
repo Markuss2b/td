@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import shutil
 from func import draw_text
 from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
@@ -77,7 +78,7 @@ class MapCreator:
             self.mx, self.my = pygame.mouse.get_pos()
 
             main_map_rect = pygame.Rect(0, 80, 1360, 765)
-            pygame.draw.rect(self.screen, (0, 0, 0), main_map_rect)
+            pygame.draw.rect(self.screen, (25, 25, 25), main_map_rect)
 
             top_border = pygame.Rect(0, 0, 1600, 30)
             pygame.draw.rect(self.screen, (0, 0, 255), top_border)
@@ -252,14 +253,15 @@ class MapCreator:
             
 
             # For selecting tiles in the map
-            for y in range(len(tile_map)):
-                for x in range(len(tile_map[y])):
-                    if tile_map[y][x].collidepoint(self.mx, self.my):
-                        if self.click:
-                            self.selected_tile = Location(x, y)
-                            print(f'Selected: X = {self.selected_tile.x}, Y = {self.selected_tile.y}')
+            if self.map_selected != None:
+                for y in range(len(tile_map)):
+                    for x in range(len(tile_map[y])):
+                        if tile_map[y][x].collidepoint(self.mx, self.my):
+                            if self.click:
+                                self.selected_tile = Location(x, y)
+                                print(f'Selected: X = {self.selected_tile.x}, Y = {self.selected_tile.y}')
 
-                            self.interacting_with_tiles()
+                                self.interacting_with_tiles()
 
         self.click = False
 
@@ -305,19 +307,34 @@ class MapCreator:
         # Creates a rect for every map
         all_maps_rect = []
         for i in range(len(self.all_maps)):
-            map_rect = pygame.Rect(base_x, base_y + 40 * (i + 1), 260, 30)
-            all_maps_rect.append(map_rect)
+            map_rect = pygame.Rect(base_x, base_y + 40 * (i + 1), 230, 30)
             pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
+
+            delete_map_rect = pygame.Rect(base_x + 230, base_y + 40 * (i + 1), 30, 30)
+            self.draw_img_on_rect("images/Assets/X.png", delete_map_rect.left, delete_map_rect.top, delete_map_rect.width, delete_map_rect.height)
+            
+            all_maps_rect.append([map_rect, delete_map_rect])
 
         # Selects any previously made maps
         for i in range(len(all_maps_rect)):
-            map_rect = all_maps_rect[i]
+            map_rect = all_maps_rect[i][0]
+            delete_map_rect = all_maps_rect[i][1]
 
+            # Recreates map
             if map_rect.collidepoint(self.mx, self.my):
                 if self.click:
                     self.map_selected = Map(self.all_maps[i], 0, 0)
 
                     self.map_selected.recreate_map_from_folder()
+
+            # Deletes map         
+            if delete_map_rect.collidepoint(self.mx, self.my):
+                if self.click:
+                    shutil.rmtree(f'all_maps/{self.all_maps[i]}')
+
+                    if self.map_selected.get_map_name() == self.all_maps[i]:
+                        self.map_selected = None
+
 
         checkmark_rect = self.draw_checkmark_on_menu(map_menu)
         self.click_outside_menu(map_menu, checkmark_rect)
