@@ -6,11 +6,10 @@ from func import draw_text
 from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
-# FIXME: Overlapping path
 # TODO: Obstacles
 # TODO: Naming new map should be visible
 # TODO: Buttons should have names
-# TODO: Draw X, when adding step fails
+# TODO: Can switch between placing obstacles on tiles and freely.
 # Tile size 16 x 9
 class MapCreator:
 
@@ -49,6 +48,7 @@ class MapCreator:
         # Which editing view has been selected, Path, Tower availability, Visual tiles, Obstacles
         self.selected_view_mode = "Tiles"
 
+        # Top of Screen, can select path
         self.selected_sequence = "first_path"
 
         self.selected_tile = None
@@ -81,7 +81,7 @@ class MapCreator:
             pygame.draw.rect(self.screen, (25, 25, 25), main_map_rect)
 
             top_border = pygame.Rect(0, 0, 1600, 30)
-            pygame.draw.rect(self.screen, (0, 0, 255), top_border)
+            pygame.draw.rect(self.screen, (0, 75, 125), top_border)
 
             # Draws first so the obstacles do not get drawn outside the map
             seq_rec = []
@@ -123,12 +123,12 @@ class MapCreator:
             pygame.draw.rect(self.screen, (0, 0, 0), map_bot_border)
 
             map_creator_ui = pygame.Rect(1360, 30, 240, 870)
-            pygame.draw.rect(self.screen, (0, 122, 122), map_creator_ui)
+            pygame.draw.rect(self.screen, (80, 40, 10), map_creator_ui)
 
             save_button = pygame.Rect(1360, 850, 120, 50)
             exit_button = pygame.Rect(1480, 850, 120, 50)
-            pygame.draw.rect(self.screen, (0, 255, 0), save_button)
-            pygame.draw.rect(self.screen, (255, 0, 0), exit_button)
+            pygame.draw.rect(self.screen, (30, 120, 0), save_button)
+            pygame.draw.rect(self.screen, (175, 0, 0), exit_button)
 
             select_map = pygame.Rect(1400, 90, 160, 50)
             pygame.draw.rect(self.screen, (255, 255, 255), select_map)
@@ -352,7 +352,6 @@ class MapCreator:
         pygame.draw.rect(self.screen, (255, 255, 255), new_map_inputfield)
 
         # Max 10 custom maps
-        # TODO: Add option to remove maps
         if len(self.all_maps) < 10:
             # Activating input field
             if new_map_inputfield.collidepoint(self.mx, self.my):
@@ -494,7 +493,6 @@ class MapCreator:
             elif tile_avail == "O":
                 tow_avail.remove_tile_tower_avail(x, y)
 
-        # FIXME: BUGGY MESS
         elif self.selected_view_mode == "Sequence":
             sel_path = self.map_selected.get_path(self.selected_sequence)
             seq = sel_path.get_sequence()
@@ -505,6 +503,11 @@ class MapCreator:
                 sel_path.remove_step()
             else:
                 sel_path.add_next_step(x, y)
+
+                # Draws X for a moment to show that next step cannot be at that xy
+                if sel_path.get_2d_path()[y][x] == 0:
+                    left, top = self.get_rect_param(x, y)
+                    self.draw_img_on_rect("images/Assets/X.png", left, top, self.tile_size, self.tile_size)
 
         # TODO:
         elif self.selected_view_mode == "Obstacles":

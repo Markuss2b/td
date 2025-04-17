@@ -41,14 +41,22 @@ class Path:
     
     def add_next_step(self, x, y):
         try:
-            last_move = self.sequence[-1]
-            # Can only add a step if start has been set, end has not been set
-            if not self.start_location == None and not self.end_location != None:
+            already_in_sequence = False
+            for location in self.sequence:
+                if location.x == x and location.y == y:
+                    already_in_sequence = True
+
+            last_move = self.sequence[-1]       
+            # Can only add a step if start has been set
+            if not self.start_location == None:
                 # If statements check if next step is connected with the last move. Also it checks if its out of bounds
                 if abs(last_move.x - x) == 0 and abs(last_move.y - y) == 1 or abs(last_move.x - x) == 1 and abs(last_move.y - y) == 0:
                     if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
-                        self.sequence.append(Location(x, y))
-                        self.path_tiles[y][x] = len(self.sequence)
+                        if already_in_sequence == False:
+                            self.sequence.append(Location(x, y))
+                            self.path_tiles[y][x] = len(self.sequence)
+                        else:
+                            raise Exception
                     else:
                         raise Exception
                 else:
@@ -67,7 +75,7 @@ class Path:
         else:
             print("No steps to remove")
     
-    
+    # TODO: Do i need this ?
     def set_start(self, x, y):
         if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
             # Only remove previous value when start_location has not been set
@@ -88,7 +96,7 @@ class Path:
     def get_start(self):
         return self.start_location
     
-    #TODO add_step
+    # TODO: do i need this?
     def set_end(self, x, y):
         if x <= self.max_x and x >= 0 and y <= self.max_y and y >= 0:
             # Only remove previous value when end_location has not been set
@@ -120,8 +128,6 @@ class Path:
     # Copy or Load map from file
     def recreate_path_from_file(self, map_name, path_name):
         with open(f'./all_maps/{map_name}/paths/{path_name}.txt', "r") as path_file:
-            # Predefined first value of sequence that needs to be removed when recreating the path from the file
-            self.sequence.remove(None)
             
             txt_file_list = [line.split() for line in path_file]
             self.max_x = len(txt_file_list[0])
@@ -139,7 +145,12 @@ class Path:
 
                     if value > 0:
                         dict_sequence[value] = Location(x, y)
-                 
+                  
+            # If there is no sequence then None will be replaced later      
+            if len(dict_sequence) != 0:     
+                # Predefined first value of sequence that needs to be removed when recreating the path from the file
+                self.sequence.remove(None)  
+
             # Sorting sequence in rising order
             sorted_dict_sequence = dict(sorted(dict_sequence.items()))
             for dict_key in sorted_dict_sequence:
