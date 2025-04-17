@@ -9,7 +9,6 @@ from model.map.tile_type_enum import get_tile_types
 # TODO: Obstacles
 # TODO: Naming new map should be visible
 # TODO: Buttons should have names
-# TODO: Can switch between placing obstacles on tiles and freely.
 # Tile size 16 x 9
 class MapCreator:
 
@@ -41,6 +40,7 @@ class MapCreator:
 
         self.all_obstacles = self.get_obstacles_from_image_folder()
         self.selected_obstacle = "None"
+        self.obstacle_placement_method = "Free"
 
         # Boolean for on click actions
         self.click = False
@@ -80,6 +80,10 @@ class MapCreator:
             main_map_rect = pygame.Rect(0, 80, 1360, 765)
             pygame.draw.rect(self.screen, (25, 25, 25), main_map_rect)
 
+            # Stops Map Creator crashing when map is no selected
+            if self.map_selected != None:
+                self.draw_tile_img()
+
             top_border = pygame.Rect(0, 0, 1600, 30)
             pygame.draw.rect(self.screen, (0, 75, 125), top_border)
 
@@ -98,10 +102,6 @@ class MapCreator:
 
                 self.draw_img_on_rect("images/Assets/Plus.png", add_path_button.left, add_path_button.top, add_path_button.width, add_path_button.height)
                 self.draw_img_on_rect("images/Assets/Minus.png", remove_path_button.left, remove_path_button.top, remove_path_button.width, remove_path_button.height)
-
-            # Stops Map Creator crashing when map is no selected
-            if self.map_selected != None:
-                self.draw_tile_img()
 
                 self.handle_path_buttons(add_path_button, remove_path_button, seq_rec)
 
@@ -431,8 +431,9 @@ class MapCreator:
 
             base_x += self.tile_size + 20
 
-
         checkmark_rect = self.draw_checkmark_on_menu(obstacle_menu)
+
+        self.change_obstacle_placement_method(checkmark_rect)
 
         self.select_menu_functionality(self.selected_view_mode, all_obstacle_rect, obstacle_menu, checkmark_rect)
 
@@ -520,7 +521,21 @@ class MapCreator:
                 if self.selected_obstacle != "None":
                     # FIXME: Bit hard to control placement
                     # TODO: Size dynamic
-                    self.map_selected.add_obstacle(self.selected_obstacle, self.mx, self.my, 170, 284)
+                    half = 42
+                    if self.obstacle_placement_method == "Free":
+                        self.map_selected.add_obstacle(self.selected_obstacle, self.mx - half, self.my - 199, 170, 284)
+                    if self.obstacle_placement_method == "Tile":
+                        left, top = self.get_rect_param(x, y)
+                        left = left - half
+                        top = top - 199
+
+                        obstacle_already_exists = False
+                        for obstacle in self.map_selected.get_obstacles():
+                            if obstacle.get_left() == left and obstacle.get_top() == top:
+                                obstacle_already_exists = True
+                                
+                        if obstacle_already_exists == False:
+                            self.map_selected.add_obstacle(self.selected_obstacle, left, top, 170, 284)
 
 
     def draw_tile_img(self):
@@ -586,3 +601,15 @@ class MapCreator:
         self.draw_img_on_rect(f'images/Assets/CheckMark.png', confirm_rect.left, confirm_rect.top, confirm_rect.width, confirm_rect.height)
 
         return confirm_rect
+    
+    def change_obstacle_placement_method(self, example_rect):
+        # TODO: Future checkbox for swapping obstacle placement method
+        change_obstacle_placement_method_rect = pygame.Rect(example_rect.left, example_rect.top - 50, example_rect.width, example_rect.height)
+        self.draw_img_on_rect("images/Numbers/0.png", change_obstacle_placement_method_rect.left, change_obstacle_placement_method_rect.top, change_obstacle_placement_method_rect.width, change_obstacle_placement_method_rect.height)
+
+        if change_obstacle_placement_method_rect.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.obstacle_placement_method == "Free":
+                    self.obstacle_placement_method = "Tile"
+                elif self.obstacle_placement_method == "Tile":
+                    self.obstacle_placement_method = "Free"
