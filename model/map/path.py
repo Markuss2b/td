@@ -24,6 +24,10 @@ class Path:
         
     
     def make_empty_path(self):
+        self.path_tiles = []
+        self.start_location = None
+        self.end_location = None
+        self.sequence = [None]
         for i in range(self.max_y):
             self.path_tiles.append([])
             for j in range(self.max_x):

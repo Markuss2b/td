@@ -99,11 +99,15 @@ class MapCreator:
                 # Buttons for adding and removing paths    
                 add_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70, 0, 30, 30)
                 remove_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5, 0, 30, 30)
+                remove_tow_avail_with_sequence_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5 + 30 + 10, 0, 50, 30)
+                clear_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5 + 30 + 10 + 50 + 10, 0, 50, 30)
 
                 self.draw_img_on_rect("images/Assets/Plus.png", add_path_button.left, add_path_button.top, add_path_button.width, add_path_button.height)
                 self.draw_img_on_rect("images/Assets/Minus.png", remove_path_button.left, remove_path_button.top, remove_path_button.width, remove_path_button.height)
+                pygame.draw.rect(self.screen, (255, 255, 255), remove_tow_avail_with_sequence_button)
+                pygame.draw.rect(self.screen, (255, 255, 255), clear_path_button)
 
-                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec)
+                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button)
 
 
             # Creating the tile map 16x9 (144 buttons)
@@ -266,7 +270,7 @@ class MapCreator:
         self.click = False
 
 
-    def handle_path_buttons(self, add_path_button, remove_path_button, seq_rec):
+    def handle_path_buttons(self, add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button):
         # Max 4
         if len(self.map_selected.get_all_paths()) < 4:
             if add_path_button.collidepoint(self.mx, self.my):
@@ -291,6 +295,29 @@ class MapCreator:
                         self.selected_sequence = "first_path"
                     else:
                         self.selected_sequence = self.path_names[i-1]
+
+        # Clears path
+        if clear_path_button.collidepoint(self.mx, self.my):
+            if self.click:
+                all_paths = self.map_selected.get_all_paths()
+                if self.selected_sequence == "first_path":
+                    all_paths[0].make_empty_path()
+                else:
+                    all_paths[self.path_names.index(self.selected_sequence)+1].make_empty_path()
+
+        # Removes tower availability from sequence tiles
+        if remove_tow_avail_with_sequence_button.collidepoint(self.mx, self.my):
+            if self.click:
+                tow_avail = self.map_selected.get_tower_availability_map()
+                all_paths = self.map_selected.get_all_paths()
+                if self.selected_sequence == "first_path":
+                    sequence = all_paths[0].get_sequence()
+                    if sequence[0] != None:
+                        tow_avail.tower_auto_x_path_tiles(sequence)
+                else:
+                    sequence = all_paths[self.path_names.index(self.selected_sequence)+1].get_sequence()
+                    if sequence[0] != None:
+                        tow_avail.tower_auto_x_path_tiles(sequence)
 
 
     def select_map_menu(self):
@@ -519,7 +546,6 @@ class MapCreator:
             print(self.map_selected.get_obstacles())
             if self.click:
                 if self.selected_obstacle != "None":
-                    # FIXME: Bit hard to control placement
                     # TODO: Size dynamic
                     half = 42
                     if self.obstacle_placement_method == "Free":
