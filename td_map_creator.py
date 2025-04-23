@@ -52,7 +52,10 @@ class MapCreator:
 
         self.selected_tile = None
 
+        # Color for numbers
         self.selected_style = "Red"
+
+        self.grid = False
 
         self.font = pygame.font.SysFont(None, 20)
 
@@ -130,6 +133,9 @@ class MapCreator:
             map_creator_ui = pygame.Rect(1360, 30, 240, 870)
             pygame.draw.rect(self.screen, (80, 40, 10), map_creator_ui)
 
+            grid_button = pygame.Rect(1330, 30, 30, 30)
+            pygame.draw.rect(self.screen, (75, 75, 75), grid_button)
+
             save_button = pygame.Rect(1360, 850, 120, 50)
             exit_button = pygame.Rect(1480, 850, 120, 50)
             pygame.draw.rect(self.screen, (30, 120, 0), save_button)
@@ -165,7 +171,7 @@ class MapCreator:
 
             # For now, have to manually add if i add any buttons
             self.handle_style(red_style_button, blue_style_button, white_style_button)
-            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles)
+            self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles, grid_button)
 
 
             draw_text("CREATOR", self.font, (255, 255, 255), self.screen, 900, 20)
@@ -213,7 +219,7 @@ class MapCreator:
             self.clock.tick(60)
 
 
-    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles):
+    def handle_buttons(self, select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles, grid_button):
 
         # Map menu pop up and its functionality
         if self.load_map_menu == True:
@@ -266,7 +272,13 @@ class MapCreator:
             if see_sequence.collidepoint(self.mx, self.my):
                 if self.click:
                     self.selected_view_mode = "Sequence"
-            
+
+            if grid_button.collidepoint(self.mx, self.my):
+                if self.click:
+                    if self.grid == True:
+                        self.grid = False
+                    else:
+                        self.grid = True
 
             # For selecting tiles in the map
             if self.map_selected != None:
@@ -610,6 +622,10 @@ class MapCreator:
                     folder_name = tile.split("_")[1]
 
                     self.draw_img_on_rect(f'images/Tiles/{folder_name}/{tile}', tile_x, tile_y, self.tile_size, self.tile_size)
+                    
+                    # Draws border around each tile
+                    if self.grid == True:
+                        self.draw_img_on_rect(f'images/Assets/Grid2.png', tile_x, tile_y, self.tile_size, self.tile_size)
 
         
         obstacles = self.map_selected.get_obstacles()
