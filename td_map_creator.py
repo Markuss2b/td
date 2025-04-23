@@ -6,7 +6,6 @@ from func import draw_text
 from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
-# TODO: Naming new map should be visible
 # TODO: Buttons should have names
 # Tile size 16 x 9
 class MapCreator:
@@ -195,7 +194,8 @@ class MapCreator:
                         if event.key == pygame.K_BACKSPACE:
                             self.new_map_name = self.new_map_name[:-1]
                         else:
-                            self.new_map_name += event.unicode
+                            if len(self.new_map_name) < 10:
+                                self.new_map_name += event.unicode
 
                     # For Removing or Returning Obstacles
                     if self.map_selected != None:
@@ -373,7 +373,17 @@ class MapCreator:
         all_maps_rect = []
         for i in range(len(self.all_maps)):
             map_rect = pygame.Rect(base_x, base_y + 40 * (i + 1), 230, 30)
-            pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
+            
+            if self.map_selected != None:
+                if self.map_selected.get_map_name() == self.all_maps[i]:
+                    pygame.draw.rect(self.screen, (211, 211, 211), map_rect)
+                    self.draw_img_on_rect("images/Assets/Grid1.png", map_rect.left, map_rect.top, map_rect.width, map_rect.height)
+                else:
+                    pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
+            else:
+                pygame.draw.rect(self.screen, (255, 255, 255), map_rect)
+
+            draw_text(self.all_maps[i], pygame.font.SysFont(None, 30), (0, 0, 0), self.screen, map_rect.left + 5, map_rect.top + 5)
 
             delete_map_rect = pygame.Rect(base_x + 230, base_y + 40 * (i + 1), 30, 30)
             self.draw_img_on_rect("images/Assets/X.png", delete_map_rect.left, delete_map_rect.top, delete_map_rect.width, delete_map_rect.height)
@@ -411,10 +421,16 @@ class MapCreator:
 
         # Create buttons
         add_new_map_rect = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 220, map_menu_width - 60, 50)
-        pygame.draw.rect(self.screen, (255, 255, 255), add_new_map_rect)
+        pygame.draw.rect(self.screen, (200, 200, 200), add_new_map_rect)
+        draw_text("CREATE MAP", pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, add_new_map_rect.left + 3, add_new_map_rect.top + 10)
 
         new_map_inputfield = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 150, map_menu_width - 60, 50)
         pygame.draw.rect(self.screen, (255, 255, 255), new_map_inputfield)
+
+        if self.new_map_name == "":
+            draw_text("Enter map name", pygame.font.SysFont(None, 40), (100, 100, 100), self.screen, new_map_inputfield.left + 5, new_map_inputfield.top + 13)
+        else:
+            draw_text(self.new_map_name, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_map_inputfield.left, new_map_inputfield.top + 10)
 
         # Max 10 custom maps
         if len(self.all_maps) < 10:
@@ -657,7 +673,8 @@ class MapCreator:
                     tile_x, tile_y = self.get_rect_param(x, y)
                     tile_num = path_2d[y][x]
 
-                    self.draw_img_on_rect(f'images/Numbers/{self.selected_style}/{tile_num}.png', tile_x, tile_y, self.tile_size-1, self.tile_size-1)
+                    if tile_num > 0:
+                        self.draw_img_on_rect(f'images/Numbers/{self.selected_style}/{tile_num}.png', tile_x, tile_y, self.tile_size-1, self.tile_size-1)
 
                      
     def get_obstacles_from_image_folder(self):
