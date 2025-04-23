@@ -6,7 +6,6 @@ from func import draw_text
 from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
-# TODO: Obstacles
 # TODO: Naming new map should be visible
 # TODO: Buttons should have names
 # Tile size 16 x 9
@@ -52,6 +51,8 @@ class MapCreator:
         self.selected_sequence = "first_path"
 
         self.selected_tile = None
+
+        self.selected_style = "Red"
 
         self.font = pygame.font.SysFont(None, 20)
 
@@ -152,7 +153,18 @@ class MapCreator:
             pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
             pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
 
+            red_style_button = pygame.Rect(1400, 660, 70, 70)
+            blue_style_button = pygame.Rect(1490, 660, 70, 70)
+            white_style_button = pygame.Rect(1445, 740, 70, 70)
+            pygame.draw.rect(self.screen, (0, 0, 0), red_style_button)
+            pygame.draw.rect(self.screen, (0, 0, 0), blue_style_button)
+            pygame.draw.rect(self.screen, (0, 0, 0), white_style_button)
+            self.draw_img_on_rect("images/Numbers/Red/1.png", red_style_button.left, red_style_button.top, red_style_button.width-1, red_style_button.height-1)
+            self.draw_img_on_rect("images/Numbers/Blue/1.png", blue_style_button.left, blue_style_button.top, blue_style_button.width-1, blue_style_button.height-1)
+            self.draw_img_on_rect("images/Numbers/White/1.png", white_style_button.left, white_style_button.top, white_style_button.width-1, white_style_button.height-1)
+
             # For now, have to manually add if i add any buttons
+            self.handle_style(red_style_button, blue_style_button, white_style_button)
             self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles)
 
 
@@ -320,6 +332,20 @@ class MapCreator:
                         tow_avail.tower_auto_x_path_tiles(sequence)
 
 
+    def handle_style(self, red_style_button, blue_style_button, white_style_button):
+        if red_style_button.collidepoint(self.mx, self.my):
+            if self.click:
+                self.selected_style = "Red"
+        
+        if blue_style_button.collidepoint(self.mx, self.my):
+            if self.click:
+                self.selected_style = "Blue"
+
+        if white_style_button.collidepoint(self.mx, self.my):
+            if self.click:
+                self.selected_style = "White"
+
+
     def select_map_menu(self):
         map_menu_left = 530
         map_menu_top = 100
@@ -396,6 +422,8 @@ class MapCreator:
                         self.map_selected.create_map_folder()
                         self.map_selected.initialize_all_maps()
                         self.map_selected.save_map()
+
+                        self.selected_view_mode = "Tiles"
 
 
     def open_tile_menu(self):
@@ -541,19 +569,22 @@ class MapCreator:
                 sel_path.add_next_step(x, y)
 
 
-        # TODO:
         elif self.selected_view_mode == "Obstacles":
-            print(self.map_selected.get_obstacles())
             if self.click:
                 if self.selected_obstacle != "None":
-                    # TODO: Size dynamic
-                    half = 42
+                    obstacle_image = pygame.image.load(f'images/Obstacles/{self.selected_obstacle}')
+                    original_image_width, original_image_height = obstacle_image.get_size()
+                    new_image_width = original_image_width * 2
+                    new_image_height = original_image_height * 2
+
                     if self.obstacle_placement_method == "Free":
-                        self.map_selected.add_obstacle(self.selected_obstacle, self.mx - half, self.my - 199, 170, 284)
+                        left = self.mx - self.tile_size/2 - 10
+                        top = self.my - new_image_height + self.tile_size/2
+                        self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
                     if self.obstacle_placement_method == "Tile":
                         left, top = self.get_rect_param(x, y)
-                        left = left - half
-                        top = top - 199
+                        left = left - 20
+                        top = top - self.tile_size - new_image_height/5
 
                         obstacle_already_exists = False
                         for obstacle in self.map_selected.get_obstacles():
@@ -561,7 +592,7 @@ class MapCreator:
                                 obstacle_already_exists = True
                                 
                         if obstacle_already_exists == False:
-                            self.map_selected.add_obstacle(self.selected_obstacle, left, top, 170, 284)
+                            self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
 
 
     def draw_tile_img(self):
@@ -610,7 +641,7 @@ class MapCreator:
                     tile_x, tile_y = self.get_rect_param(x, y)
                     tile_num = path_2d[y][x]
 
-                    self.draw_img_on_rect(f'images/Numbers/{tile_num}.png', tile_x, tile_y, self.tile_size, self.tile_size)
+                    self.draw_img_on_rect(f'images/Numbers/{self.selected_style}/{tile_num}.png', tile_x, tile_y, self.tile_size-1, self.tile_size-1)
 
                      
     def get_obstacles_from_image_folder(self):
