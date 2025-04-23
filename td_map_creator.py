@@ -104,13 +104,15 @@ class MapCreator:
                 remove_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5, 0, 30, 30)
                 remove_tow_avail_with_sequence_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5 + 30 + 10, 0, 50, 30)
                 clear_path_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5 + 30 + 10 + 50 + 10, 0, 50, 30)
+                undo_clear_button = pygame.Rect(40 + len(self.map_selected.get_all_paths()) * 70 + 30 + 5 + 30 + 10 + 50 + 10 + 50 + 10, 0, 30, 30)
 
                 self.draw_img_on_rect("images/Assets/Plus.png", add_path_button.left, add_path_button.top, add_path_button.width, add_path_button.height)
                 self.draw_img_on_rect("images/Assets/Minus.png", remove_path_button.left, remove_path_button.top, remove_path_button.width, remove_path_button.height)
                 pygame.draw.rect(self.screen, (255, 255, 255), remove_tow_avail_with_sequence_button)
                 pygame.draw.rect(self.screen, (255, 255, 255), clear_path_button)
+                pygame.draw.rect(self.screen, (255, 255, 255), undo_clear_button)
 
-                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button)
+                self.handle_path_buttons(add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button, undo_clear_button)
 
 
             # Creating the tile map 16x9 (144 buttons)
@@ -294,7 +296,7 @@ class MapCreator:
         self.click = False
 
 
-    def handle_path_buttons(self, add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button):
+    def handle_path_buttons(self, add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button, undo_clear_button):
         # Max 4
         if len(self.map_selected.get_all_paths()) < 4:
             if add_path_button.collidepoint(self.mx, self.my):
@@ -320,15 +322,6 @@ class MapCreator:
                     else:
                         self.selected_sequence = self.path_names[i-1]
 
-        # Clears path
-        if clear_path_button.collidepoint(self.mx, self.my):
-            if self.click:
-                all_paths = self.map_selected.get_all_paths()
-                if self.selected_sequence == "first_path":
-                    all_paths[0].make_empty_path()
-                else:
-                    all_paths[self.path_names.index(self.selected_sequence)+1].make_empty_path()
-
         # Removes tower availability from sequence tiles
         if remove_tow_avail_with_sequence_button.collidepoint(self.mx, self.my):
             if self.click:
@@ -342,6 +335,30 @@ class MapCreator:
                     sequence = all_paths[self.path_names.index(self.selected_sequence)+1].get_sequence()
                     if sequence[0] != None:
                         tow_avail.tower_auto_x_path_tiles(sequence)
+
+        # Clears path or tower_availability
+        if clear_path_button.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.selected_view_mode == "Sequence":
+                    all_paths = self.map_selected.get_all_paths()
+                    if self.selected_sequence == "first_path":
+                        all_paths[0].make_empty_path()
+                    else:
+                        all_paths[self.path_names.index(self.selected_sequence)+1].make_empty_path()
+                elif self.selected_view_mode == "Tower":
+                    self.map_selected.get_tower_availability_map().create_empty_tower_avail_map()
+
+        # Undo clear action
+        if undo_clear_button.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.selected_view_mode == "Sequence":
+                    all_paths = self.map_selected.get_all_paths()
+                    if self.selected_sequence == "first_path":
+                        all_paths[0].undo_path_clear()
+                    else:
+                        all_paths[self.path_names.index(self.selected_sequence)+1].undo_path_clear()
+                elif self.selected_view_mode == "Tower":
+                    self.map_selected.get_tower_availability_map().undo_tower_availability_clear()
 
 
     def handle_style(self, red_style_button, blue_style_button, white_style_button):
@@ -407,8 +424,9 @@ class MapCreator:
                 if self.click:
                     shutil.rmtree(f'all_maps/{self.all_maps[i]}')
 
-                    if self.map_selected.get_map_name() == self.all_maps[i]:
-                        self.map_selected = None
+                    if self.map_selected != None:
+                        if self.map_selected.get_map_name() == self.all_maps[i]:
+                            self.map_selected = None
 
 
         checkmark_rect = self.draw_checkmark_on_menu(map_menu)
@@ -427,7 +445,7 @@ class MapCreator:
         new_map_inputfield = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 150, map_menu_width - 60, 50)
         pygame.draw.rect(self.screen, (255, 255, 255), new_map_inputfield)
 
-        if self.new_map_name == "":
+        if self.naming_new_map == False:
             draw_text("Enter map name", pygame.font.SysFont(None, 40), (100, 100, 100), self.screen, new_map_inputfield.left + 5, new_map_inputfield.top + 13)
         else:
             draw_text(self.new_map_name, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_map_inputfield.left, new_map_inputfield.top + 10)
@@ -439,11 +457,9 @@ class MapCreator:
                 if self.click:
                     self.naming_new_map = True
                     self.new_map_name = ""
-            elif self.click:
-                self.naming_new_map = False 
 
             # Creating a new map
-            if add_new_map_rect.collidepoint(self.mx, self.my):
+            elif add_new_map_rect.collidepoint(self.mx, self.my):
                 if self.click:
                     if self.new_map_name != "":
                         self.map_selected = Map(self.new_map_name, 16, 9)
@@ -452,6 +468,11 @@ class MapCreator:
                         self.map_selected.save_map()
 
                         self.selected_view_mode = "Tiles"
+                        self.new_map_name = ""
+
+            elif self.click:
+                self.naming_new_map = False
+                self.new_map_name = "" 
 
 
     def open_tile_menu(self):

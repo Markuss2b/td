@@ -12,6 +12,7 @@ class Path:
         self.sequence = [None]
         self.path_tiles = []
         self.valid_path = False
+        self.cleared_path = None
 
     def get_2d_path(self):
         return self.path_tiles
@@ -24,6 +25,9 @@ class Path:
         
     
     def make_empty_path(self):
+        if self.path_tiles != []:
+            self.cleared_path = [self.path_tiles, self.start_location, self.end_location, self.sequence]
+
         self.path_tiles = []
         self.start_location = None
         self.end_location = None
@@ -32,6 +36,15 @@ class Path:
             self.path_tiles.append([])
             for j in range(self.max_x):
                 self.path_tiles[i].append(0)
+
+
+    def undo_path_clear(self):
+        if self.cleared_path != None:
+            self.path_tiles = self.cleared_path[0]
+            self.start_location = self.cleared_path[1]
+            self.end_location = self.cleared_path[2]
+            self.sequence = self.cleared_path[3]
+            self.cleared_path = None
                 
                 
     def draw_path(self):

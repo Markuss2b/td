@@ -3,6 +3,7 @@ class Tower_availability:
         self.tower_avail = []
         self.max_x = max_x
         self.max_y = max_y
+        self.cleared_tower_avail = None
         
         
     def get_tower_availability(self):
@@ -10,11 +11,18 @@ class Tower_availability:
     
     
     def create_empty_tower_avail_map(self):
+        self.cleared_tower_avail = self.tower_avail
+        self.tower_avail = []
         for i in range(self.max_y):
             self.tower_avail.append([])
             for j in range(self.max_x):
                 self.tower_avail[i].append("O")
     
+    def undo_tower_availability_clear(self):
+        if self.cleared_tower_avail != None:
+            self.tower_avail = self.cleared_tower_avail
+            self.cleared_tower_avail = None
+
     
     # Automatically crosses out the possibility to place towers on all path tiles 
     def tower_auto_x_path_tiles(self, path_sequence): 
