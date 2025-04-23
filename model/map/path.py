@@ -88,10 +88,14 @@ class Path:
             
             
     def remove_step(self):
-        if len(self.sequence) > 0:
+        if len(self.sequence) > 1:
             self.path_tiles[self.sequence[-1].y][self.sequence[-1].x] = 0
             self.sequence.remove(self.sequence[-1])
-        else:
+        elif len(self.sequence) == 1:
+            self.path_tiles[self.sequence[-1].y][self.sequence[-1].x] = 0
+            self.start_location = None
+            self.end_location = None
+            self.sequence = [None]
             print("No steps to remove")
     
     # TODO: Do i need this ?

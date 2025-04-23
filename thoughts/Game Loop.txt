@@ -49,3 +49,5 @@ Towers:
 	* I guess you need to compare how many steps left an enemy has
 	
 	* Bullets each iteration move to enemies location with the shortest distance
+
+	* What happens to the bullets after an enemy dies

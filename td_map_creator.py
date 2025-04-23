@@ -43,6 +43,11 @@ class MapCreator:
         # Boolean for on click actions
         self.click = False
 
+        # Boolean for holding key actions
+        self.hold_m1 = False
+
+        self.last_selected_tile = None
+
         # Which editing view has been selected, Path, Tower availability, Visual tiles, Obstacles
         self.selected_view_mode = "Tiles"
 
@@ -71,7 +76,12 @@ class MapCreator:
 
 
     def td_map_creator_loop(self):
+        last_hold_action = 0
+        action_delay = 100
+
         while self.running:
+            now = pygame.time.get_ticks()
+
             self.counter += 1
 
             self.screen.fill((0,0,0))
@@ -110,7 +120,7 @@ class MapCreator:
                 self.draw_img_on_rect("images/Assets/Minus.png", remove_path_button.left, remove_path_button.top, remove_path_button.width, remove_path_button.height)
                 pygame.draw.rect(self.screen, (255, 255, 255), remove_tow_avail_with_sequence_button)
                 pygame.draw.rect(self.screen, (255, 255, 255), clear_path_button)
-                pygame.draw.rect(self.screen, (255, 255, 255), undo_clear_button)
+                self.draw_img_on_rect("images/Assets/Undo.png", undo_clear_button.left, undo_clear_button.top, undo_clear_button.width, undo_clear_button.height)
 
                 self.handle_path_buttons(add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button, undo_clear_button)
 
@@ -198,22 +208,36 @@ class MapCreator:
                         else:
                             if len(self.new_map_name) < 10:
                                 self.new_map_name += event.unicode
-
-                    # For Removing or Returning Obstacles
-                    if self.map_selected != None:
-                        if len(self.map_selected.get_obstacles()) > 0:
-                            if event.key == pygame.K_LEFT:
-                                self.map_selected.remove_obstacle()
-                        
-                        if len(self.map_selected.get_removed_obstacles()) > 0:
-                            if event.key == pygame.K_RIGHT:
-                                self.map_selected.return_removed_obstacle()
-
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.click = True
-            
+
+
+            # For Removing or Returning Obstacles while holding a button
+            if self.map_selected != None:
+                if pygame.key.get_pressed()[pygame.K_LEFT]:
+                    if len(self.map_selected.get_obstacles()) > 0:
+                        if now - last_hold_action > action_delay:
+                            self.map_selected.remove_obstacle()
+                            last_hold_action = now
+
+                if pygame.key.get_pressed()[pygame.K_RIGHT]:
+                    if len(self.map_selected.get_removed_obstacles()) > 0:
+                        if now - last_hold_action > action_delay:
+                            self.map_selected.return_removed_obstacle()
+                            last_hold_action = now
+
+
+            # For on hold mouse1 events, like interacting with tiles (Might want custom delay for some view modes)
+            if pygame.mouse.get_pressed()[0]:
+                if now - last_hold_action > action_delay:
+                    self.hold_m1 = True
+                    last_hold_action = now
+                else:
+                    self.hold_m1 = False
+            elif not pygame.mouse.get_pressed()[0]:
+                self.hold_m1 = False
 
             pygame.display.flip()
 
@@ -287,11 +311,34 @@ class MapCreator:
                 for y in range(len(tile_map)):
                     for x in range(len(tile_map[y])):
                         if tile_map[y][x].collidepoint(self.mx, self.my):
+
+                            # Click has to be before hold, because every hold is a click, but not every click is a hold
                             if self.click:
+                                # If tile type or obstacle have not been selected, will crash if tile has been clicked on
+                                if (self.selected_view_mode == "Tower" or self.selected_view_mode == "Sequence" or
+                                        self.selected_view_mode == "Tiles" and self.selected_visual_tile_type != "None" or
+                                        self.selected_view_mode == "Obstacles" and self.selected_obstacle != "None"):
+                                    
+                                    self.selected_tile = Location(x, y)
+                                    print(f'Selected: X = {self.selected_tile.x}, Y = {self.selected_tile.y}')
+                                    self.interacting_with_tiles()
+                                    self.last_selected_tile = self.selected_tile
+
+
+                            elif self.hold_m1:
                                 self.selected_tile = Location(x, y)
                                 print(f'Selected: X = {self.selected_tile.x}, Y = {self.selected_tile.y}')
 
-                                self.interacting_with_tiles()
+                                if self.last_selected_tile != None:
+                                    if not (self.last_selected_tile.x == self.selected_tile.x and self.last_selected_tile.y == self.selected_tile.y) and (self.selected_view_mode == "Tower" or self.selected_view_mode == "Sequence"):
+                                        self.interacting_with_tiles()
+                                elif self.selected_view_mode == "Tower" or self.selected_view_mode == "Sequence":
+                                    self.interacting_with_tiles()
+
+                                if self.selected_view_mode == "Tiles" and self.selected_visual_tile_type != "None" or self.selected_view_mode == "Obstacles" and self.selected_obstacle != "None":
+                                    self.interacting_with_tiles()
+
+                                self.last_selected_tile = self.selected_tile
 
         self.click = False
 
@@ -461,7 +508,7 @@ class MapCreator:
             # Creating a new map
             elif add_new_map_rect.collidepoint(self.mx, self.my):
                 if self.click:
-                    if self.new_map_name != "":
+                    if self.new_map_name != "" and not self.new_map_name in self.all_maps:
                         self.map_selected = Map(self.new_map_name, 16, 9)
                         self.map_selected.create_map_folder()
                         self.map_selected.initialize_all_maps()
@@ -617,31 +664,28 @@ class MapCreator:
             else:
                 sel_path.add_next_step(x, y)
 
-
         elif self.selected_view_mode == "Obstacles":
-            if self.click:
-                if self.selected_obstacle != "None":
-                    obstacle_image = pygame.image.load(f'images/Obstacles/{self.selected_obstacle}')
-                    original_image_width, original_image_height = obstacle_image.get_size()
-                    new_image_width = original_image_width * 2
-                    new_image_height = original_image_height * 2
+            obstacle_image = pygame.image.load(f'images/Obstacles/{self.selected_obstacle}')
+            original_image_width, original_image_height = obstacle_image.get_size()
+            new_image_width = original_image_width * 2
+            new_image_height = original_image_height * 2
 
-                    if self.obstacle_placement_method == "Free":
-                        left = self.mx - self.tile_size/2 - 10
-                        top = self.my - new_image_height + self.tile_size/2
-                        self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
-                    if self.obstacle_placement_method == "Tile":
-                        left, top = self.get_rect_param(x, y)
-                        left = left - 20
-                        top = top - self.tile_size - new_image_height/5
+            if self.obstacle_placement_method == "Free":
+                left = self.mx - self.tile_size/2 - 10
+                top = self.my - new_image_height + self.tile_size/2
+                self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
+            if self.obstacle_placement_method == "Tile":
+                left, top = self.get_rect_param(x, y)
+                left = left - 20
+                top = top - self.tile_size - new_image_height/5
 
-                        obstacle_already_exists = False
-                        for obstacle in self.map_selected.get_obstacles():
-                            if obstacle.get_left() == left and obstacle.get_top() == top:
-                                obstacle_already_exists = True
-                                
-                        if obstacle_already_exists == False:
-                            self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
+                obstacle_already_exists = False
+                for obstacle in self.map_selected.get_obstacles():
+                    if obstacle.get_left() == left and obstacle.get_top() == top:
+                        obstacle_already_exists = True
+                        
+                if obstacle_already_exists == False:
+                    self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
 
 
     def draw_tile_img(self):
