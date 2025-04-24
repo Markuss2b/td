@@ -7,6 +7,7 @@ from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
 # TODO: Buttons should have names
+# FIXME: Too slow with a lot of obstacles, might need to add parallel drawing
 # Tile size 16 x 9
 class MapCreator:
 
@@ -96,6 +97,9 @@ class MapCreator:
             # Stops Map Creator crashing when map is no selected
             if self.map_selected != None:
                 self.draw_tile_img()
+
+                if self.load_obstacle_menu == False:
+                    self.draw_selected_obstacle_on_mouse()
 
             top_border = pygame.Rect(0, 0, 1600, 30)
             pygame.draw.rect(self.screen, (0, 75, 125), top_border)
@@ -195,6 +199,11 @@ class MapCreator:
                 # Inputs 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        
+                        # For unselecting obstacle
+                        if self.selected_view_mode == "Obstacles" and self.selected_obstacle != "None" and self.load_obstacle_menu == False:
+                            self.selected_obstacle = "None"
+
                         self.load_map_menu = False
                         self.load_tile_menu = False
                         self.load_obstacle_menu = False
@@ -620,6 +629,10 @@ class MapCreator:
     def get_rect_param(self, x, y):
         # LEFT, TOP
         return x * 85, y * 85 + 80
+    
+
+    def get_xy_from_cords(self, x, y):
+        return int(x / 85), int(y / 85) - 1
 
 
     # On Tile Click
@@ -665,14 +678,10 @@ class MapCreator:
                 sel_path.add_next_step(x, y)
 
         elif self.selected_view_mode == "Obstacles":
-            obstacle_image = pygame.image.load(f'images/Obstacles/{self.selected_obstacle}')
-            original_image_width, original_image_height = obstacle_image.get_size()
-            new_image_width = original_image_width * 2
-            new_image_height = original_image_height * 2
+            new_image_width, new_image_height, path = self.get_obstacle_sizes()
 
             if self.obstacle_placement_method == "Free":
-                left = self.mx - self.tile_size/2 - 10
-                top = self.my - new_image_height + self.tile_size/2
+                left, top = self.get_free_obstacle_left_top(new_image_width, new_image_height)
                 self.map_selected.add_obstacle(self.selected_obstacle, left, top, new_image_width, new_image_height)
             if self.obstacle_placement_method == "Tile":
                 left, top = self.get_rect_param(x, y)
@@ -741,6 +750,36 @@ class MapCreator:
                     if tile_num > 0:
                         self.draw_img_on_rect(f'images/Numbers/{self.selected_style}/{tile_num}.png', tile_x, tile_y, self.tile_size-1, self.tile_size-1)
 
+
+    def draw_selected_obstacle_on_mouse(self):
+        if self.selected_obstacle != "None" and self.selected_view_mode == "Obstacles":
+            new_image_width, new_image_height, path = self.get_obstacle_sizes()
+
+            if self.obstacle_placement_method == "Free":
+                left, top = self.get_free_obstacle_left_top(new_image_width, new_image_height)
+            elif self.obstacle_placement_method == "Tile":
+                x, y = self.get_xy_from_cords(self.mx, self.my)
+                left, top = self.get_rect_param(x, y)
+                left = left - 20
+                top = top - self.tile_size - new_image_height/5
+            self.draw_transparent_img(path, left, top, new_image_width, new_image_height)
+
+
+    def get_obstacle_sizes(self):
+            path = f'images/Obstacles/{self.selected_obstacle}'
+            obstacle_image = pygame.image.load(path)
+            original_image_width, original_image_height = obstacle_image.get_size()
+            new_image_width = original_image_width * 2
+            new_image_height = original_image_height * 2
+
+            return new_image_width, new_image_height, path
+    
+
+    def get_free_obstacle_left_top(self, new_image_width, new_image_height):
+        left = self.mx - self.tile_size/2 - 10
+        top = self.my - new_image_height + self.tile_size/2
+        return left, top
+    
                      
     def get_obstacles_from_image_folder(self):
         return os.listdir("images/Obstacles")
@@ -749,6 +788,12 @@ class MapCreator:
     def draw_img_on_rect(self, path_to_img, left, top, width, height):
         img = pygame.image.load(path_to_img)
         img = pygame.transform.scale(img, (width, height))
+        self.screen.blit(img, (left, top))
+
+    def draw_transparent_img(self, path_to_img, left, top, width, height):
+        img = pygame.image.load(path_to_img)
+        img = pygame.transform.scale(img, (width, height))
+        img.set_alpha(160)
         self.screen.blit(img, (left, top))
 
     def draw_checkmark_on_menu(self, menu_rect):
