@@ -88,7 +88,7 @@ class Map:
         self.obstacles.append(self.removed_obstacles[-1])
         self.removed_obstacles.remove(self.removed_obstacles[-1])
         
-        
+
     def save_map(self):
         self.visual_map.save_visual_map(self.name)
         

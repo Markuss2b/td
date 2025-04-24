@@ -718,7 +718,7 @@ class MapCreator:
                         self.draw_img_on_rect(f'images/Assets/Grid2.png', tile_x, tile_y, self.tile_size, self.tile_size)
 
         
-        obstacles = self.map_selected.get_obstacles()
+        obstacles = self.sort_obstacles_from_top_descending()
         for obstacle in obstacles:
             self.draw_img_on_rect(f'images/Obstacles/{obstacle.get_name()}', obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height())
 
@@ -813,3 +813,8 @@ class MapCreator:
                     self.obstacle_placement_method = "Tile"
                 elif self.obstacle_placement_method == "Tile":
                     self.obstacle_placement_method = "Free"
+
+    def sort_obstacles_from_top_descending(self):
+        obstacles = self.map_selected.get_obstacles()
+        sorted_obstacles = sorted(obstacles , key=lambda obstacle: obstacle.get_top())
+        return sorted_obstacles
