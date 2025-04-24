@@ -111,6 +111,7 @@ class MapCreator:
                 for i in range(len(self.map_selected.get_all_paths())):
                     seq = pygame.Rect(40 + i * 70, 0, 60, 30)
                     pygame.draw.rect(self.screen, (180, 0, 0), seq)
+                    draw_text(f'PATH {i}', pygame.font.SysFont(None, 20), (0, 0, 0), self.screen, seq.left + 3, seq.top + 9)
                     seq_rec.append(seq)
 
                 # Buttons for adding and removing paths    
@@ -125,6 +126,9 @@ class MapCreator:
                 pygame.draw.rect(self.screen, (255, 255, 255), remove_tow_avail_with_sequence_button)
                 pygame.draw.rect(self.screen, (255, 255, 255), clear_path_button)
                 self.draw_img_on_rect("images/Assets/Undo.png", undo_clear_button.left, undo_clear_button.top, undo_clear_button.width, undo_clear_button.height)
+
+                draw_text("PATH X", pygame.font.SysFont(None, 20), (0, 0, 0), self.screen, remove_tow_avail_with_sequence_button.left + 1, remove_tow_avail_with_sequence_button.top + 9)
+                draw_text("CLEAR", pygame.font.SysFont(None, 20), (0, 0, 0), self.screen, clear_path_button.left + 1, clear_path_button.top + 9)
 
                 self.handle_path_buttons(add_path_button, remove_path_button, seq_rec, clear_path_button, remove_tow_avail_with_sequence_button, undo_clear_button)
 
@@ -146,7 +150,7 @@ class MapCreator:
             pygame.draw.rect(self.screen, (0, 0, 0), map_bot_border)
 
             map_creator_ui = pygame.Rect(1360, 30, 240, 870)
-            pygame.draw.rect(self.screen, (80, 40, 10), map_creator_ui)
+            self.draw_img_on_rect("images/UI/MapCreator/UI_SidePanel.png", map_creator_ui.left, map_creator_ui.top, map_creator_ui.width, map_creator_ui.height)
 
             grid_button = pygame.Rect(1330, 30, 30, 30)
             pygame.draw.rect(self.screen, (75, 75, 75), grid_button)
@@ -157,22 +161,22 @@ class MapCreator:
             pygame.draw.rect(self.screen, (175, 0, 0), exit_button)
 
             select_map = pygame.Rect(1400, 90, 160, 50)
-            pygame.draw.rect(self.screen, (255, 255, 255), select_map)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_SelectMap_Unselected.png", select_map.left, select_map.top, select_map.width, select_map.height)
 
             see_tiles = pygame.Rect(1400, 190, 160, 50)
             open_tile_menu_button = pygame.Rect(1400, 260, 160, 50)
-            pygame.draw.rect(self.screen, (255, 255, 255), see_tiles)
-            pygame.draw.rect(self.screen, (150, 150, 50), open_tile_menu_button)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_EditTiles_Unselected.png", see_tiles.left, see_tiles.top, see_tiles.width, see_tiles.height)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_SelectTile_Unselected.png", open_tile_menu_button.left, open_tile_menu_button.top, open_tile_menu_button.width, open_tile_menu_button.height)
 
             see_obstacles = pygame.Rect(1400, 360, 160, 50)
             open_obstacle_menu = pygame.Rect(1400, 430, 160, 50)
-            pygame.draw.rect(self.screen, (255, 255, 255), see_obstacles)
-            pygame.draw.rect(self.screen, (50, 150, 50), open_obstacle_menu)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_EditObstacles_Unselected.png", see_obstacles.left, see_obstacles.top, see_obstacles.width, see_obstacles.height)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_SelectObstacle_Unselected.png", open_obstacle_menu.left, open_obstacle_menu.top, open_obstacle_menu.width, open_obstacle_menu.height)
 
             see_tower_avail = pygame.Rect(1400, 530, 160, 50)
             see_sequence = pygame.Rect(1400, 600, 160, 50)
-            pygame.draw.rect(self.screen, (255, 255, 255), see_tower_avail)
-            pygame.draw.rect(self.screen, (255, 255, 255), see_sequence)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_EditTower_Unselected.png", see_tower_avail.left, see_tower_avail.top, see_tower_avail.width, see_tower_avail.height)
+            self.draw_img_on_rect("images/UI/MapCreator/Buttons/Chiller/BTN_EditPath_Unselected.png", see_sequence.left, see_sequence.top, see_sequence.width, see_sequence.height)
 
             red_style_button = pygame.Rect(1400, 660, 70, 70)
             blue_style_button = pygame.Rect(1490, 660, 70, 70)
@@ -459,7 +463,7 @@ class MapCreator:
             draw_text(self.all_maps[i], pygame.font.SysFont(None, 30), (0, 0, 0), self.screen, map_rect.left + 5, map_rect.top + 5)
 
             delete_map_rect = pygame.Rect(base_x + 230, base_y + 40 * (i + 1), 30, 30)
-            self.draw_img_on_rect("images/Assets/X.png", delete_map_rect.left, delete_map_rect.top, delete_map_rect.width, delete_map_rect.height)
+            self.draw_img_on_rect(f'images/Assets/X_{self.selected_style}.png', delete_map_rect.left, delete_map_rect.top, delete_map_rect.width, delete_map_rect.height)
             
             all_maps_rect.append([map_rect, delete_map_rect])
 
@@ -569,7 +573,7 @@ class MapCreator:
         obstacle_menu_width = 545
         obstacle_menu_length = 700
         obstacle_menu = pygame.Rect(obstacle_menu_left, obstacle_menu_top, obstacle_menu_width, obstacle_menu_length)
-        pygame.draw.rect(self.screen, (0, 0, 0), obstacle_menu)
+        pygame.draw.rect(self.screen, (50, 50, 50), obstacle_menu)
 
         all_obstacle_rect = []
         base_x = obstacle_menu_left + 20
@@ -673,7 +677,7 @@ class MapCreator:
                     # Draws X for a moment to show that next step cannot be at that xy
                     if sel_path.get_2d_path()[y][x] == 0:
                         left, top = self.get_rect_param(x, y)
-                        self.draw_img_on_rect("images/Assets/X.png", left, top, self.tile_size, self.tile_size)
+                        self.draw_img_on_rect(f'images/Assets/X_{self.selected_style}.png', left, top, self.tile_size, self.tile_size)
             else:
                 sel_path.add_next_step(x, y)
 
@@ -735,7 +739,7 @@ class MapCreator:
 
                     # ADD X
                     if tile_avail == "X":
-                        self.draw_img_on_rect("images/Assets/X.png", tile_x, tile_y, self.tile_size, self.tile_size)
+                        self.draw_img_on_rect(f'images/Assets/X_{self.selected_style}.png', tile_x, tile_y, self.tile_size, self.tile_size)
 
 
         elif self.selected_view_mode == "Sequence":
@@ -803,9 +807,12 @@ class MapCreator:
         return confirm_rect
     
     def change_obstacle_placement_method(self, example_rect):
-        # TODO: Future checkbox for swapping obstacle placement method
-        change_obstacle_placement_method_rect = pygame.Rect(example_rect.left, example_rect.top - 50, example_rect.width, example_rect.height)
-        self.draw_img_on_rect("images/Numbers/0.png", change_obstacle_placement_method_rect.left, change_obstacle_placement_method_rect.top, change_obstacle_placement_method_rect.width, change_obstacle_placement_method_rect.height)
+        # Checkbox, 
+        change_obstacle_placement_method_rect = pygame.Rect(example_rect.left, example_rect.top - 60, example_rect.width, example_rect.height)
+        pygame.draw.rect(self.screen, (80, 80, 80), change_obstacle_placement_method_rect)
+        draw_text("LOCK:", pygame.font.SysFont(None, 40), (255, 255, 255), self.screen, change_obstacle_placement_method_rect.left - 95, change_obstacle_placement_method_rect.top + 12)
+        if self.obstacle_placement_method == "Tile":
+            self.draw_img_on_rect(f'images/Assets/X_{self.selected_style}.png', change_obstacle_placement_method_rect.left, change_obstacle_placement_method_rect.top, change_obstacle_placement_method_rect.width, change_obstacle_placement_method_rect.height)
 
         if change_obstacle_placement_method_rect.collidepoint(self.mx, self.my):
             if self.click:

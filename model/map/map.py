@@ -128,8 +128,8 @@ class Map:
                 line = [el.replace("\n", "") for el in line]
 
                 name = line[0]
-                left = int(line[1])
-                top = int(line[2])
+                left = float(line[1])
+                top = float(line[2])
                 width = int(line[3])
                 height = int(line[4])
 
