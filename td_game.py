@@ -1,5 +1,5 @@
 import pygame
-from func import draw_text
+from pygame_functions import draw_text
 
 def td_game_loop(clock, screen):
     click = False
