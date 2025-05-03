@@ -7,10 +7,12 @@ from db_functions import *
 from model.profile import Profile
 
 
+# FIXME: If too many profiles made it will look ugly
 class MainMenu:
     def __init__(self):
         self.menu_state = "main_menu"
         self.click = False
+        self.load_game = False
         self.load_select_profile = False
         self.load_create_new_profile = False
         self.can_delete_profile = False
@@ -53,9 +55,16 @@ class MainMenu:
                     exit_button = pygame.Rect(50, 400, 150, 50)
 
                     pygame.draw.rect(self.screen, (255, 255, 255), select_profile_button)
+                    draw_text(f'Select Profile', self.font, (0,0,0), self.screen, select_profile_button.left + 2, select_profile_button.top + 2)
+
                     pygame.draw.rect(self.screen, (255, 255, 255), play_button)
+                    draw_text(f'Play', self.font, (0,0,0), self.screen, play_button.left + 2, play_button.top + 2)
+
                     pygame.draw.rect(self.screen, (255, 255, 255), map_creator_button)
+                    draw_text(f'Map creator', self.font, (0,0,0), self.screen, map_creator_button.left + 2, map_creator_button.top + 2)
+
                     pygame.draw.rect(self.screen, (255, 255, 255), exit_button)
+                    draw_text(f'Exit', self.font, (0,0,0), self.screen, exit_button.left + 2, exit_button.top + 2)
 
                     if select_profile_button.collidepoint(self.mx, self.my):
                         if self.click:
