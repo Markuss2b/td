@@ -1,6 +1,6 @@
 import pygame
 from OpenGL.GL import *
-from td_game import td_game_loop
+from td_game import TDGame
 from td_map_creator import MapCreator
 from pygame_functions import draw_checkmark_on_menu, draw_img_on_rect, draw_text
 from db_functions import *
@@ -118,7 +118,7 @@ class MainMenu:
         pygame.quit()
 
     def play_game(self):
-        td_game_loop(self.clock, self.screen)
+        TDGame(self.clock, self.screen)
 
     def map_creator(self):
         MapCreator(self.clock, self.screen)
