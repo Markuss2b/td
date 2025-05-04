@@ -5,6 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame_functions import draw_text
 from pyopengl_functions import load_texture, draw_quad, unload_texture
+from model.map.map import Map
 
 class TDGame:
     def __init__(self, clock, screen):
@@ -14,12 +15,20 @@ class TDGame:
         # TODO: If i change main menu to opengl swap this to previous screen
         self.screen = pygame.display.set_mode(self.display_size, pygame.OPENGL|pygame.DOUBLEBUF)
 
+
+        self.selected_profile = None
+        self.map_selected = Map("demomap3", 16, 9)
+        self.map_selected.recreate_map_from_folder()
+
         self.click = False
+        self.tile_size = 85
 
         self.tile_textures = {}
         self.obstacle_textures = {}
         self.tower_textures = {}
         self.enemy_textures = {}
+        self.assets_textures = {}
+        self.UI_textures = {}
 
         # Other textures
 
@@ -33,11 +42,11 @@ class TDGame:
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
  
-        #textID = load_texture("")
+        # Load all textures
         self.load_tile_textures()
         self.load_obstacle_textures()
-        print(self.tile_textures)
-        print(self.obstacle_textures)
+        self.load_UI_textures()
+
 
         running = True
         while running:
@@ -45,7 +54,8 @@ class TDGame:
             
             top_border = pygame.Rect(0, 0, 1600, 40)
             tile_map = pygame.Rect(0, 40, 1360, 900)
-            tower_selector = pygame.Rect(1360, 40, 240, 900)
+
+            # self.draw_map()
 
             self.click = False
 
@@ -58,6 +68,9 @@ class TDGame:
                         unload_texture(texture_id)
 
                     for texture_id in self.obstacle_textures.values():
+                        unload_texture(texture_id)
+
+                    for texture_id in self.UI_textures.values():
                         unload_texture(texture_id)
 
                     pygame.quit()
@@ -74,7 +87,11 @@ class TDGame:
 
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            #draw_quad(0, 0, 500, 500, textID)
+            
+            self.draw_map()
+            self.draw_obstacles()
+            self.draw_UI()
+
             pygame.display.flip()
 
             # Frame rate
@@ -99,8 +116,56 @@ class TDGame:
         self.obstacle_textures = { k:load_texture(f'{obstacle_path}/{k}') for k in all_obstacle_images }
 
     def load_enemy_textures(self):
-        pass
+        enemies_path = "images/Enemies"
+        all_enemy_images = os.listdir(enemies_path)
+        self.enemy_textures = { k:load_texture(f'{enemies_path}/{k}') for k in all_enemy_images }
 
     def load_tower_textures(self):
+        towers_path = "images/Towers"
+        all_tower_images = os.listdir(towers_path)
+        self.tower_textures = { k:load_texture(f'{towers_path}/{k}') for k in all_tower_images }
+
+    def load_assets_textures(self):
         pass
 
+    def load_UI_textures(self):
+        self.UI_textures["UI_SidePanel.png"] = load_texture(f'images/UI/MapCreator/UI_SidePanel.png') 
+
+    
+    def draw_UI(self):
+        draw_quad(1360, 40, 240, 900, self.UI_textures.get("UI_SidePanel.png"))
+
+
+    def draw_map(self):
+        visual_tile = self.map_selected.get_visual_map()
+        visual_tile_map = visual_tile.get_visual_tile_map()
+
+        for y in range(len(visual_tile_map)):
+            for x in range(len(visual_tile_map[y])):
+
+                tile_x, tile_y = self.get_rect_param(x, y)
+                tile = visual_tile.get_tile_type(x, y)
+
+                if tile != None:
+                    draw_quad(tile_x, tile_y, self.tile_size, self.tile_size, self.tile_textures.get(tile))
+
+
+    def draw_obstacles(self):
+        obstacles = self.sort_obstacles_from_top_descending()
+        for obstacle in obstacles:
+            draw_quad(obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height(), self.obstacle_textures.get(obstacle.get_name()))
+
+
+
+
+
+
+    # Might want to move this to a different file
+    def sort_obstacles_from_top_descending(self):
+        obstacles = self.map_selected.get_obstacles()
+        sorted_obstacles = sorted(obstacles , key=lambda obstacle: obstacle.get_top())
+        return sorted_obstacles
+
+    def get_rect_param(self, x, y):
+        # LEFT, TOP
+        return x * 85, y * 85 + 80

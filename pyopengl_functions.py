@@ -12,7 +12,6 @@ Stackoverflow post on PyOpenGL:
 https://stackoverflow.com/questions/72684375/pyopengl-how-to-draw-2d-image
 """
 
-# TODO: Delete all textures after stops running
 def load_texture(texture):
 
     text = Image.open(texture).transpose(Image.FLIP_TOP_BOTTOM)
@@ -27,6 +26,11 @@ def load_texture(texture):
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0)
+
+    # Transparancy
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, text.size[0], text.size[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data)
     text.close()
     return texture_id
