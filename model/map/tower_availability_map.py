@@ -54,8 +54,13 @@ class Tower_availability:
         f.close()
     
     
-    def recreate_tower_avail_map_from_file(self, map_name):
-        with open(f'./all_maps/{map_name}/tower_availability.txt', "r") as path_file:
+    def recreate_tower_avail_map_from_file(self, map_name, map_type):
+        if map_type == "PremadeMap":
+            start_folder = "predrawn_maps"
+        elif map_type == "Map":
+            start_folder = "all_maps"
+
+        with open(f'./{start_folder}/{map_name}/tower_availability.txt', "r") as path_file:
             self.tower_avail = [line.split() for line in path_file]
             self.max_x = len(self.tower_avail[0])
             self.max_y = len(self.tower_avail)

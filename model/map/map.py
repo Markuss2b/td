@@ -9,6 +9,7 @@ from model.map.obstacle import Obstacle
 
 class Map:
     def __init__(self, name, x, y):
+        self.type = "Map"
         self.name = name
         self.x = x
         self.y = y
@@ -21,6 +22,9 @@ class Map:
     
     def get_map_name(self):
         return self.name
+    
+    def get_map_type(self):
+        return self.type
         
         
     def create_map_folder(self):
@@ -115,9 +119,9 @@ class Map:
             path_name = all_path_dir[path_i].replace(".txt", "")
 
             self.paths.append(Path(path_name, self.x, self.y))
-            self.paths[path_i].recreate_path_from_file(self.name, path_name)
+            self.paths[path_i].recreate_path_from_file(self.name, path_name, self.type)
         
-        self.tower_availability_map.recreate_tower_avail_map_from_file(self.name)
+        self.tower_availability_map.recreate_tower_avail_map_from_file(self.name, self.type)
 
         # Obstacles
         f = open(f'./all_maps/{self.name}/obstacles.txt', "r")

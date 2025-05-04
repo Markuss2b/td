@@ -149,8 +149,14 @@ class Path:
 
     
     # Copy or Load map from file
-    def recreate_path_from_file(self, map_name, path_name):
-        with open(f'./all_maps/{map_name}/paths/{path_name}.txt', "r") as path_file:
+    def recreate_path_from_file(self, map_name, path_name, map_type):
+
+        if map_type == "PremadeMap":
+            start_folder = "predrawn_maps"
+        elif map_type == "Map":
+            start_folder = "all_maps"
+
+        with open(f'./{start_folder}/{map_name}/paths/{path_name}.txt', "r") as path_file:
             
             txt_file_list = [line.split() for line in path_file]
             self.max_x = len(txt_file_list[0])
