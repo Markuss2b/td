@@ -184,6 +184,7 @@ class MainMenu:
             if self.click:
                 if self.can_delete_profile == False:
                     self.can_delete_profile = True
+                    self.selected_profile = None
                 else:
                     self.can_delete_profile = False
 
@@ -284,19 +285,29 @@ class MainMenu:
         # TODO: Can create new profile with enter
         elif checkmark_rect.collidepoint(self.mx, self.my):
             if self.click:
-                create_profile(self.new_profile_name)
 
-                created_profile = get_profile_with_name(self.new_profile_name)
-                id = created_profile[0]
-                name = created_profile[1]
-                wins = created_profile[2]
-                losses = created_profile[3]
+                all_profile_names = [profile[1] for profile in get_all_profiles()]
 
-                self.selected_profile = Profile(id, name, wins, losses)
+                # TODO: Some info about profile already existing
+                if not self.new_profile_name in all_profile_names:
 
-                self.load_create_new_profile = False
-                self.load_select_profile = True
-                self.new_profile_name = "" 
+                    # TODO: Allow only certain symbols
+                    # Might stop SQL injection
+                    # Or might stop error
+                    self.new_profile_name = self.new_profile_name.replace("'", "")
+                    create_profile(self.new_profile_name)
+
+                    created_profile = get_profile_with_name(self.new_profile_name)
+                    id = created_profile[0]
+                    name = created_profile[1]
+                    wins = created_profile[2]
+                    losses = created_profile[3]
+
+                    self.selected_profile = Profile(id, name, wins, losses)
+
+                    self.load_create_new_profile = False
+                    self.load_select_profile = True
+                    self.new_profile_name = "" 
 
         elif self.click:
             self.naming_new_profile = False
@@ -367,7 +378,6 @@ class MainMenu:
                     TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
 
 
-    # TODO: Little bit different from map_creator, but still really similar
     def select_custom_made_maps(self):
         custom_maps = os.listdir("all_maps")
 

@@ -37,3 +37,20 @@ def delete_profile_with_id(id):
         cursor.execute(f'DELETE FROM Profile WHERE id = {id}')
         conn.commit()
         cursor.close()
+
+
+def get_all_towers():
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Tower")
+        result = cursor.fetchall()
+        cursor.close()
+    return result
+
+def get_tower_with_name(name):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM Tower WHERE name = '{name}'")
+        result = cursor.fetchone()
+        cursor.close()
+    return result

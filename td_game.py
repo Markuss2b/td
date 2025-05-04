@@ -4,9 +4,11 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame_functions import draw_text
+from db_functions import get_tower_with_name
 from pyopengl_functions import load_texture, draw_quad, unload_texture
 from model.map.map import Map
 from model.map.premade_map import PremadeMap
+from model.tower import Tower
 
 class TDGame:
     def __init__(self, clock, screen, selected_profile, map_selected):
@@ -19,8 +21,11 @@ class TDGame:
 
         self.selected_profile = selected_profile
         self.map_selected = map_selected
+        self.tower_avail = self.map_selected.get_tower_availability_map()
 
         self.click = False
+        self.mx = 0
+        self.my = 0
         self.tile_size = 85
 
         self.tile_textures = {}
@@ -29,9 +34,16 @@ class TDGame:
         self.enemy_textures = {}
         self.assets_textures = {}
         self.UI_textures = {}
+        # Other textures
+
         self.premade_map_texture = None
 
-        # Other textures
+        self.tower_selected = None
+
+        #TODO:
+        self.only_tower = get_tower_with_name("Magma Ball")
+
+        self.towers_on_map = []
 
         self.td_game_loop()
 
@@ -52,6 +64,8 @@ class TDGame:
             self.load_premade_map_textures()
 
         # Always load
+        self.load_tower_textures()
+        self.load_enemy_textures()
         self.load_UI_textures()
 
 
@@ -78,6 +92,12 @@ class TDGame:
                     for texture_id in self.UI_textures.values():
                         unload_texture(texture_id)
 
+                    for texture_id in self.enemy_textures.values():
+                        unload_texture(texture_id)
+
+                    for texture_id in self.tower_textures.values():
+                        unload_texture(texture_id)
+
                     pygame.quit()
                     quit()
                 
@@ -100,7 +120,16 @@ class TDGame:
                 self.draw_premade_map()
 
             # Always draw
-            self.draw_UI()
+            select_magma_rect = self.draw_UI()
+            self.handle_UI_buttons(select_magma_rect)
+            self.draw_towers()
+
+            if self.tower_selected != None:
+                if self.click:
+                    x, y = self.get_xy_from_cords(self.mx, self.my)
+
+                    if x >= 0 and x <= 15 and y >= 0 and y <= 8:
+                        self.place_tower(x, y)
 
             pygame.display.flip()
 
@@ -148,6 +177,19 @@ class TDGame:
     def draw_UI(self):
         draw_quad(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"))
 
+        select_magma_rect = pygame.Rect(1435, 60, 85, 85)
+        draw_quad(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"))
+
+        return select_magma_rect
+    
+
+    def handle_UI_buttons(self, select_magma_rect):
+        if select_magma_rect.collidepoint(self.mx, self.my):
+            if self.click:
+
+                # TODO: towers
+                self.tower_selected = self.only_tower
+
 
     def draw_map(self):
         visual_tile = self.map_selected.get_visual_map()
@@ -173,6 +215,32 @@ class TDGame:
         draw_quad(0, 80, 1360, 765, self.premade_map_texture)
 
 
+    def place_tower(self, x, y):
+        
+        tile_tower_avail = self.tower_avail.get_tile_tower_avail(x, y)
+
+        if tile_tower_avail != "X":
+            
+            if self.towers_on_map != []:
+                for tower in self.towers_on_map:
+                    tower_location = tower.get_location()
+                    if tower_location != (x, y):
+
+                        # Name, attack, range, x, y
+                        self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
+            else:
+                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
+
+
+    def draw_towers(self):
+        for tower in self.towers_on_map:
+            tower_location = tower.get_location()
+            left, top = self.get_rect_param(tower_location[0], tower_location[1])
+            draw_quad(left, top, self.tile_size, self.tile_size, self.tower_textures.get(tower.get_image()))
+
+    def remove_tower():
+        pass
+
 
 
     # Might want to move this to a different file
@@ -184,3 +252,6 @@ class TDGame:
     def get_rect_param(self, x, y):
         # LEFT, TOP
         return x * 85, y * 85 + 80
+    
+    def get_xy_from_cords(self, x, y):
+        return int(x / 85), int(y / 85) - 1
