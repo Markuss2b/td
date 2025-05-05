@@ -62,6 +62,8 @@ class MapCreator:
 
         self.grid = False
 
+        self.page = 1
+
         self.font = pygame.font.SysFont(None, 20)
 
         # List containing of all maps from all_maps folder
@@ -211,6 +213,7 @@ class MapCreator:
                         self.load_map_menu = False
                         self.load_tile_menu = False
                         self.load_obstacle_menu = False
+                        self.page = 1
 
                         # Without this click would stay TRUE (if clicked on anything) and would click on anything hovered after closing the POP-UP
                         self.click = False
@@ -549,21 +552,30 @@ class MapCreator:
         base_x = tile_menu_left + 20
         base_y = tile_menu_top + 20
 
+        loop = 0
+
         for key in self.all_tile_types.keys():
-            for tile_type in self.all_tile_types.get(key):
-                tile_type_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
 
-                # Draws the tile type images
-                draw_img_on_rect(self.screen, f'images/Tiles/{key}/{tile_type}', base_x, base_y, self.tile_size, self.tile_size)
+            if loop+1 > self.page * 5:
+                break
+            elif loop+1 > (self.page - 1) * 5:
+                for tile_type in self.all_tile_types.get(key):
+                    tile_type_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
 
-                # Example = [[Rect, Type], [Rect, Type]]
-                all_tile_type_rect.append([tile_type_rect, tile_type])
+                    # Draws the tile type images
+                    draw_img_on_rect(self.screen, f'images/Tiles/{key}/{tile_type}', base_x, base_y, self.tile_size, self.tile_size)
 
-                base_x += self.tile_size + 20
-            base_y += self.tile_size + 20
-            base_x = tile_menu_left + 20
+                    # Example = [[Rect, Type], [Rect, Type]]
+                    all_tile_type_rect.append([tile_type_rect, tile_type])
+
+                    base_x += self.tile_size + 20
+                base_y += self.tile_size + 20
+                base_x = tile_menu_left + 20
+            loop += 1
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, tile_menu)
+
+        self.change_page(checkmark_rect, len(self.all_tile_types) * 5)
 
         self.select_menu_functionality(self.selected_view_mode, all_tile_type_rect, tile_menu,checkmark_rect)
 
@@ -581,24 +593,29 @@ class MapCreator:
         base_y = obstacle_menu_top + 20
 
         for i in range(len(self.all_obstacles)):
-            # 5 in a row
-            if (i+1) % 6 == 0:
-                base_x = obstacle_menu_left + 20
-                base_y += (i+1) / 5 * self.tile_size + 20
+            
+            if i+1 > self.page * 25:
+                break
+            elif i+1 > (self.page - 1) * 25:
+                obstacle_name = self.all_obstacles[i]
 
-            obstacle_name = self.all_obstacles[i]
+                obstacle_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
+                # Draws the obstacle images
+                draw_img_on_rect(self.screen, f'images/Obstacles/{obstacle_name}', base_x, base_y, self.tile_size, self.tile_size)
 
-            obstacle_rect = pygame.Rect(base_x, base_y, self.tile_size, self.tile_size)
-            # Draws the obstacle images
-            draw_img_on_rect(self.screen, f'images/Obstacles/{obstacle_name}', base_x, base_y, self.tile_size, self.tile_size)
+                all_obstacle_rect.append([obstacle_rect, obstacle_name])
 
-            all_obstacle_rect.append([obstacle_rect, obstacle_name])
+                base_x += self.tile_size + 20
 
-            base_x += self.tile_size + 20
+                # 5 in a row
+                if (i+1) % 5 == 0:
+                    base_x = obstacle_menu_left + 20
+                    base_y += self.tile_size + 20
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, obstacle_menu)
 
         self.change_obstacle_placement_method(checkmark_rect)
+        self.change_page(checkmark_rect, len(self.all_obstacles))
 
         self.select_menu_functionality(self.selected_view_mode, all_obstacle_rect, obstacle_menu, checkmark_rect)
 
@@ -628,6 +645,7 @@ class MapCreator:
                 self.load_obstacle_menu = False
                 self.load_tile_menu = False
                 self.load_map_menu = False
+                self.page = 1
 
 
     # Gets accurate UI Location for Tile
@@ -804,6 +822,25 @@ class MapCreator:
                     self.obstacle_placement_method = "Tile"
                 elif self.obstacle_placement_method == "Tile":
                     self.obstacle_placement_method = "Free"
+
+    
+    def change_page(self, example_rect, len_of_all):
+        page_back = pygame.Rect(example_rect.left, example_rect.top - 90, 20, 20)
+        page_forwards = pygame.Rect(example_rect.left + 30, example_rect.top - 90, 20, 20)
+
+        pygame.draw.rect(self.screen, (255, 255, 255), page_back)
+        pygame.draw.rect(self.screen, (255, 255, 255), page_forwards)
+
+        if page_back.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.page != 1 and self.page > len_of_all / 25:
+                    self.page -= 1
+        
+        if page_forwards.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.page < len_of_all / 25:
+                    self.page += 1
+
 
     def sort_obstacles_from_top_descending(self):
         obstacles = self.map_selected.get_obstacles()

@@ -1,5 +1,6 @@
 import pygame
 import os
+import re
 from OpenGL.GL import *
 from td_game import TDGame
 from td_map_creator import MapCreator
@@ -29,6 +30,7 @@ class MainMenu:
         self.selected_premade_map = None
         self.naming_new_profile = False
         self.new_profile_name = ""
+        self.error_msg = ""
 
         pygame.init()
         self.font = pygame.font.SysFont(None, 30)
@@ -119,6 +121,7 @@ class MainMenu:
                             self.load_select_map = True
                             self.load_custom_map = False
                             self.load_premade_map = False
+                        self.error_msg = ""
 
                     if self.naming_new_profile == True:
                         if event.key == pygame.K_BACKSPACE:
@@ -205,11 +208,6 @@ class MainMenu:
             wins = all_profiles[i][2]
             losses = all_profiles[i][3]
 
-            # 4 in a row
-            if (i+1) % 5 == 0:
-                base_x = profile_left + 30
-                base_y += 170
-
             profile_rect = pygame.Rect(base_x, base_y, 300, 150)
             # Adds a selected button effect
             if self.selected_profile != None:
@@ -231,6 +229,11 @@ class MainMenu:
             profile_rects.append([profile_rect, x_rect, id])
             
             base_x += 320
+
+            # 4 in a row
+            if (i+1) % 4 == 0:
+                base_x = profile_left + 30
+                base_y += 170
 
         return profile_rects
     
@@ -273,6 +276,8 @@ class MainMenu:
         else:
             draw_text(self.new_profile_name, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_profile_inputfield.left, new_profile_inputfield.top + 10)
 
+        draw_text(self.error_msg, pygame.font.SysFont(None, 40), (255, 50, 50), self.screen, popup_left, popup_top + popup_height + 5)
+
         checkmark_rect = draw_checkmark_on_menu(self.screen, popup)
 
         # Activating input field
@@ -286,12 +291,10 @@ class MainMenu:
         elif checkmark_rect.collidepoint(self.mx, self.my):
             if self.click:
 
-                all_profile_names = [profile[1] for profile in get_all_profiles()]
+                all_profile_names = [profile[1].upper() for profile in get_all_profiles()]
 
-                # TODO: Some info about profile already existing
-                if not self.new_profile_name in all_profile_names:
+                if not self.new_profile_name.upper() in all_profile_names and len(all_profile_names) < 16 and re.match(r'^[A-Za-z0-9]+$', self.new_profile_name):
 
-                    # TODO: Allow only certain symbols
                     # Might stop SQL injection
                     # Or might stop error
                     self.new_profile_name = self.new_profile_name.replace("'", "")
@@ -307,7 +310,14 @@ class MainMenu:
 
                     self.load_create_new_profile = False
                     self.load_select_profile = True
-                    self.new_profile_name = "" 
+                    self.new_profile_name = ""
+                    self.error_msg = ""
+                elif self.new_profile_name.upper() in all_profile_names:
+                    self.error_msg = "Name taken"
+                elif len(all_profile_names) > 16:
+                    self.error_msg = "No free slots"
+                elif not re.match(r'^[A-Za-z0-9]+$', self.new_profile_name):
+                    self.error_msg = "Invalid symbols"
 
         elif self.click:
             self.naming_new_profile = False
