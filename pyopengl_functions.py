@@ -36,6 +36,7 @@ def load_texture(texture):
     return texture_id
 
 # Can be used like in pygame Rect(left, top, width, height)
+# FIXME: Dictionary with all textureid
 def draw_quad(left, top, width, height, texture_id):
     verts = (
         (left + width, top + height),
@@ -56,6 +57,41 @@ def draw_quad(left, top, width, height, texture_id):
     glEnd()
     
     glDisable(GL_TEXTURE_2D)
+
+
+#TODO:
+def draw_quads(texture_ids_with_quads):
+
+    texts = ((1, 0), (1, 1), (0, 1), (0, 0))
+    surf = (0, 1, 2, 3)
+
+    glEnable(GL_TEXTURE_2D)
+    for dict_type in texture_ids_with_quads:
+
+        for texture_id in texture_ids_with_quads.get(dict_type):
+            glBindTexture(GL_TEXTURE_2D, texture_id)
+
+            for rectangle in texture_ids_with_quads.get(dict_type).get(texture_id):
+                left = rectangle[0]
+                top = rectangle[1]
+                width = rectangle[2]
+                height = rectangle[3]
+
+                verts = (
+                    (left + width, top + height),
+                    (left + width, top),
+                    (left, top),
+                    (left, top + height)
+                )
+
+                glBegin(GL_QUADS)
+                for i in surf:
+                    glTexCoord2f(texts[i][0], texts[i][1])
+                    glVertex2f(verts[i][0], verts[i][1])
+                glEnd()
+                
+    glDisable(GL_TEXTURE_2D)
+
 
 # Clear VRAM
 def unload_texture(texture_id):

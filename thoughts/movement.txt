@@ -1,0 +1,9 @@
+Notes:
+ * Each path consists of a sequence of tile XY locations
+
+Ideas:
+ * For movement each tile should further be split into 10, 20
+ * While moving enemy needs to know next tile in sequence
+This is so i can tell enemy that it needs to walk for example: halfway north then halfway east
+
+* Could make a function that would convert which step of the sequence enemy is in into coords

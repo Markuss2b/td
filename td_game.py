@@ -5,7 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame_functions import draw_text
 from db_functions import get_tower_with_name
-from pyopengl_functions import load_texture, draw_quad, unload_texture
+from pyopengl_functions import load_texture, draw_quad, unload_texture, draw_quads
 from model.map.map import Map
 from model.map.premade_map import PremadeMap
 from model.tower import Tower
@@ -35,6 +35,13 @@ class TDGame:
         self.assets_textures = {}
         self.UI_textures = {}
         # Other textures
+
+        self.static_tile = False
+        self.static_obstacles = False
+        self.static_UI = False
+
+
+        self.texture_ids_with_quads = {}
 
         self.premade_map_texture = None
 
@@ -67,6 +74,9 @@ class TDGame:
         self.load_tower_textures()
         self.load_enemy_textures()
         self.load_UI_textures()
+
+        self.group_textures_2()
+        print(self.texture_ids_with_quads)
 
 
         running = True
@@ -124,6 +134,9 @@ class TDGame:
             self.handle_UI_buttons(select_magma_rect)
             self.draw_towers()
 
+            print(self.towers_on_map)
+            draw_quads(self.texture_ids_with_quads)
+
             if self.tower_selected != None:
                 if self.click:
                     x, y = self.get_xy_from_cords(self.mx, self.my)
@@ -173,6 +186,20 @@ class TDGame:
     def load_premade_map_textures(self):
         self.premade_map_texture = load_texture(f'predrawn_maps/{self.map_selected.get_map_name()}/map_image.png')
 
+
+    def group_textures(self):
+        all_textures = self.tile_textures | self.enemy_textures | self.UI_textures | self.tower_textures | self.assets_textures | self.obstacle_textures 
+        self.texture_ids_with_quads = { all_textures.get(k):[] for k in all_textures }
+
+    
+    def group_textures_2(self):
+        self.texture_ids_with_quads["UI"] = { self.UI_textures.get(k):[] for k in self.UI_textures }
+        self.texture_ids_with_quads["TILE"] = { self.tile_textures.get(k):[] for k in self.tile_textures }
+        self.texture_ids_with_quads["OBSTACLES"] = { self.obstacle_textures.get(k):[] for k in self.obstacle_textures }
+        self.texture_ids_with_quads["TOWER"] = { self.tower_textures.get(k):[] for k in self.tower_textures }
+        self.texture_ids_with_quads["ENEMY"] = { self.enemy_textures.get(k):[] for k in self.enemy_textures }
+        self.texture_ids_with_quads["ASSETS"] = { self.assets_textures.get(k):[] for k in self.assets_textures }
+
     
     def draw_UI(self):
         draw_quad(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"))
@@ -202,13 +229,24 @@ class TDGame:
                 tile = visual_tile.get_tile_type(x, y)
 
                 if tile != None:
-                    draw_quad(tile_x, tile_y, self.tile_size, self.tile_size, self.tile_textures.get(tile))
+                    if self.static_tile == False:
+                        self.texture_ids_with_quads.get("TILE").get(self.tile_textures.get(tile)).append((tile_x, tile_y, self.tile_size, self.tile_size))
+                    
+                    # draw_quad(tile_x, tile_y, self.tile_size, self.tile_size, self.tile_textures.get(tile))
 
+        self.static_tile = True
 
+                    
     def draw_obstacles(self):
         obstacles = self.sort_obstacles_from_top_descending()
         for obstacle in obstacles:
-            draw_quad(obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height(), self.obstacle_textures.get(obstacle.get_name()))
+            if self.static_obstacles == False:
+                self.texture_ids_with_quads.get("OBSTACLES").get(
+                    self.obstacle_textures.get(obstacle.get_name())).append( (obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height())
+                )
+            # draw_quad(obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height(), self.obstacle_textures.get(obstacle.get_name()))
+
+        self.static_obstacles = True
 
 
     def draw_premade_map(self):
@@ -219,24 +257,31 @@ class TDGame:
         
         tile_tower_avail = self.tower_avail.get_tile_tower_avail(x, y)
 
+        tower_already_there = False
+
         if tile_tower_avail != "X":
             
             if self.towers_on_map != []:
                 for tower in self.towers_on_map:
                     tower_location = tower.get_location()
-                    if tower_location != (x, y):
+                    if tower_location == (x, y):
+                        tower_already_there = True
 
-                        # Name, attack, range, x, y
-                        self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
+                if tower_already_there == False:
+                    # Name, attack, range, x, y
+                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
             else:
                 self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
+        
 
 
     def draw_towers(self):
         for tower in self.towers_on_map:
             tower_location = tower.get_location()
             left, top = self.get_rect_param(tower_location[0], tower_location[1])
-            draw_quad(left, top, self.tile_size, self.tile_size, self.tower_textures.get(tower.get_image()))
+
+            self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(tower.get_image())).append((left, top, self.tile_size, self.tile_size))
+            # draw_quad(left, top, self.tile_size, self.tile_size, self.tower_textures.get(tower.get_image()))
 
     def remove_tower():
         pass

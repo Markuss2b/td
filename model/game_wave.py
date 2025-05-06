@@ -1,6 +1,7 @@
 from model.enemy import Enemy
 
 #TODO: Needs some optimization, maybe different wave creation methods
+# Headache
 class Wave:
     def __init__(self, basic_enemy, simple_enemy, advanced_enemy):
         self.enemies = []
