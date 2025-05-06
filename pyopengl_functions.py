@@ -70,7 +70,7 @@ def draw_quads(texture_ids_with_quads):
 
         for texture_id in texture_ids_with_quads.get(dict_type):
             glBindTexture(GL_TEXTURE_2D, texture_id)
-
+            glBegin(GL_QUADS)
             for rectangle in texture_ids_with_quads.get(dict_type).get(texture_id):
                 left = rectangle[0]
                 top = rectangle[1]
@@ -84,11 +84,10 @@ def draw_quads(texture_ids_with_quads):
                     (left, top + height)
                 )
 
-                glBegin(GL_QUADS)
                 for i in surf:
                     glTexCoord2f(texts[i][0], texts[i][1])
                     glVertex2f(verts[i][0], verts[i][1])
-                glEnd()
+            glEnd()
                 
     glDisable(GL_TEXTURE_2D)
 
