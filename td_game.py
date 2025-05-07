@@ -1,11 +1,12 @@
 import pygame
 import os
+import time
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame_functions import draw_text
 from db_functions import get_tower_with_name
-from pyopengl_functions import load_texture, draw_quad, unload_texture, draw_quads
+from pyopengl_functions import load_texture, draw_quad, unload_texture, draw_quads, create_shader, draw_quad_2, draw_quads_2, destroy
 from model.map.map import Map
 from model.map.premade_map import PremadeMap
 from model.tower import Tower
@@ -52,15 +53,21 @@ class TDGame:
 
         self.towers_on_map = []
 
+        self.vao = glGenVertexArrays(1)
+        glBindVertexArray(self.vao)
+        self.vbo = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * 4, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * 4, ctypes.c_void_p(2 * 4))
+
+        self.shader = create_shader()
+        glUseProgram(self.shader)
+
         self.td_game_loop()
 
     def td_game_loop(self):
-
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluOrtho2D(0, self.display_size[0], self.display_size[1], 0)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
  
         # Load all textures
 
@@ -108,6 +115,9 @@ class TDGame:
                     for texture_id in self.tower_textures.values():
                         unload_texture(texture_id)
 
+                    glDeleteProgram(self.shader)
+                    destroy(self.vao, self.vbo)
+
                     pygame.quit()
                     quit()
                 
@@ -122,7 +132,7 @@ class TDGame:
 
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            
+
             if self.map_selected.get_map_type() == "Map":
                 self.draw_map()
                 self.draw_obstacles()
@@ -134,8 +144,10 @@ class TDGame:
             self.handle_UI_buttons(select_magma_rect)
             self.draw_towers()
 
-            print(self.towers_on_map)
-            draw_quads(self.texture_ids_with_quads)
+            start = time.time()
+            draw_quads_2(self.texture_ids_with_quads, self.shader, self.vbo)
+            end = time.time()
+            print(f'Time: {start-end}')
 
             if self.tower_selected != None:
                 if self.click:
@@ -202,10 +214,10 @@ class TDGame:
 
     
     def draw_UI(self):
-        draw_quad(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"))
+        draw_quad_2(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"), self.shader, self.vbo)
 
         select_magma_rect = pygame.Rect(1435, 60, 85, 85)
-        draw_quad(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"))
+        draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
 
         return select_magma_rect
     
@@ -250,7 +262,7 @@ class TDGame:
 
 
     def draw_premade_map(self):
-        draw_quad(0, 80, 1360, 765, self.premade_map_texture)
+        draw_quad_2(0, 80, 1360, 765, self.premade_map_texture, self.shader, self.vbo)
 
 
     def place_tower(self, x, y):
@@ -276,7 +288,12 @@ class TDGame:
 
 
     def draw_towers(self):
+        clear_list = False
         for tower in self.towers_on_map:
+            if clear_list == False:
+                self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(tower.get_image())).clear()
+                clear_list = True
+
             tower_location = tower.get_location()
             left, top = self.get_rect_param(tower_location[0], tower_location[1])
 
