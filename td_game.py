@@ -4,13 +4,15 @@ import time
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from pygame_functions import draw_text
 from db_functions import get_tower_with_name
-from pyopengl_functions import load_texture, draw_quad, unload_texture, draw_quads, create_shader, draw_quad_2, draw_quads_2, destroy
+from pyopengl_functions import load_texture, unload_texture, create_shader, draw_quad_2, draw_quads_2, destroy
 from model.map.map import Map
 from model.map.premade_map import PremadeMap
 from model.tower import Tower
+from model.enemy import Enemy
 
+# TODO: If bullet kills, do not shoot another bullet
+# FIXME: Obstacles, Towers, Enemies
 class TDGame:
     def __init__(self, clock, screen, selected_profile, map_selected):
         self.clock = clock
@@ -23,6 +25,7 @@ class TDGame:
         self.selected_profile = selected_profile
         self.map_selected = map_selected
         self.tower_avail = self.map_selected.get_tower_availability_map()
+        self.sequences = [path.get_sequence() for path in self.map_selected.get_all_paths()]
 
         self.click = False
         self.mx = 0
@@ -65,6 +68,9 @@ class TDGame:
         self.shader = create_shader()
         glUseProgram(self.shader)
 
+        self.enemy = Enemy("MagmaBall.png", 0, 0, 0, self.sequences[0])
+        self.enemies_on_map = [self.enemy]
+
         self.td_game_loop()
 
     def td_game_loop(self):
@@ -85,9 +91,13 @@ class TDGame:
         self.group_textures_2()
         print(self.texture_ids_with_quads)
 
+        # TODO: MOVEMENT
+        delay = 7
+        last_event = pygame.time.get_ticks()
 
         running = True
         while running:
+
             self.mx, self.my = pygame.mouse.get_pos()
             self.click = False
 
@@ -147,7 +157,18 @@ class TDGame:
             start = time.time()
             draw_quads_2(self.texture_ids_with_quads, self.shader, self.vbo)
             end = time.time()
-            print(f'Time: {start-end}')
+            # print(f'Time: {start-end}')
+
+            # TODO: MOVEMENT
+            now = pygame.time.get_ticks()
+            if now - last_event > delay:
+                last_event = now
+
+                if self.enemy.is_finished() == False:
+                    self.enemy.move()
+
+            if self.enemy.is_finished() == False:
+                draw_quad_2(self.enemy.get_x_pix(), self.enemy.get_y_pix(), 85, 85, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
 
             if self.tower_selected != None:
                 if self.click:
