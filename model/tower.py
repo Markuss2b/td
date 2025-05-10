@@ -1,3 +1,4 @@
+import copy
 from model.bullet import Bullet
 
 class Tower:
@@ -11,7 +12,7 @@ class Tower:
         self.y = y
         self.tower_image = tower_image
 
-        self.last_attack = 0
+        self.last_attack = 300
 
     def get_name(self):
         return self.name
@@ -34,12 +35,23 @@ class Tower:
     def get_last_attack(self):
         return self.last_attack
     
-    def attack_enemy(self, all_enemies, last_attack):
+    def attack_enemy(self, all_enemies, last_attack, bullets_on_map):
         self.last_attack = last_attack
+        available_targets = []
+        
+        # Calculate if enemy will die, by checking how many bullets are currently targetting it
+        for enemy in all_enemies:
+            enemy_health = copy.copy(enemy.get_health())
+            for bullet in bullets_on_map:
+                if enemy == bullet.get_target():
+                    enemy_health -= bullet.get_damage()
+
+            if enemy_health > 0:
+                available_targets.append(enemy)
 
         # Get enemy closest to finish
-        all_enemies = sorted(all_enemies, key=lambda x: len(x.get_sequence()))
+        available_targets = sorted(available_targets, key=lambda x: len(x.get_sequence()))
 
-        if len(all_enemies) > 0:
+        if len(available_targets) > 0:
             # Spawn bullet with target to enemy
-            return Bullet(self.bullet_img, all_enemies[0], 1, self.x, self.y)
+            return Bullet(self.bullet_img, available_targets[0], 1, 1, self.x, self.y)

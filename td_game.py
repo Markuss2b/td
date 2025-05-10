@@ -82,6 +82,8 @@ class TDGame:
 
         self.bullets_on_map = []
 
+        self.health = 20
+
         self.td_game_loop()
 
     def td_game_loop(self):
@@ -115,10 +117,11 @@ class TDGame:
         while running:
 
             # TODO: Swapping waves
+            # FIXME: CRASH WHEN SECOND WAVE LAST ENEMY SPAWNS
             if len(self.game_waves[self.current_wave].get_enemies()) == 0:
                 # Pause
 
-                if self.current_wave < len(self.game_waves):
+                if self.current_wave < len(self.game_waves)-1:
                     self.current_wave += 1
                     self.game_waves[self.current_wave].create_simple_wave()
                     last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
@@ -196,6 +199,14 @@ class TDGame:
                     if enemy.is_finished() == False:
                         enemy.move()
 
+                        if enemy.is_alive() == False:
+                            self.enemies_on_map.remove(enemy)
+                    else:
+                        # TODO: Deal dmg here
+                        self.enemies_on_map.remove(enemy)
+
+
+            # TODO: Draw ENEMIES in bulk
             for enemy in self.enemies_on_map:
                 draw_quad_2(enemy.get_x_pix(), enemy.get_y_pix(), 85, 85, self.enemy_textures.get(enemy.get_img()), self.shader, self.vbo)
 
@@ -218,18 +229,29 @@ class TDGame:
 
 
             # TODO: Shooting 
-            if len(self.towers_on_map) > 0:
+            if len(self.towers_on_map) > 0 and len(self.enemies_on_map) > 0:
                 now = pygame.time.get_ticks()
-                if now - self.towers_on_map[0].get_last_attack() > self.towers_on_map[0].get_attack_delay():
-                    self.bullets_on_map.append(self.towers_on_map[0].attack_enemy(self.enemies_on_map, self.towers_on_map[0].get_attack_delay() + self.towers_on_map[0].get_last_attack()))
 
+                for tower_on_map in self.towers_on_map:
+                    if now - tower_on_map.get_last_attack() > tower_on_map.get_attack_delay():
+                        new_bullet = tower_on_map.attack_enemy(self.enemies_on_map, tower_on_map.get_attack_delay() + tower_on_map.get_last_attack(), self.bullets_on_map)
+                        if new_bullet != None:
+                            self.bullets_on_map.append(new_bullet)
+
+            # Bullets
+            #FIXME: Crash when placing tower with only 1 enemy
             if len(self.bullets_on_map) > 0:
                 for bull in self.bullets_on_map:
-                    bull.move()
+                    if bull.has_hit() == False:
+                        bull.move()
 
-                bull_left, bull_top, bull_width, bull_height = self.bullets_on_map[0].get_rect()
-                bull_img = self.bullets_on_map[0].get_img()
-                draw_quad_2(bull_left, bull_top, bull_width, bull_height, self.enemy_textures.get(bull_img), self.shader, self.vbo)
+                        bull_left, bull_top, bull_width, bull_height = bull.get_rect()
+                        bull_img = bull.get_img()
+                        draw_quad_2(bull_left, bull_top, bull_width, bull_height, self.enemy_textures.get(bull_img), self.shader, self.vbo)
+                    else:
+                        bull.get_target().set_health(bull.get_damage())
+                        self.bullets_on_map.remove(bull)
+
 
             pygame.display.flip()
 
