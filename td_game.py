@@ -18,7 +18,6 @@ from model.game_wave import Wave
 # TODO: Remove tower
 # TODO: Towers in menu
 # FIXME: Change images from magma balls :D
-# TODO: Can start a new wave
 # TODO: Can save game
 # FIXME: Shoots a lot of bullets after a new wave starts
 class TDGame:
@@ -77,6 +76,7 @@ class TDGame:
         glUseProgram(self.shader)
 
         self.enemies_on_map = []
+        self.last_spawn = pygame.time.get_ticks()
 
         self.bullets_on_map = []
 
@@ -107,7 +107,6 @@ class TDGame:
         delay = 16.67
         last_event = pygame.time.get_ticks()
 
-        last_spawn = pygame.time.get_ticks()
         # Add delay to waves ?
         last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
         self.game_waves[self.current_wave].create_simple_wave()
@@ -215,8 +214,8 @@ class TDGame:
             if self.pause == False:
                 if len(self.game_waves[self.current_wave].get_enemies()) > 0:
                     now = pygame.time.get_ticks()
-                    if now - last_spawn > last_spawn_delay:
-                        last_spawn += last_spawn_delay
+                    if now - self.last_spawn > last_spawn_delay:
+                        self.last_spawn += last_spawn_delay
                         self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[0])))
 
 
@@ -228,19 +227,17 @@ class TDGame:
                     if x >= 0 and x <= 15 and y >= 0 and y <= 8:
                         self.place_tower(x, y)
 
-
-            # TODO: Shooting 
+            # Shooting
             if len(self.towers_on_map) > 0 and len(self.enemies_on_map) > 0:
-                now = pygame.time.get_ticks()
 
                 for tower_on_map in self.towers_on_map:
+                    now = pygame.time.get_ticks()
                     if now - tower_on_map.get_last_attack() > tower_on_map.get_attack_delay():
                         new_bullet = tower_on_map.attack_enemy(self.enemies_on_map, tower_on_map.get_attack_delay() + tower_on_map.get_last_attack(), self.bullets_on_map)
                         if new_bullet != None:
                             self.bullets_on_map.append(new_bullet)
 
             # Bullets
-            #FIXME: Crash when placing tower with only 1 enemy
             if len(self.bullets_on_map) > 0:
                 for bull in self.bullets_on_map:
                     if bull.has_hit() == False:
@@ -318,7 +315,7 @@ class TDGame:
         select_magma_rect = pygame.Rect(1435, 60, 85, 85)
         draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
 
-        play_button_rect = pygame.Rect(1360, 769, 240, 131)
+        play_button_rect = pygame.Rect(1360, 749, 240, 131)
         draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo)
 
         return select_magma_rect, play_button_rect
@@ -334,6 +331,10 @@ class TDGame:
         if play_button_rect.collidepoint(self.mx, self.my):
             if self.click:
                 self.pause = False
+                self.last_spawn = pygame.time.get_ticks()
+                
+                for tower in self.towers_on_map:
+                    tower.reset_last_attack()
 
 
     def draw_map(self):

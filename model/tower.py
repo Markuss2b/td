@@ -36,6 +36,9 @@ class Tower:
     def get_last_attack(self):
         return self.last_attack
     
+    def reset_last_attack(self):
+        self.last_attack = pygame.time.get_ticks() + 1000
+    
     def attack_enemy(self, all_enemies, last_attack, bullets_on_map):
         self.last_attack = last_attack
         available_targets = []
