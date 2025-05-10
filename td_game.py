@@ -1,6 +1,7 @@
 import pygame
 import os
 import time
+import copy
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -13,14 +14,17 @@ from model.enemy import Enemy
 
 # TODO: If bullet kills, do not shoot another bullet
 # FIXME: Obstacles, Towers, Enemies
+# TODO: Select tower
+# TODO: Remove tower
+# TODO: Towers in menu
+# TODO: Tower shooting
+# FIXME: Change images from magma balls :D
 class TDGame:
     def __init__(self, clock, screen, selected_profile, map_selected):
         self.clock = clock
 
         self.display_size = (1600, 900)
-        # TODO: If i change main menu to opengl swap this to previous screen
         self.screen = pygame.display.set_mode(self.display_size, pygame.OPENGL|pygame.DOUBLEBUF)
-
 
         self.selected_profile = selected_profile
         self.map_selected = map_selected
@@ -68,8 +72,11 @@ class TDGame:
         self.shader = create_shader()
         glUseProgram(self.shader)
 
-        self.enemy = Enemy("MagmaBall.png", 0, 0, 0, self.sequences[0])
+        self.enemy = Enemy("MagmaBall.png", 0, 2, 0, copy.copy(self.sequences[0]))
+        self.enemy2 = Enemy("MagmaBall.png", 0, 1, 0, copy.copy(self.sequences[0]))
         self.enemies_on_map = [self.enemy]
+
+        self.bullets_on_map = []
 
         self.td_game_loop()
 
@@ -92,7 +99,7 @@ class TDGame:
         print(self.texture_ids_with_quads)
 
         # TODO: MOVEMENT
-        delay = 7
+        delay = 16.67
         last_event = pygame.time.get_ticks()
 
         running = True
@@ -162,20 +169,43 @@ class TDGame:
             # TODO: MOVEMENT
             now = pygame.time.get_ticks()
             if now - last_event > delay:
-                last_event = now
+                last_event += delay
 
                 if self.enemy.is_finished() == False:
                     self.enemy.move()
 
+                if self.enemy2.is_finished() == False:
+                    self.enemy2.move()
+
             if self.enemy.is_finished() == False:
                 draw_quad_2(self.enemy.get_x_pix(), self.enemy.get_y_pix(), 85, 85, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
 
+            if self.enemy2.is_finished() == False:
+                draw_quad_2(self.enemy2.get_x_pix(), self.enemy2.get_y_pix(), 85, 85, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
+
+
+            # Placing Tower
             if self.tower_selected != None:
                 if self.click:
                     x, y = self.get_xy_from_cords(self.mx, self.my)
 
                     if x >= 0 and x <= 15 and y >= 0 and y <= 8:
                         self.place_tower(x, y)
+
+
+            # TODO: Shooting 
+            if len(self.towers_on_map) > 0:
+                now = pygame.time.get_ticks()
+                if now - self.towers_on_map[0].get_last_attack() > self.towers_on_map[0].get_attack_delay():
+                    self.bullets_on_map.append(self.towers_on_map[0].attack_enemy(self.enemies_on_map, self.towers_on_map[0].get_attack_delay() + self.towers_on_map[0].get_last_attack()))
+
+            if len(self.bullets_on_map) > 0:
+                for bull in self.bullets_on_map:
+                    bull.move()
+
+                bull_left, bull_top, bull_width, bull_height = self.bullets_on_map[0].get_rect()
+                bull_img = self.bullets_on_map[0].get_img()
+                draw_quad_2(bull_left, bull_top, bull_width, bull_height, self.enemy_textures.get(bull_img), self.shader, self.vbo)
 
             pygame.display.flip()
 
@@ -302,9 +332,9 @@ class TDGame:
 
                 if tower_already_there == False:
                     # Name, attack, range, x, y
-                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
+                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "MagmaBall.png", x, y, self.tower_selected[4]))
             else:
-                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], x, y, self.tower_selected[4]))
+                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "MagmaBall.png", x, y, self.tower_selected[4]))
         
 
 

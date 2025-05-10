@@ -19,17 +19,17 @@ class Enemy:
         self.direction = self.get_direction(self.x, self.y, self.sequence[1].x, self.sequence[1].y)
 
         # Every 5 steps turn to direction, every 10 steps reset to 0 (Moving through tiles)
-        self.step_in_tile = 24
+        self.step_in_tile = 24 / self.speed
 
         self.finished = False
         self.alive = True
         
     def move(self):
         # print(self.direction)
-        if self.step_in_tile == 24:
+        if self.step_in_tile == 24 / self.speed:
             if not (self.sequence[-1].x == self.x and self.sequence[-1].y == self.y):
                 self.direction = self.get_direction(self.x, self.y, self.sequence[1].x, self.sequence[1].y)
-        elif self.step_in_tile == 40:
+        elif self.step_in_tile == 40 / self.speed:
             self.step_in_tile = 0
             self.sequence.remove(self.sequence[0])
             self.x = self.sequence[0].x
@@ -37,14 +37,15 @@ class Enemy:
             # print(f'x={self.x}, y={self.y}')
 
         # step
+        step = 2.125 * self.speed
         if self.direction == "UP":
-            self.y_pix -= 2.125
+            self.y_pix -= step
         elif self.direction == "DOWN":
-            self.y_pix += 2.125
+            self.y_pix += step
         elif self.direction == "LEFT":
-            self.x_pix -= 2.125
+            self.x_pix -= step
         elif self.direction == "RIGHT":
-            self.x_pix += 2.125
+            self.x_pix += step
         
         self.step_in_tile += 1
 
@@ -69,3 +70,6 @@ class Enemy:
     
     def is_finished(self):
         return self.finished
+    
+    def get_sequence(self):
+        return self.sequence
