@@ -13,16 +13,14 @@ from model.tower import Tower
 from model.enemy import Enemy
 from model.game_wave import Wave
 
-# TODO: If bullet kills, do not shoot another bullet
 # FIXME: Obstacles, Towers, Enemies
 # TODO: Select tower
 # TODO: Remove tower
 # TODO: Towers in menu
-# TODO: Tower shooting
 # FIXME: Change images from magma balls :D
-# TODO: Break when wave ends
 # TODO: Can start a new wave
 # TODO: Can save game
+# FIXME: Shoots a lot of bullets after a new wave starts
 class TDGame:
     def __init__(self, clock, screen, selected_profile, map_selected):
         self.clock = clock
@@ -83,6 +81,7 @@ class TDGame:
         self.bullets_on_map = []
 
         self.health = 20
+        self.pause = True
 
         self.td_game_loop()
 
@@ -117,9 +116,8 @@ class TDGame:
         while running:
 
             # TODO: Swapping waves
-            # FIXME: CRASH WHEN SECOND WAVE LAST ENEMY SPAWNS
             if len(self.game_waves[self.current_wave].get_enemies()) == 0:
-                # Pause
+                self.pause = True
 
                 if self.current_wave < len(self.game_waves)-1:
                     self.current_wave += 1
@@ -127,7 +125,7 @@ class TDGame:
                     last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
                 else:
                     pass
-                    # Game ends IG
+                    # TODO: Game ends IG
 
             self.mx, self.my = pygame.mouse.get_pos()
             self.click = False
@@ -181,8 +179,8 @@ class TDGame:
                 self.draw_premade_map()
 
             # Always draw
-            select_magma_rect = self.draw_UI()
-            self.handle_UI_buttons(select_magma_rect)
+            select_magma_rect, play_button_rect = self.draw_UI()
+            self.handle_UI_buttons(select_magma_rect, play_button_rect)
             self.draw_towers()
 
             start = time.time()
@@ -213,10 +211,13 @@ class TDGame:
 
             # TODO: Spawning enemy
             # TODO: Multiple sequences
-            now = pygame.time.get_ticks()
-            if now - last_spawn > last_spawn_delay:
-                last_spawn += last_spawn_delay
-                self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[0])))
+
+            if self.pause == False:
+                if len(self.game_waves[self.current_wave].get_enemies()) > 0:
+                    now = pygame.time.get_ticks()
+                    if now - last_spawn > last_spawn_delay:
+                        last_spawn += last_spawn_delay
+                        self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[0])))
 
 
             # Placing Tower
@@ -291,6 +292,7 @@ class TDGame:
 
     def load_UI_textures(self):
         self.UI_textures["UI_SidePanel.png"] = load_texture(f'images/UI/MapCreator/UI_SidePanel.png') 
+        self.UI_textures["PlayButton.png"] = load_texture(f'images/UI/Game/PlayButton.png')
 
     def load_premade_map_textures(self):
         self.premade_map_texture = load_texture(f'predrawn_maps/{self.map_selected.get_map_name()}/map_image.png')
@@ -316,15 +318,22 @@ class TDGame:
         select_magma_rect = pygame.Rect(1435, 60, 85, 85)
         draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
 
-        return select_magma_rect
+        play_button_rect = pygame.Rect(1360, 769, 240, 131)
+        draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo)
+
+        return select_magma_rect, play_button_rect
     
 
-    def handle_UI_buttons(self, select_magma_rect):
+    def handle_UI_buttons(self, select_magma_rect, play_button_rect):
         if select_magma_rect.collidepoint(self.mx, self.my):
             if self.click:
 
                 # TODO: towers
                 self.tower_selected = self.only_tower
+        
+        if play_button_rect.collidepoint(self.mx, self.my):
+            if self.click:
+                self.pause = False
 
 
     def draw_map(self):
