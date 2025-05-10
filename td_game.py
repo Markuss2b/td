@@ -45,6 +45,7 @@ class TDGame:
         self.enemy_textures = {}
         self.assets_textures = {}
         self.UI_textures = {}
+        self.bullet_textures = {}
         # Other textures
 
         self.static_tile = False
@@ -99,6 +100,7 @@ class TDGame:
         self.load_tower_textures()
         self.load_enemy_textures()
         self.load_UI_textures()
+        self.load_bullet_textures()
 
         self.group_textures_2()
         print(self.texture_ids_with_quads)
@@ -192,25 +194,14 @@ class TDGame:
             if now - last_event > delay:
                 last_event += delay
 
-                for enemy in self.enemies_on_map:
-                    if enemy.is_finished() == False:
-                        enemy.move()
+                self.move_enemies()
 
-                        if enemy.is_alive() == False:
-                            self.enemies_on_map.remove(enemy)
-                    else:
-                        # TODO: Deal dmg here
-                        self.enemies_on_map.remove(enemy)
+            
+            self.draw_enemies()
 
 
-            # TODO: Draw ENEMIES in bulk
-            for enemy in self.enemies_on_map:
-                draw_quad_2(enemy.get_x_pix(), enemy.get_y_pix(), 85, 85, self.enemy_textures.get(enemy.get_img()), self.shader, self.vbo)
-
-
-            # TODO: Spawning enemy
+            # Spawning enemy
             # TODO: Multiple sequences
-
             if self.pause == False:
                 if len(self.game_waves[self.current_wave].get_enemies()) > 0:
                     now = pygame.time.get_ticks()
@@ -228,27 +219,12 @@ class TDGame:
                         self.place_tower(x, y)
 
             # Shooting
-            if len(self.towers_on_map) > 0 and len(self.enemies_on_map) > 0:
-
-                for tower_on_map in self.towers_on_map:
-                    now = pygame.time.get_ticks()
-                    if now - tower_on_map.get_last_attack() > tower_on_map.get_attack_delay():
-                        new_bullet = tower_on_map.attack_enemy(self.enemies_on_map, tower_on_map.get_attack_delay() + tower_on_map.get_last_attack(), self.bullets_on_map)
-                        if new_bullet != None:
-                            self.bullets_on_map.append(new_bullet)
+            self.towers_fire()
 
             # Bullets
-            if len(self.bullets_on_map) > 0:
-                for bull in self.bullets_on_map:
-                    if bull.has_hit() == False:
-                        bull.move()
+            self.move_bullets()
 
-                        bull_left, bull_top, bull_width, bull_height = bull.get_rect()
-                        bull_img = bull.get_img()
-                        draw_quad_2(bull_left, bull_top, bull_width, bull_height, self.enemy_textures.get(bull_img), self.shader, self.vbo)
-                    else:
-                        bull.get_target().set_health(bull.get_damage())
-                        self.bullets_on_map.remove(bull)
+            self.draw_bullets()
 
 
             pygame.display.flip()
@@ -291,6 +267,12 @@ class TDGame:
         self.UI_textures["UI_SidePanel.png"] = load_texture(f'images/UI/MapCreator/UI_SidePanel.png') 
         self.UI_textures["PlayButton.png"] = load_texture(f'images/UI/Game/PlayButton.png')
 
+    # TODO:
+    def load_bullet_textures(self):
+        bullet_path = "images/Bullets"
+        all_bullet_images = os.listdir(bullet_path)
+        self.bullet_textures = { k:load_texture(f'{bullet_path}/{k}') for k in all_bullet_images }
+
     def load_premade_map_textures(self):
         self.premade_map_texture = load_texture(f'predrawn_maps/{self.map_selected.get_map_name()}/map_image.png')
 
@@ -307,6 +289,7 @@ class TDGame:
         self.texture_ids_with_quads["TOWER"] = { self.tower_textures.get(k):[] for k in self.tower_textures }
         self.texture_ids_with_quads["ENEMY"] = { self.enemy_textures.get(k):[] for k in self.enemy_textures }
         self.texture_ids_with_quads["ASSETS"] = { self.assets_textures.get(k):[] for k in self.assets_textures }
+        self.texture_ids_with_quads["BULLET"] = { self.bullet_textures.get(k):[] for k in self.bullet_textures }
 
     
     def draw_UI(self):
@@ -393,14 +376,9 @@ class TDGame:
                 self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "MagmaBall.png", x, y, self.tower_selected[4]))
         
 
-
     def draw_towers(self):
-        clear_list = False
+        self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get("MagmaBall.png")).clear()
         for tower in self.towers_on_map:
-            if clear_list == False:
-                self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(tower.get_image())).clear()
-                clear_list = True
-
             tower_location = tower.get_location()
             left, top = self.get_rect_param(tower_location[0], tower_location[1])
 
@@ -410,6 +388,55 @@ class TDGame:
     def remove_tower():
         pass
 
+    def move_enemies(self):
+        for enemy in self.enemies_on_map:
+            if enemy.is_finished() == False:
+                enemy.move()
+
+                if enemy.is_alive() == False:
+                    self.enemies_on_map.remove(enemy)
+            else:
+                self.health -= enemy.get_attack()
+                self.enemies_on_map.remove(enemy)
+
+    # Why did i have to make a list inside of a dict inside of a dict
+    def draw_enemies(self):
+        # draw_quad_2(enemy.get_x_pix(), enemy.get_y_pix(), 85, 85, self.enemy_textures.get(enemy.get_img()), self.shader, self.vbo)
+        self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("MagmaBall.png")).clear()
+        for enemy in self.enemies_on_map:
+            left, top = enemy.get_x_pix(), enemy.get_y_pix()
+            self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get(enemy.get_img())).append((left, top, self.tile_size, self.tile_size))
+
+
+    def towers_fire(self):
+        if len(self.towers_on_map) > 0 and len(self.enemies_on_map) > 0:
+
+            for tower_on_map in self.towers_on_map:
+                now = pygame.time.get_ticks()
+                if now - tower_on_map.get_last_attack() > tower_on_map.get_attack_delay():
+                    new_bullet = tower_on_map.attack_enemy(self.enemies_on_map, tower_on_map.get_attack_delay() + tower_on_map.get_last_attack(), self.bullets_on_map)
+                    if new_bullet != None:
+                        self.bullets_on_map.append(new_bullet)
+
+
+    def draw_bullets(self):
+        self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("MagmaBall.png")).clear()
+        for bull in self.bullets_on_map:
+            bull_left, bull_top, bull_width, bull_height = bull.get_rect()
+            self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get(bull.get_img())).append((bull_left, bull_top, bull_width, bull_height))
+
+    def move_bullets(self):
+        if len(self.bullets_on_map) > 0:
+            for bull in self.bullets_on_map:
+                if bull.has_hit() == False:
+                    bull.move()
+
+                    # bull_left, bull_top, bull_width, bull_height = bull.get_rect()
+                    # bull_img = bull.get_img()
+                    # draw_quad_2(bull_left, bull_top, bull_width, bull_height, self.enemy_textures.get(bull_img), self.shader, self.vbo)
+                else:
+                    bull.get_target().set_health(bull.get_damage())
+                    self.bullets_on_map.remove(bull)
 
 
     # Might want to move this to a different file
