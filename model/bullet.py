@@ -46,11 +46,11 @@ class Bullet:
             # distance = math.sqrt(pow(self.x_pix, 2) + pow(self.y_pix, 2))
             distance = math.sqrt(pow(distance_x, 2) + pow(distance_y, 2))
             
-            if distance >= 2.5:
+            if distance >= 12.5:
                 vector = ((self.x_pix - center_x) / distance, (self.y_pix - center_y) / distance)
 
-                self.x_pix = self.x_pix - vector[0] * 2.5 * self.speed
-                self.y_pix = self.y_pix - vector[1] * 2.5 * self.speed
+                self.x_pix = self.x_pix - vector[0] * 12.5 * self.speed
+                self.y_pix = self.y_pix - vector[1] * 12.5 * self.speed
             else:
                 self.x_pix = center_x
                 self.y_pix = center_y

@@ -1,4 +1,5 @@
 import copy
+import pygame
 from model.bullet import Bullet
 
 class Tower:
@@ -12,7 +13,7 @@ class Tower:
         self.y = y
         self.tower_image = tower_image
 
-        self.last_attack = 300
+        self.last_attack = pygame.time.get_ticks()
 
     def get_name(self):
         return self.name
