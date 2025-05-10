@@ -54,3 +54,11 @@ def get_tower_with_name(name):
         result = cursor.fetchone()
         cursor.close()
     return result
+
+def get_enemy_with_title(title):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM Enemy WHERE title = '{title}'")
+        result = cursor.fetchone()
+        cursor.close()
+    return result

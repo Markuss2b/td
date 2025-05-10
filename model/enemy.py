@@ -3,11 +3,12 @@ from other_functions import get_pix
 
 # Move enemies that are alive and haven't finished
 class Enemy:
-    def __init__(self, title, health, speed, attack, sequence):
+    def __init__(self, title, health, speed, attack, img, sequence):
         self.title = title
         self.health = health
         self.speed = speed
         self.attack = attack
+        self.img = img
 
         # Example: [Location(x, y), Location(x, y), ...]
         self.sequence = sequence
@@ -73,3 +74,6 @@ class Enemy:
     
     def get_sequence(self):
         return self.sequence
+
+    def get_img(self):
+        return self.img

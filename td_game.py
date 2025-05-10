@@ -11,6 +11,7 @@ from model.map.map import Map
 from model.map.premade_map import PremadeMap
 from model.tower import Tower
 from model.enemy import Enemy
+from model.game_wave import Wave
 
 # TODO: If bullet kills, do not shoot another bullet
 # FIXME: Obstacles, Towers, Enemies
@@ -19,6 +20,9 @@ from model.enemy import Enemy
 # TODO: Towers in menu
 # TODO: Tower shooting
 # FIXME: Change images from magma balls :D
+# TODO: Break when wave ends
+# TODO: Can start a new wave
+# TODO: Can save game
 class TDGame:
     def __init__(self, clock, screen, selected_profile, map_selected):
         self.clock = clock
@@ -30,6 +34,8 @@ class TDGame:
         self.map_selected = map_selected
         self.tower_avail = self.map_selected.get_tower_availability_map()
         self.sequences = [path.get_sequence() for path in self.map_selected.get_all_paths()]
+        self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0)]
+        self.current_wave = 0
 
         self.click = False
         self.mx = 0
@@ -72,9 +78,7 @@ class TDGame:
         self.shader = create_shader()
         glUseProgram(self.shader)
 
-        self.enemy = Enemy("MagmaBall.png", 0, 2, 0, copy.copy(self.sequences[0]))
-        self.enemy2 = Enemy("MagmaBall.png", 0, 1, 0, copy.copy(self.sequences[0]))
-        self.enemies_on_map = [self.enemy]
+        self.enemies_on_map = []
 
         self.bullets_on_map = []
 
@@ -102,8 +106,25 @@ class TDGame:
         delay = 16.67
         last_event = pygame.time.get_ticks()
 
+        last_spawn = pygame.time.get_ticks()
+        # Add delay to waves ?
+        last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
+        self.game_waves[self.current_wave].create_simple_wave()
+
         running = True
         while running:
+
+            # TODO: Swapping waves
+            if len(self.game_waves[self.current_wave].get_enemies()) == 0:
+                # Pause
+
+                if self.current_wave < len(self.game_waves):
+                    self.current_wave += 1
+                    self.game_waves[self.current_wave].create_simple_wave()
+                    last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
+                else:
+                    pass
+                    # Game ends IG
 
             self.mx, self.my = pygame.mouse.get_pos()
             self.click = False
@@ -171,17 +192,20 @@ class TDGame:
             if now - last_event > delay:
                 last_event += delay
 
-                if self.enemy.is_finished() == False:
-                    self.enemy.move()
+                for enemy in self.enemies_on_map:
+                    if enemy.is_finished() == False:
+                        enemy.move()
 
-                if self.enemy2.is_finished() == False:
-                    self.enemy2.move()
+            for enemy in self.enemies_on_map:
+                draw_quad_2(enemy.get_x_pix(), enemy.get_y_pix(), 85, 85, self.enemy_textures.get(enemy.get_img()), self.shader, self.vbo)
 
-            if self.enemy.is_finished() == False:
-                draw_quad_2(self.enemy.get_x_pix(), self.enemy.get_y_pix(), 85, 85, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
 
-            if self.enemy2.is_finished() == False:
-                draw_quad_2(self.enemy2.get_x_pix(), self.enemy2.get_y_pix(), 85, 85, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
+            # TODO: Spawning enemy
+            # TODO: Multiple sequences
+            now = pygame.time.get_ticks()
+            if now - last_spawn > last_spawn_delay:
+                last_spawn += last_spawn_delay
+                self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[0])))
 
 
             # Placing Tower

@@ -11,8 +11,8 @@ class Bullet:
         self.size = 20
 
         self.x_pix, self.y_pix = get_pix(self.x, self.y)
-        self.x_pix += 42.5
-        self.y_pix += 42.5
+        self.x_pix += 32.5
+        self.y_pix += 32.5
         hit = False
 
     def move(self):
@@ -20,8 +20,8 @@ class Bullet:
         target_y = self.target.get_y_pix()
 
         # Aim for center
-        center_x = target_x + 42.5
-        center_y = target_y + 42.5
+        center_x = target_x + 32.5
+        center_y = target_y + 32.5
 
         distance_x = abs(self.x_pix - center_x)
         distance_y = abs(self.y_pix - center_y)

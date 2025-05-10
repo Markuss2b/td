@@ -40,5 +40,6 @@ class Tower:
         # Get enemy closest to finish
         all_enemies = sorted(all_enemies, key=lambda x: len(x.get_sequence()))
 
-        # Spawn bullet with target to enemy
-        return Bullet(self.bullet_img, all_enemies[-1], 1, self.x, self.y)
+        if len(all_enemies) > 0:
+            # Spawn bullet with target to enemy
+            return Bullet(self.bullet_img, all_enemies[0], 1, self.x, self.y)

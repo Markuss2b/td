@@ -1,27 +1,35 @@
 from model.enemy import Enemy
+from db_functions import get_enemy_with_title
 
 #TODO: Needs some optimization, maybe different wave creation methods
 # Headache
 class Wave:
-    def __init__(self, basic_enemy, simple_enemy, advanced_enemy):
-        self.enemies = []
+    def __init__(self, spawn_delay, basic_enemy, simple_enemy, advanced_enemy):
+        self.spawn_delay = spawn_delay
         self.basic_enemy = basic_enemy
         self.simple_enemy = simple_enemy
         self.advanced_enemy = advanced_enemy
         self.types = ["simple", "advanced"]
+        self.enemies = []
+
+    def get_spawn_delay(self):
+        return self.spawn_delay
 
     def get_enemies(self):
         return self.enemies
         
     def add_enemy_1(self):
-        self.enemies.append(Enemy(title="basic", health=1, speed=1, attack=1, x=1, y=1))
+        self.enemies.append("basic")
     
     def add_enemy_2(self):
-        self.enemies.append(Enemy(title="simple", health=3, speed=1, attack=3, x=1, y=1))
+        self.enemies.append("simple")
     
     def add_enemy_3(self):
-        self.enemies.append(Enemy(title="advanced", health=10, speed=1, attack=10, x=1, y=1))
+        self.enemies.append("advanced")
 
+    # Basic => Fire Orb
+    # Simple => Magma Ball
+    # Advanced => ?
     def add_enemy(self, type):
         if type == "basic":
             self.add_enemy_1()
@@ -85,3 +93,18 @@ class Wave:
                 self.add_enemy(enemy_type)
                 
         return step
+    
+    def create_simple_wave(self):
+        for i in range(self.simple_enemy):
+            self.enemies.append("simple")
+
+    def spawn_enemy(self, sequence):
+        if self.enemies[-1] == "basic":
+            enemy = get_enemy_with_title("Fire orb")
+        elif self.enemies[-1] == "simple":
+            enemy = get_enemy_with_title("Magma ball")
+        
+        title, health, speed, attack, img = enemy[1], enemy[2], enemy[3], enemy[4], enemy[5]
+
+        self.enemies.remove(self.enemies[-1])
+        return Enemy(title, health, speed, attack, img, sequence)
