@@ -45,6 +45,9 @@ class Enemy:
     
     def set_health(self, damage):
         self.health = self.health - damage
+
+    def get_attack(self):
+        return self.attack
     
     def is_alive(self):
         return self.alive

@@ -13,7 +13,8 @@ from model.map.premade_map import PremadeMap
 
 # FIXME: If too many profiles made it will look ugly
 class MainMenu:
-    def __init__(self):
+    def __init__(self, view_state):
+        self.view_state = view_state
         self.menu_state = "main_menu"
         self.click = False
         self.load_game = False
@@ -25,12 +26,13 @@ class MainMenu:
         self.load_premade_map = False
         self.mx = 0
         self.my = 0
-        self.selected_profile = None
+        self.selected_profile = self.view_state.get_selected_profile()
         self.map_selected = None
         self.selected_premade_map = None
         self.naming_new_profile = False
         self.new_profile_name = ""
         self.error_msg = ""
+        self.running = True
 
         pygame.init()
         self.font = pygame.font.SysFont(None, 30)
@@ -40,8 +42,7 @@ class MainMenu:
         self.main_loop()
 
     def main_loop(self):
-        running = True
-        while(running):
+        while self.running:
             
             self.mx, self.my = pygame.mouse.get_pos()
             if self.menu_state == "main_menu":
@@ -98,13 +99,15 @@ class MainMenu:
                     if exit_button.collidepoint(self.mx, self.my):
                         if self.click:
                             self.quit()
+                            self.view_state.set_quit(True)
 
 
             self.click = False
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    self.running = False
+                    self.view_state.set_quit(True)
                 
                 # Inputs 
                 if event.type == pygame.KEYDOWN:
@@ -143,9 +146,6 @@ class MainMenu:
 
     def quit(self):
         pygame.quit()
-
-    def play_game(self):
-        TDGame(self.clock, self.screen, self.selected_profile)
 
     def map_creator(self):
         MapCreator(self.clock, self.screen)
@@ -252,6 +252,7 @@ class MainMenu:
                     losses = db_profile_result[3]
 
                     self.selected_profile = Profile(id, name, wins, losses)
+                    self.view_state.set_selected_profile(self.selected_profile)
 
             # Deletes profile
             if profile_rects[i][1].collidepoint(self.mx, self.my) and self.can_delete_profile == True:
@@ -385,7 +386,11 @@ class MainMenu:
                 if self.click:
                     self.map_selected = PremadeMap("farmfield", 16, 9)
                     self.map_selected.recreate_map_from_folder()
-                    TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
+                    self.view_state.set_map_selected(self.map_selected)
+
+                    self.view_state.set_state("game")
+                    self.running = False
+                    # TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
 
 
     def select_custom_made_maps(self):
@@ -439,5 +444,5 @@ class MainMenu:
         if self.map_selected != None:
             if checkmark_rect.collidepoint(self.mx, self.my):
                 if self.click:
-                    TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
-                
+                    self.view_state.set_state("game")
+                    # TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
