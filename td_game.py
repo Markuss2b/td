@@ -18,8 +18,6 @@ from model.game_wave import Wave
 # TODO: Remove tower
 # TODO: Towers in menu
 # FIXME: Change images from magma balls :D
-# TODO: Can save game
-# FIXME: Shoots a lot of bullets after a new wave starts
 class TDGame:
     def __init__(self, view_state):
         self.view_state = view_state

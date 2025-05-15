@@ -11,7 +11,6 @@ from model.map.map import Map
 from model.map.premade_map import PremadeMap
 
 
-# FIXME: If too many profiles made it will look ugly
 class MainMenu:
     def __init__(self, view_state):
         self.view_state = view_state

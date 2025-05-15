@@ -7,7 +7,6 @@ from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
 # TODO: Buttons should have names
-# FIXME: Too slow with a lot of obstacles, might need to add parallel drawing
 # Tile size 16 x 9
 class MapCreator:
 
@@ -83,6 +82,11 @@ class MapCreator:
         action_delay = 100
 
         while self.running:
+            if self.selected_view_mode == "Obstacles":
+                action_delay = 100
+            else:
+                action_delay = 10
+
             now = pygame.time.get_ticks()
 
             self.counter += 1
@@ -784,7 +788,12 @@ class MapCreator:
                 x, y = self.get_xy_from_cords(self.mx, self.my)
                 left, top = self.get_rect_param(x, y)
                 left = left - 20
-                top = top - self.tile_size - new_image_height/5
+
+                # TODO: Scuffed
+                if new_image_height >= 200:
+                    top = top - self.tile_size - new_image_height/5
+                elif new_image_height >= 120:
+                    top = top - 20
             draw_transparent_img(self.screen, path, left, top, new_image_width, new_image_height)
 
 
