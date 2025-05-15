@@ -99,8 +99,9 @@ class TDGame:
             # TODO: Only tower
             self.tower_selected = self.only_tower
             self.current_wave = self.view_state.get_saved_game()[0]
+            self.health = self.view_state.get_saved_game()[1]
 
-            towers = self.view_state.get_saved_game()[1]
+            towers = self.view_state.get_saved_game()[2]
             for tower in towers:
                 tower = tower.replace("\n", "")
                 tower = tower.split(",")
@@ -390,6 +391,7 @@ class TDGame:
                     with open(save_path, "w") as f:
                         f.write(f'{self.map_selected.get_map_name()}\n')
                         f.write(f'{self.current_wave}\n')
+                        f.write(f'{self.health}\n')
                         for tower in self.towers_on_map:
                             loc = tower.get_location()
                             f.write(f'{tower.get_name()},{loc[0]},{loc[1]}\n')

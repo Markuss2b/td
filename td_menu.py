@@ -348,6 +348,7 @@ class MainMenu:
                     with open(save_path, "r") as f:
                         map_name = f.readline().replace("\n", "")
                         wave = int(f.readline().replace("\n", ""))
+                        health = int(f.readline().replace("\n", ""))
                         towers = f.readlines()
                     
                     if map_name == "farmfield":
@@ -360,6 +361,7 @@ class MainMenu:
                     self.view_state.set_map_selected(self.map_selected)
                     self.view_state.set_saved_game([]) # reset
                     self.view_state.get_saved_game().append(wave)
+                    self.view_state.get_saved_game().append(health)
                     self.view_state.get_saved_game().append(towers)
                     self.view_state.set_state("game")
                     os.remove(f'saved_games/{self.selected_profile.get_name()}.txt')
