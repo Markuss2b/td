@@ -38,6 +38,19 @@ def delete_profile_with_id(id):
         conn.commit()
         cursor.close()
 
+def add_profile_win_by_name(name):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"UPDATE Profile SET wins = wins + 1 WHERE name = '{name}'")
+        conn.commit()
+        cursor.close()
+
+def add_profile_loss_by_name(name):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"UPDATE Profile SET losses = losses + 1 WHERE name = '{name}'")
+        conn.commit()
+        cursor.close()
 
 def get_all_towers():
     with sqlite3.connect('towerdefense.db') as conn:

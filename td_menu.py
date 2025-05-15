@@ -339,6 +339,33 @@ class MainMenu:
         pygame.draw.rect(self.screen, (255, 255, 255), premade_map_rect)
         pygame.draw.rect(self.screen, (255, 255, 255), custom_map_rect)
 
+        if self.check_for_saved_games() == True:
+            saved_map_rect = pygame.Rect(select_map_left + select_map_width / 2 - 15, select_map_top + select_map_height - 40, 30, 30)
+            pygame.draw.rect(self.screen, (255, 0, 0), saved_map_rect)
+
+            if saved_map_rect.collidepoint(self.mx, self.my):
+                if self.click:
+                    save_path = f'saved_games/{self.selected_profile.get_name()}.txt'
+                    with open(save_path, "r") as f:
+                        map_name = f.readline().replace("\n", "")
+                        wave = int(f.readline().replace("\n", ""))
+                        towers = f.readlines()
+                    
+                    if map_name == "farmfield":
+                        self.map_selected = PremadeMap("farmfield", 16, 9)
+                        self.map_selected.recreate_map_from_folder()
+                    else:
+                        self.map_selected = Map(map_name, 0, 0)
+                        self.map_selected.recreate_map_from_folder()
+
+                    self.view_state.set_map_selected(self.map_selected)
+                    self.view_state.set_saved_game([]) # reset
+                    self.view_state.get_saved_game().append(wave)
+                    self.view_state.get_saved_game().append(towers)
+                    self.view_state.set_state("game")
+                    os.remove(f'saved_games/{self.selected_profile.get_name()}.txt')
+                    self.running = False
+
         if premade_map_rect.collidepoint(self.mx, self.my):
             if self.click:
                 self.load_premade_map = True
@@ -436,8 +463,6 @@ class MainMenu:
 
                     self.map_selected.recreate_map_from_folder()
 
-                    print(self.map_selected.get_map_name())
-
         checkmark_rect = draw_checkmark_on_menu(self.screen, map_menu)
         
 
@@ -446,3 +471,11 @@ class MainMenu:
                 if self.click:
                     self.view_state.set_state("game")
                     # TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
+
+
+    def check_for_saved_games(self):
+        saved_game_files = os.listdir("saved_games")
+        for game_file in saved_game_files:
+            if game_file == f'{self.selected_profile.get_name()}.txt':
+                return True
+        return False

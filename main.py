@@ -7,6 +7,7 @@ class ViewState:
         self.selected_profile = None
         self.quit = False
         self.map_selected = None
+        self.saved_game = []
 
     def set_state(self, new_state):
         self.state = new_state
@@ -32,12 +33,17 @@ class ViewState:
     def set_map_selected(self, map_selected):
         self.map_selected = map_selected
 
+    def get_saved_game(self):
+        return self.saved_game
+    
+    def set_saved_game(self, saved_game):
+        self.saved_game = saved_game
+
 
 def main():
     view_state = ViewState()
     while True:
         if view_state.get_state() == "menu":
-            print(view_state.get_selected_profile())
             MainMenu(view_state)
         if view_state.get_state() == "game":
             TDGame(view_state)

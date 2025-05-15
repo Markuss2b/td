@@ -5,7 +5,7 @@ import copy
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from db_functions import get_tower_with_name
+from db_functions import get_tower_with_name, add_profile_win_by_name, add_profile_loss_by_name
 from pyopengl_functions import load_texture, unload_texture, create_shader, draw_quad_2, draw_quads_2, destroy
 from model.map.map import Map
 from model.map.premade_map import PremadeMap
@@ -89,12 +89,31 @@ class TDGame:
         self.pause = True
         self.game_end = False
         self.result = ""
+        self.profile_updated = False
 
         self.running = True
         self.td_game_loop()
 
     def td_game_loop(self):
- 
+
+        # If loading save file
+        if len(self.view_state.get_saved_game()):
+            # TODO: Only tower
+            self.tower_selected = self.only_tower
+            self.current_wave = self.view_state.get_saved_game()[0]
+
+            towers = self.view_state.get_saved_game()[1]
+            for tower in towers:
+                tower = tower.replace("\n", "")
+                tower = tower.split(",")
+                
+                name = tower[0]
+                x = int(tower[1])
+                y = int(tower[2])
+                self.place_tower(x, y)
+            
+            self.view_state.set_saved_game([])
+
         # Load all textures
 
         if self.map_selected.get_map_type() == "Map":
@@ -139,10 +158,17 @@ class TDGame:
                 if self.current_wave == len(self.game_waves)-1 and len(self.enemies_on_map) == 0 and self.pause == True:
                     self.game_end = True
                     self.result = "Won"
+                    if self.profile_updated == False:
+                        self.profile_updated = True
+                        add_profile_win_by_name(self.selected_profile.get_name())
+                        
                 
             if self.health <= 0:
                 self.game_end = True
                 self.result = "Lost"
+                if self.profile_updated == False:
+                    self.profile_updated = True
+                    add_profile_loss_by_name(self.selected_profile.get_name())
 
 
             self.mx, self.my = pygame.mouse.get_pos()
@@ -202,8 +228,7 @@ class TDGame:
                     self.draw_premade_map()
 
                 # Always draw
-                select_magma_rect, play_button_rect = self.draw_UI()
-                self.handle_UI_buttons(select_magma_rect, play_button_rect)
+                self.draw_UI()
                 self.draw_towers()
 
                 start = time.time()
@@ -295,6 +320,7 @@ class TDGame:
         self.UI_textures["T_YouLost.png"] = load_texture(f'images/UI/Game/GameEnd/T_YouLost.png')
         self.UI_textures["T_YouWon.png"] = load_texture(f'images/UI/Game/GameEnd/T_YouWon.png')
         self.UI_textures["T_GameEndBackground.png"] = load_texture(f'images/UI/Game/GameEnd/T_GameEndBackground.png')
+        self.UI_textures["BTN_Next.png"] = load_texture(f'images/UI/Game/GameEnd/BTN_Next.png')
 
     # TODO:
     def load_bullet_textures(self):
@@ -330,10 +356,16 @@ class TDGame:
         play_button_rect = pygame.Rect(1360, 749, 240, 131)
         draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo)
 
-        return select_magma_rect, play_button_rect
+        return_to_menu_rect = pygame.Rect(1380, 880, 20, 20)
+        draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Next.png"), self.shader, self.vbo)
+
+        save_and_exit_rect = pygame.Rect(1380, 700, 20, 20)
+        draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get("BTN_Back.png"), self.shader, self.vbo)
+
+        self.handle_UI_buttons(select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect)
     
 
-    def handle_UI_buttons(self, select_magma_rect, play_button_rect):
+    def handle_UI_buttons(self, select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect):
         if select_magma_rect.collidepoint(self.mx, self.my):
             if self.click:
 
@@ -347,6 +379,25 @@ class TDGame:
                 
                 for tower in self.towers_on_map:
                     tower.reset_last_attack()
+
+        if return_to_menu_rect.collidepoint(self.mx, self.my):
+            if self.click:
+                self.running = False
+                self.view_state.set_state("menu")
+
+        if self.pause == True:
+            if save_and_exit_rect.collidepoint(self.mx, self.my):
+                if self.click:
+                    save_path = f'saved_games/{self.selected_profile.get_name()}.txt'
+                    with open(save_path, "w") as f:
+                        f.write(f'{self.map_selected.get_map_name()}\n')
+                        f.write(f'{self.current_wave}\n')
+                        for tower in self.towers_on_map:
+                            loc = tower.get_location()
+                            f.write(f'{tower.get_name()},{loc[0]},{loc[1]}\n')
+
+                    self.running = False
+                    self.view_state.set_state("menu")
 
 
     def draw_map(self):
@@ -506,7 +557,8 @@ class TDGame:
         if retry_rect.collidepoint(self.mx, self.my):
             if self.click:
                 self.running = False
-                TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
+                # Redundant
+                self.view_state.set_state("game")
 
 
     # Might want to move this to a different file
