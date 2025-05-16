@@ -1,0 +1,14 @@
+#version 330 core
+
+in vec2 fragmentCoord;
+
+out vec4 fragmentColor;
+
+uniform sampler2D textu;
+uniform float alpha;
+
+void main()
+{
+    vec4 color = texture(textu, fragmentCoord);
+    fragmentColor = vec4(color.rgb, color.a * alpha);
+}

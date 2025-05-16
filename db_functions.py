@@ -75,3 +75,19 @@ def get_enemy_with_title(title):
         result = cursor.fetchone()
         cursor.close()
     return result
+
+def add_game_in_history(player_id, map_name, game_result, wave, towers_placed, seconds):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"INSERT INTO game_history (player_id, map_name, result, wave, towers_placed, seconds) VALUES({player_id}, '{map_name}', '{game_result}', {wave}, {towers_placed}, {seconds})")
+        result = cursor.fetchone()
+        cursor.close()
+    return result
+
+def get_history_with_id(player_id):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM game_history WHERE player_id = '{player_id}'")
+        result = cursor.fetchall()
+        cursor.close()
+    return result

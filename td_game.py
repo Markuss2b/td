@@ -5,7 +5,7 @@ import copy
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from db_functions import get_tower_with_name, add_profile_win_by_name, add_profile_loss_by_name
+from db_functions import get_tower_with_name, add_profile_win_by_name, add_profile_loss_by_name, add_game_in_history, get_profile_with_name
 from pyopengl_functions import load_texture, unload_texture, create_shader, draw_quad_2, draw_quads_2, destroy
 from model.map.map import Map
 from model.map.premade_map import PremadeMap
@@ -18,6 +18,7 @@ from model.game_wave import Wave
 # TODO: Remove tower
 # TODO: Towers in menu
 # FIXME: Change images from magma balls :D
+# FIXME: Transparent finish only looks good in premade maps
 class TDGame:
     def __init__(self, view_state):
         self.view_state = view_state
@@ -75,8 +76,9 @@ class TDGame:
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * 4, ctypes.c_void_p(2 * 4))
 
-        self.shader = create_shader()
+        self.shader = create_shader(vertex_path = "shaders/vertex.txt", fragment_path = "shaders/new_fragment.txt")
         glUseProgram(self.shader)
+        self.alpha = 1
 
         self.enemies_on_map = []
         self.last_spawn = pygame.time.get_ticks()
@@ -88,6 +90,9 @@ class TDGame:
         self.game_end = False
         self.result = ""
         self.profile_updated = False
+        self.towers_placed_amount = 0
+        self.game_start_time = time.time()
+        self.game_end_time = None
 
         self.running = True
         self.td_game_loop()
@@ -160,6 +165,12 @@ class TDGame:
                     if self.profile_updated == False:
                         self.profile_updated = True
                         add_profile_win_by_name(self.selected_profile.get_name())
+
+                        # Game history
+                        self.game_end_time = time.time()
+                        profile = get_profile_with_name(self.selected_profile.get_name())
+                        profile_id = profile[0]
+                        add_game_in_history(profile_id, self.map_selected.get_map_name(), "Win", self.current_wave+1, self.towers_placed_amount, int(self.game_end_time - self.game_start_time))
                         
                 
             if self.health <= 0:
@@ -168,6 +179,12 @@ class TDGame:
                 if self.profile_updated == False:
                     self.profile_updated = True
                     add_profile_loss_by_name(self.selected_profile.get_name())
+
+                    # Game history
+                    self.game_end_time = time.time()
+                    profile = get_profile_with_name(self.selected_profile.get_name())
+                    profile_id = profile[0]
+                    add_game_in_history(profile_id, self.map_selected.get_map_name(), "Loss", self.current_wave, self.towers_placed_amount, int(self.game_end_time - self.game_start_time))
 
 
             self.mx, self.my = pygame.mouse.get_pos()
@@ -216,60 +233,62 @@ class TDGame:
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+
+            if self.game_end == True:
+                self.alpha = 0.3
+
+            if self.map_selected.get_map_type() == "Map":
+                self.draw_map()
+                self.draw_obstacles()
+            elif self.map_selected.get_map_type() == "PremadeMap":
+                self.draw_premade_map()
+
+            # Always draw
+            self.draw_UI()
+            self.draw_towers()
+
+            start = time.time()
+            draw_quads_2(self.texture_ids_with_quads, self.shader, self.vbo, self.alpha)
+            end = time.time()
+            # print(f'Time: {start-end}')
+
+            # TODO: MOVEMENT
+            now = pygame.time.get_ticks()
+            if now - last_event > delay:
+                last_event += delay
+
+                self.move_enemies()
+
+            
+            self.draw_enemies()
+
+
+            # Spawning enemy
+            if self.pause == False:
+                if len(self.game_waves[self.current_wave].get_enemies()) > 0:
+                    now = pygame.time.get_ticks()
+                    if now - self.last_spawn > last_spawn_delay:
+                        self.last_spawn += last_spawn_delay
+                        self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[self.selected_sequence])))
+
+            # Placing Tower
+            if self.tower_selected != None:
+                if self.click:
+                    x, y = self.get_xy_from_cords(self.mx, self.my)
+
+                    if x >= 0 and x <= 15 and y >= 0 and y <= 8:
+                        self.place_tower(x, y)
+
+            # Shooting
+            self.towers_fire()
+
+            # Bullets
+            self.move_bullets()
+
+            self.draw_bullets()
+
             if self.game_end == True:
                 self.draw_game_end_popup()
-
-            else:
-                if self.map_selected.get_map_type() == "Map":
-                    self.draw_map()
-                    self.draw_obstacles()
-                elif self.map_selected.get_map_type() == "PremadeMap":
-                    self.draw_premade_map()
-
-                # Always draw
-                self.draw_UI()
-                self.draw_towers()
-
-                start = time.time()
-                draw_quads_2(self.texture_ids_with_quads, self.shader, self.vbo)
-                end = time.time()
-                # print(f'Time: {start-end}')
-
-                # TODO: MOVEMENT
-                now = pygame.time.get_ticks()
-                if now - last_event > delay:
-                    last_event += delay
-
-                    self.move_enemies()
-
-                
-                self.draw_enemies()
-
-
-                # Spawning enemy
-                if self.pause == False:
-                    if len(self.game_waves[self.current_wave].get_enemies()) > 0:
-                        now = pygame.time.get_ticks()
-                        if now - self.last_spawn > last_spawn_delay:
-                            self.last_spawn += last_spawn_delay
-                            self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[self.selected_sequence])))
-
-
-                # Placing Tower
-                if self.tower_selected != None:
-                    if self.click:
-                        x, y = self.get_xy_from_cords(self.mx, self.my)
-
-                        if x >= 0 and x <= 15 and y >= 0 and y <= 8:
-                            self.place_tower(x, y)
-
-                # Shooting
-                self.towers_fire()
-
-                # Bullets
-                self.move_bullets()
-
-                self.draw_bullets()
 
 
             pygame.display.flip()
@@ -347,19 +366,19 @@ class TDGame:
 
     
     def draw_UI(self):
-        draw_quad_2(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"), self.shader, self.vbo)
+        draw_quad_2(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"), self.shader, self.vbo, self.alpha)
 
         select_magma_rect = pygame.Rect(1435, 60, 85, 85)
-        draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo)
+        draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo, self.alpha)
 
         play_button_rect = pygame.Rect(1360, 749, 240, 131)
-        draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo)
+        draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo, self.alpha)
 
         return_to_menu_rect = pygame.Rect(1380, 880, 20, 20)
-        draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Next.png"), self.shader, self.vbo)
+        draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Next.png"), self.shader, self.vbo, self.alpha)
 
         save_and_exit_rect = pygame.Rect(1380, 700, 20, 20)
-        draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get("BTN_Back.png"), self.shader, self.vbo)
+        draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get("BTN_Back.png"), self.shader, self.vbo, self.alpha)
 
         self.handle_UI_buttons(select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect)
     
@@ -432,7 +451,7 @@ class TDGame:
 
 
     def draw_premade_map(self):
-        draw_quad_2(0, 80, 1360, 765, self.premade_map_texture, self.shader, self.vbo)
+        draw_quad_2(0, 80, 1360, 765, self.premade_map_texture, self.shader, self.vbo, self.alpha)
 
 
     def place_tower(self, x, y):
@@ -443,6 +462,8 @@ class TDGame:
 
         if tile_tower_avail != "X":
             
+            self.towers_placed_amount += 1
+
             if self.towers_on_map != []:
                 for tower in self.towers_on_map:
                     tower_location = tower.get_location()
@@ -525,26 +546,26 @@ class TDGame:
         game_end_top = 130
         game_end_width = 415
         game_end_height = 540
-        draw_quad_2(game_end_left, game_end_top, game_end_width, game_end_height, self.UI_textures.get("T_GameEndBackground.png"), self.shader, self.vbo)
+        draw_quad_2(game_end_left, game_end_top, game_end_width, game_end_height, self.UI_textures.get("T_GameEndBackground.png"), self.shader, self.vbo, 1)
 
         # Result
         result_left = game_end_left + 115
         result_top = game_end_top + 170
         result_width = 194
         result_height = 85
-        draw_quad_2(result_left, result_top, result_width, result_height, self.UI_textures.get(f'T_You{self.result}.png'), self.shader, self.vbo)
+        draw_quad_2(result_left, result_top, result_width, result_height, self.UI_textures.get(f'T_You{self.result}.png'), self.shader, self.vbo, 1)
 
         # Retry
         exit_left = game_end_left + 130
         exit_top = game_end_top + game_end_height - 135
         exit_width = 60
         exit_height = 60
-        draw_quad_2(exit_left, exit_top, exit_width, exit_height, self.UI_textures.get(f'BTN_Back.png'), self.shader, self.vbo)
+        draw_quad_2(exit_left, exit_top, exit_width, exit_height, self.UI_textures.get(f'BTN_Back.png'), self.shader, self.vbo, 1)
         exit_rect = pygame.Rect(exit_left, exit_top, exit_width, exit_height)
 
         # Exit
         retry_left = game_end_left + 130 + 60 + 40
-        draw_quad_2(retry_left, exit_top, exit_width, exit_height, self.UI_textures.get(f'BTN_Retry.png'), self.shader, self.vbo)
+        draw_quad_2(retry_left, exit_top, exit_width, exit_height, self.UI_textures.get(f'BTN_Retry.png'), self.shader, self.vbo, 1)
         retry_rect = pygame.Rect(retry_left, exit_top, exit_width, exit_height)
         
         self.handle_game_end_buttons(exit_rect, retry_rect)

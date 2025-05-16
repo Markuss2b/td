@@ -19,6 +19,7 @@ class MainMenu:
         self.load_game = False
         self.load_select_profile = False
         self.load_create_new_profile = False
+        self.load_history = False
         self.can_delete_profile = False
         self.load_select_map = False
         self.load_custom_map = False
@@ -32,6 +33,7 @@ class MainMenu:
         self.new_profile_name = ""
         self.error_msg = ""
         self.running = True
+        self.history_page = 1
 
         pygame.init()
         self.font = pygame.font.SysFont(None, 30)
@@ -47,7 +49,6 @@ class MainMenu:
             if self.menu_state == "main_menu":
 
                 if self.load_select_profile == True:
-                    # FIXME: Transparent later ?
                     self.screen.fill((0,0,0))
                     self.profile_screen()
                 elif self.load_create_new_profile == True:
@@ -62,6 +63,9 @@ class MainMenu:
                 elif self.load_premade_map == True:
                     self.screen.fill((0,0,0))
                     self.select_premade_maps()
+                elif self.load_history == True:
+                    self.screen.fill((0,0,0))
+                    self.history()
                 else:
                     self.screen.fill((0,0,0))
 
@@ -71,7 +75,8 @@ class MainMenu:
                     select_profile_button = pygame.Rect(50, 100, 150, 50)
                     play_button = pygame.Rect(50, 200, 150, 50)
                     map_creator_button = pygame.Rect(50, 300, 150, 50)
-                    exit_button = pygame.Rect(50, 400, 150, 50)
+                    history_button = pygame.Rect(50, 400, 150, 50)
+                    exit_button = pygame.Rect(50, 500, 150, 50)
 
                     pygame.draw.rect(self.screen, (255, 255, 255), select_profile_button)
                     draw_text(f'Select Profile', self.font, (0,0,0), self.screen, select_profile_button.left + 2, select_profile_button.top + 2)
@@ -81,6 +86,9 @@ class MainMenu:
 
                     pygame.draw.rect(self.screen, (255, 255, 255), map_creator_button)
                     draw_text(f'Map creator', self.font, (0,0,0), self.screen, map_creator_button.left + 2, map_creator_button.top + 2)
+
+                    pygame.draw.rect(self.screen, (255, 255, 255), history_button)
+                    draw_text(f'History', self.font, (0,0,0), self.screen, history_button.left + 2, history_button.top + 2)
 
                     pygame.draw.rect(self.screen, (255, 255, 255), exit_button)
                     draw_text(f'Exit', self.font, (0,0,0), self.screen, exit_button.left + 2, exit_button.top + 2)
@@ -92,6 +100,9 @@ class MainMenu:
                         if play_button.collidepoint(self.mx, self.my):
                             if self.click:
                                 self.load_select_map = True
+                        if history_button.collidepoint(self.mx, self.my):
+                            if self.click:
+                                self.load_history = True
                     if map_creator_button.collidepoint(self.mx, self.my):
                         if self.click:
                             self.map_creator()
@@ -461,8 +472,11 @@ class MainMenu:
             if map_rect.collidepoint(self.mx, self.my):
                 if self.click:
                     self.map_selected = Map(custom_maps[i], 0, 0)
-
                     self.map_selected.recreate_map_from_folder()
+
+                    self.view_state.set_map_selected(self.map_selected)
+                    self.view_state.set_state("game")
+                    self.running = False
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, map_menu)
         
@@ -480,3 +494,67 @@ class MainMenu:
             if game_file == f'{self.selected_profile.get_name()}.txt':
                 return True
         return False
+    
+    
+    def history(self):
+        history_left = 300
+        history_top = 150
+        history_width = 1000
+        history_height = 550
+        history_rect = pygame.Rect(history_left, history_top, history_width, history_height)
+        pygame.draw.rect(self.screen, (40, 40, 40), history_rect)
+
+        checkmark_rect = draw_checkmark_on_menu(self.screen, history_rect)
+
+        if not history_rect.collidepoint(self.mx, self.my) or checkmark_rect.collidepoint(self.mx, self.my):
+            if self.click:
+                self.load_history = False
+
+        profile = get_profile_with_name(self.selected_profile.get_name())
+        profile_id = profile[0]
+
+        draw_text(self.selected_profile.get_name(), pygame.font.SysFont(None, 55), (255,255,255), self.screen, history_left + history_width / 2 - 30, history_top + 15)
+
+        draw_text("Game", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 60, history_top + 60)
+        draw_text("Map", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 80, history_top + 60)
+        draw_text("Result", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 100, history_top + 60)
+        draw_text("Wave", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 120, history_top + 60)
+        draw_text("Towers", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 520 + 140, history_top + 60)
+        draw_text("Time", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 650 + 160, history_top + 60)
+
+        all_games = get_history_with_id(profile_id)
+        if all_games != None:
+            base_y = history_top + 50
+
+            for i in range(len(all_games)):
+                if i+1 > self.history_page * 7:
+                    break
+                elif i+1 > (self.history_page - 1) * 7:
+                    game = all_games[i]
+                    draw_text(str(game[0]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 60, base_y + 60)
+                    draw_text(str(game[2]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 80, base_y + 60)
+                    draw_text(str(game[3]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 100, base_y + 60)
+                    draw_text(str(game[4]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 120, base_y + 60)
+                    draw_text(str(game[5]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 520 + 140, base_y + 60)
+                    draw_text(str(game[6]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 650 + 160, base_y + 60)
+                    base_y += 50
+        
+        self.change_page(checkmark_rect, len(all_games))
+        
+
+    def change_page(self, example_rect, len_of_all):
+        page_back = pygame.Rect(example_rect.left, example_rect.top - 30, 20, 20)
+        page_forwards = pygame.Rect(example_rect.left + 30, example_rect.top - 30, 20, 20)
+
+        pygame.draw.rect(self.screen, (255, 255, 255), page_back)
+        pygame.draw.rect(self.screen, (255, 255, 255), page_forwards)
+
+        if page_back.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.history_page != 1 and self.history_page > len_of_all / 7:
+                    self.history_page -= 1
+        
+        if page_forwards.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.history_page < len_of_all / 7:
+                    self.history_page += 1

@@ -101,7 +101,7 @@ def draw_quads(texture_ids_with_quads):
     glDisable(GL_TEXTURE_2D)
 
 
-def draw_quad_2(left, top, width, height, texture_id, shader, vbo):
+def draw_quad_2(left, top, width, height, texture_id, shader, vbo, alpha):
 
     texts = ((1, 0), (1, 1), (0, 1), (0, 0))
     surf = (0, 1, 2, 3)
@@ -128,17 +128,18 @@ def draw_quad_2(left, top, width, height, texture_id, shader, vbo):
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_2D, texture_id)
 
-    glUseProgram(shader)
     glUniform1i(glGetUniformLocation(shader, "textu"), 0)
+    glUniform1f(glGetUniformLocation(shader, "alpha"), alpha)
     
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4)
 
 
-def draw_quads_2(texture_ids_with_quads, shader, vbo):
+def draw_quads_2(texture_ids_with_quads, shader, vbo, alpha):
     
     texts = ((1, 0), (1, 1), (0, 1), (0, 0))
     surf = (0, 1, 2, 3)
     glUniform1i(glGetUniformLocation(shader, "textu"), 0)
+    glUniform1f(glGetUniformLocation(shader, "alpha"), alpha)
 
     for dict_type in texture_ids_with_quads:
 
@@ -180,9 +181,7 @@ def destroy(vao, vbo):
     glDeleteBuffers(1, (vbo,))
 
 
-def create_shader():
-    vertex_path = "shaders/vertex.txt"
-    fragment_path = "shaders/fragment.txt"
+def create_shader(vertex_path, fragment_path):
 
     with open(vertex_path, 'r') as f:
         vertex_src = f.readlines()
