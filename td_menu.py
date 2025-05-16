@@ -513,14 +513,14 @@ class MainMenu:
         profile = get_profile_with_name(self.selected_profile.get_name())
         profile_id = profile[0]
 
-        draw_text(self.selected_profile.get_name(), pygame.font.SysFont(None, 55), (255,255,255), self.screen, history_left + history_width / 2 - 30, history_top + 15)
+        draw_text(self.selected_profile.get_name(), pygame.font.SysFont(None, 45), (255,255,255), self.screen, history_left + 30, history_top + 15)
 
         draw_text("Game", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 60, history_top + 60)
-        draw_text("Map", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 80, history_top + 60)
-        draw_text("Result", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 100, history_top + 60)
-        draw_text("Wave", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 120, history_top + 60)
-        draw_text("Towers", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 520 + 140, history_top + 60)
-        draw_text("Time", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 650 + 160, history_top + 60)
+        draw_text("Map", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 90, history_top + 60)
+        draw_text("Result", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 120, history_top + 60)
+        draw_text("Wave", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 150, history_top + 60)
+        draw_text("Towers", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 520 + 180, history_top + 60)
+        draw_text("Time", pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 650 + 210, history_top + 60)
 
         all_games = get_history_with_id(profile_id)
         if all_games != None:
@@ -532,11 +532,11 @@ class MainMenu:
                 elif i+1 > (self.history_page - 1) * 7:
                     game = all_games[i]
                     draw_text(str(game[0]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 60, base_y + 60)
-                    draw_text(str(game[2]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 80, base_y + 60)
-                    draw_text(str(game[3]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 100, base_y + 60)
-                    draw_text(str(game[4]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 120, base_y + 60)
-                    draw_text(str(game[5]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 520 + 140, base_y + 60)
-                    draw_text(str(game[6]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 650 + 160, base_y + 60)
+                    draw_text(str(game[2]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 90, base_y + 60)
+                    draw_text(str(game[3]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 120, base_y + 60)
+                    draw_text(str(game[4]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 150, base_y + 60)
+                    draw_text(str(game[5]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 520 + 180, base_y + 60)
+                    draw_text(str(game[6]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 650 + 210, base_y + 60)
                     base_y += 50
         
         self.change_page(checkmark_rect, len(all_games))

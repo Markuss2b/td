@@ -94,6 +94,8 @@ class TDGame:
         self.game_start_time = time.time()
         self.game_end_time = None
 
+        self.trash_selected = False
+
         self.running = True
         self.td_game_loop()
 
@@ -277,7 +279,11 @@ class TDGame:
                     x, y = self.get_xy_from_cords(self.mx, self.my)
 
                     if x >= 0 and x <= 15 and y >= 0 and y <= 8:
-                        self.place_tower(x, y)
+
+                        if self.trash_selected == False:
+                            self.place_tower(x, y)
+                        else:
+                            self.remove_tower(x, y)
 
             # Shooting
             self.towers_fire()
@@ -374,16 +380,23 @@ class TDGame:
         play_button_rect = pygame.Rect(1360, 749, 240, 131)
         draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo, self.alpha)
 
+        if self.trash_selected == False:
+            img = "BTN_TrashButton_Unselected.png"
+        else:
+            img = "BTN_TrashButton_Selected.png"
+        trash_button_rect = pygame.Rect(1360 + 120 - 35, 400, 70, 70)
+        draw_quad_2(trash_button_rect.left, trash_button_rect.top, trash_button_rect.width, trash_button_rect.height, self.UI_textures.get(img), self.shader, self.vbo, self.alpha)
+
         return_to_menu_rect = pygame.Rect(1380, 880, 20, 20)
         draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Next.png"), self.shader, self.vbo, self.alpha)
 
         save_and_exit_rect = pygame.Rect(1380, 700, 20, 20)
         draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get("BTN_Back.png"), self.shader, self.vbo, self.alpha)
 
-        self.handle_UI_buttons(select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect)
+        self.handle_UI_buttons(select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect)
     
 
-    def handle_UI_buttons(self, select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect):
+    def handle_UI_buttons(self, select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect):
         if select_magma_rect.collidepoint(self.mx, self.my):
             if self.click:
 
@@ -417,6 +430,13 @@ class TDGame:
 
                     self.running = False
                     self.view_state.set_state("menu")
+
+        if trash_button_rect.collidepoint(self.mx, self.my):
+            if self.click:
+                if self.trash_selected == False:
+                    self.trash_selected = True
+                else:
+                    self.trash_selected = False
 
 
     def draw_map(self):
@@ -486,8 +506,12 @@ class TDGame:
             self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(tower.get_image())).append((left, top, self.tile_size, self.tile_size))
             # draw_quad(left, top, self.tile_size, self.tile_size, self.tower_textures.get(tower.get_image()))
 
-    def remove_tower():
-        pass
+    def remove_tower(self, x, y):
+        if self.towers_on_map != []:
+            for tower in self.towers_on_map:
+                tower_location = tower.get_location()
+                if tower_location == (x, y):
+                    self.towers_on_map.remove(tower)
 
     def move_enemies(self):
         for enemy in self.enemies_on_map:
