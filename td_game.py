@@ -15,7 +15,6 @@ from model.game_wave import Wave
 
 # FIXME: Obstacles, Towers, Enemies
 # TODO: Select tower
-# TODO: Remove tower
 # TODO: Towers in menu
 # FIXME: Change images from magma balls :D
 # FIXME: Transparent finish only looks good in premade maps
@@ -34,7 +33,7 @@ class TDGame:
 
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
-        self.game_waves = [Wave(300, 0, 1, 0), Wave(1000, 0, 1, 0)]
+        self.game_waves = [Wave(50, 0, 300, 0), Wave(1000, 0, 1, 0)]
         self.current_wave = 0
 
         self.click = False
@@ -62,8 +61,7 @@ class TDGame:
 
         self.tower_selected = None
 
-        #TODO:
-        self.only_tower = get_tower_with_name("Magma Ball")
+        self.stickman = get_tower_with_name("Stickman")
 
         self.towers_on_map = []
 
@@ -101,10 +99,27 @@ class TDGame:
 
     def td_game_loop(self):
 
+        # Always load
+        self.load_tower_textures()
+        self.load_enemy_textures()
+        self.load_UI_textures()
+        self.load_bullet_textures()
+
+        # Load all textures
+
+        if self.map_selected.get_map_type() == "Map":
+            self.load_tile_textures()
+            self.load_obstacle_textures()
+        elif self.map_selected.get_map_type() == "PremadeMap":
+            self.load_premade_map_textures()
+
+        self.group_textures_2()
+
+
         # If loading save file
         if len(self.view_state.get_saved_game()):
             # TODO: Only tower
-            self.tower_selected = self.only_tower
+            self.tower_selected = self.stickman
             self.current_wave = self.view_state.get_saved_game()[0]
             self.health = self.view_state.get_saved_game()[1]
 
@@ -119,22 +134,6 @@ class TDGame:
                 self.place_tower(x, y)
             
             self.view_state.set_saved_game([])
-
-        # Load all textures
-
-        if self.map_selected.get_map_type() == "Map":
-            self.load_tile_textures()
-            self.load_obstacle_textures()
-        elif self.map_selected.get_map_type() == "PremadeMap":
-            self.load_premade_map_textures()
-
-        # Always load
-        self.load_tower_textures()
-        self.load_enemy_textures()
-        self.load_UI_textures()
-        self.load_bullet_textures()
-
-        self.group_textures_2()
 
         # MOVEMENT
         delay = 16.67
@@ -186,7 +185,7 @@ class TDGame:
                     self.game_end_time = time.time()
                     profile = get_profile_with_name(self.selected_profile.get_name())
                     profile_id = profile[0]
-                    add_game_in_history(profile_id, self.map_selected.get_map_name(), "Loss", self.current_wave, self.towers_placed_amount, int(self.game_end_time - self.game_start_time))
+                    add_game_in_history(profile_id, self.map_selected.get_map_name(), "Loss", self.current_wave+1, self.towers_placed_amount, int(self.game_end_time - self.game_start_time))
 
 
             self.mx, self.my = pygame.mouse.get_pos()
@@ -291,6 +290,7 @@ class TDGame:
             # Bullets
             self.move_bullets()
 
+            print(self.bullet_textures)
             self.draw_bullets()
 
             if self.game_end == True:
@@ -401,7 +401,7 @@ class TDGame:
             if self.click:
 
                 # TODO: towers
-                self.tower_selected = self.only_tower
+                self.tower_selected = self.stickman
         
         if play_button_rect.collidepoint(self.mx, self.my):
             if self.click:
@@ -492,18 +492,25 @@ class TDGame:
 
                 if tower_already_there == False:
                     # Name, attack, range, x, y
-                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "MagmaBall.png", x, y, self.tower_selected[4]))
+                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "C_Stickman_", x, y, self.tower_selected[4]))
             else:
-                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "MagmaBall.png", x, y, self.tower_selected[4]))
+                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "C_Stickman_", x, y, self.tower_selected[4]))
         
 
     def draw_towers(self):
-        self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get("MagmaBall.png")).clear()
+        all_stickman_img = ["C_Stickman_D.png", "C_Stickman_DL.png", "C_Stickman_DR.png", "C_Stickman_L.png", "C_Stickman_R.png", "C_Stickman_U.png", "C_Stickman_UL.png", "C_Stickman_UR.png"]
+
+        if self.texture_ids_with_quads.get("TOWER") != []:
+            for img in all_stickman_img:
+                self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(img)).clear()
+
         for tower in self.towers_on_map:
             tower_location = tower.get_location()
+            img_ending = tower.get_ending()
+
             left, top = self.get_rect_param(tower_location[0], tower_location[1])
 
-            self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(tower.get_image())).append((left, top, self.tile_size, self.tile_size))
+            self.texture_ids_with_quads.get("TOWER").get(self.tower_textures.get(f'{tower.get_image()}{img_ending}.png')).append((left, top, self.tile_size, self.tile_size))
             # draw_quad(left, top, self.tile_size, self.tile_size, self.tower_textures.get(tower.get_image()))
 
     def remove_tower(self, x, y):
@@ -548,7 +555,9 @@ class TDGame:
         self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("MagmaBall.png")).clear()
         for bull in self.bullets_on_map:
             bull_left, bull_top, bull_width, bull_height = bull.get_rect()
-            self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get(bull.get_img())).append((bull_left, bull_top, bull_width, bull_height))
+            #FIXME:
+            self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("MagmaBall.png")).append((bull_left, bull_top, bull_width, bull_height))
+            # self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get(bull.get_img())).append((bull_left, bull_top, bull_width, bull_height))
 
     def move_bullets(self):
         if len(self.bullets_on_map) > 0:
