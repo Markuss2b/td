@@ -718,7 +718,7 @@ class MainMenu:
             self.editing_enemy_attack = False
 
             if checkmark_rect.collidepoint(self.mx, self.my):
-                if re.match(r'^[0-9]+$', self.new_enemy_health) and re.match(r'^[0-9]+$', self.new_enemy_speed) and re.match(r'^[0-9]+$', self.new_enemy_attack):
+                if re.match(r'^[0-9]+$', self.new_enemy_health) and re.match(r'^[0-9]+$', self.new_enemy_speed) and re.match(r'^[0-9]+$', self.new_enemy_attack) and len(self.new_enemy_health) > 0 and len(self.new_enemy_speed) > 0 and len(self.new_enemy_attack) > 0:
 
                     update_enemy(name, int(self.new_enemy_health), int(self.new_enemy_speed), int(self.new_enemy_attack))
                     self.new_enemy_attack = ""
