@@ -31,6 +31,12 @@ class Enemy:
     def get_y_pix(self):
         return self.y_pix
     
+    def get_x(self):
+        return self.x
+    
+    def get_y(self):
+        return self.y
+    
     def is_finished(self):
         return self.finished
     

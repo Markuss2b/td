@@ -13,10 +13,8 @@ from model.tower import Tower
 from model.enemy import Enemy
 from model.game_wave import Wave
 
-# FIXME: Obstacles, Towers, Enemies
 # TODO: Select tower
 # TODO: Towers in menu
-# FIXME: Change images from magma balls :D
 # FIXME: Transparent finish only looks good in premade maps
 class TDGame:
     def __init__(self, view_state):
@@ -364,11 +362,11 @@ class TDGame:
     def group_textures_2(self):
         self.texture_ids_with_quads["UI"] = { self.UI_textures.get(k):[] for k in self.UI_textures }
         self.texture_ids_with_quads["TILE"] = { self.tile_textures.get(k):[] for k in self.tile_textures }
-        self.texture_ids_with_quads["OBSTACLES"] = { self.obstacle_textures.get(k):[] for k in self.obstacle_textures }
         self.texture_ids_with_quads["TOWER"] = { self.tower_textures.get(k):[] for k in self.tower_textures }
         self.texture_ids_with_quads["ENEMY"] = { self.enemy_textures.get(k):[] for k in self.enemy_textures }
         self.texture_ids_with_quads["ASSETS"] = { self.assets_textures.get(k):[] for k in self.assets_textures }
         self.texture_ids_with_quads["BULLET"] = { self.bullet_textures.get(k):[] for k in self.bullet_textures }
+        self.texture_ids_with_quads["OBSTACLES"] = { self.obstacle_textures.get(k):[] for k in self.obstacle_textures }
 
     
     def draw_UI(self):

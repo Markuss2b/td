@@ -67,10 +67,13 @@ class Tower:
         available_targets = sorted(available_targets, key=lambda x: len(x.get_sequence()))
 
         if len(available_targets) > 0:
-            self.turn_to_target(available_targets[0])
+            for target in available_targets:
+                if self.is_in_range(target) == True:
 
-            # Spawn bullet with target to enemy
-            return Bullet(self.bullet_img, available_targets[0], 1, 1, self.x, self.y)
+                    self.turn_to_target(target)
+
+                    # Spawn bullet with target to enemy
+                    return Bullet(self.bullet_img, target, 1, 1, self.x, self.y)
 
 
     def turn_to_target(self, target):
@@ -108,3 +111,14 @@ class Tower:
             self.img_end = "DR"
             self.direction = "DOWNRIGHT"
 
+
+    def is_in_range(self, target):
+        target_x = target.get_x()
+        target_y = target.get_y()
+
+        if abs(self.x - target_x) > self.range:
+            return False
+        if abs(self.y - target_y) > self.range:
+            return False
+
+        return True
