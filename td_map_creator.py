@@ -842,7 +842,7 @@ class MapCreator:
 
         if page_back.collidepoint(self.mx, self.my):
             if self.click:
-                if self.page != 1 and self.page > len_of_all / 25:
+                if self.page != 1 and self.page >= len_of_all / 25:
                     self.page -= 1
         
         if page_forwards.collidepoint(self.mx, self.my):

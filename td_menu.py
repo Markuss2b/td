@@ -20,6 +20,17 @@ class MainMenu:
         self.load_select_profile = False
         self.load_create_new_profile = False
         self.load_history = False
+
+        self.load_edit_enemies = False
+        self.load_enemy = False
+        self.enemy_selected = None
+        self.new_enemy_health = ""
+        self.editing_enemy_health = False
+        self.new_enemy_speed = ""
+        self.editing_enemy_speed = False
+        self.new_enemy_attack = ""
+        self.editing_enemy_attack = False
+
         self.can_delete_profile = False
         self.load_select_map = False
         self.load_custom_map = False
@@ -44,7 +55,7 @@ class MainMenu:
 
     def main_loop(self):
         while self.running:
-            
+            print(self.history_page)
             self.mx, self.my = pygame.mouse.get_pos()
             if self.menu_state == "main_menu":
 
@@ -66,6 +77,12 @@ class MainMenu:
                 elif self.load_history == True:
                     self.screen.fill((0,0,0))
                     self.history()
+                elif self.load_edit_enemies == True:
+                    self.screen.fill((0,0,0))
+                    self.edit_enemies()
+                elif self.load_enemy == True:
+                    self.screen.fill((0,0,0))
+                    self.edit_enemy()
                 else:
                     self.screen.fill((0,0,0))
 
@@ -76,7 +93,8 @@ class MainMenu:
                     play_button = pygame.Rect(50, 200, 150, 50)
                     map_creator_button = pygame.Rect(50, 300, 150, 50)
                     history_button = pygame.Rect(50, 400, 150, 50)
-                    exit_button = pygame.Rect(50, 500, 150, 50)
+                    enemies_button = pygame.Rect(50, 500, 150, 50)
+                    exit_button = pygame.Rect(50, 600, 150, 50)
 
                     pygame.draw.rect(self.screen, (255, 255, 255), select_profile_button)
                     draw_text(f'Select Profile', self.font, (0,0,0), self.screen, select_profile_button.left + 2, select_profile_button.top + 2)
@@ -89,6 +107,9 @@ class MainMenu:
 
                     pygame.draw.rect(self.screen, (255, 255, 255), history_button)
                     draw_text(f'History', self.font, (0,0,0), self.screen, history_button.left + 2, history_button.top + 2)
+
+                    pygame.draw.rect(self.screen, (255, 255, 255), enemies_button)
+                    draw_text(f'Enemies', self.font, (0,0,0), self.screen, enemies_button.left + 2, enemies_button.top + 2)
 
                     pygame.draw.rect(self.screen, (255, 255, 255), exit_button)
                     draw_text(f'Exit', self.font, (0,0,0), self.screen, exit_button.left + 2, exit_button.top + 2)
@@ -106,6 +127,9 @@ class MainMenu:
                     if map_creator_button.collidepoint(self.mx, self.my):
                         if self.click:
                             self.map_creator()
+                    if enemies_button.collidepoint(self.mx, self.my):
+                        if self.click:
+                            self.load_edit_enemies = True
                     if exit_button.collidepoint(self.mx, self.my):
                         if self.click:
                             self.quit()
@@ -136,13 +160,41 @@ class MainMenu:
                             self.load_premade_map = False
                         self.error_msg = ""
 
+                        if self.load_enemy == True:
+                            self.load_edit_enemies = True
+                            self.load_enemy = False
+                        elif self.load_edit_enemies == True:
+                            self.load_edit_enemies = False
+
+                    # Spaghetti
                     if self.naming_new_profile == True:
                         if event.key == pygame.K_BACKSPACE:
                             self.new_profile_name = self.new_profile_name[:-1]
                         else:
                             if len(self.new_profile_name) < 16:
                                 self.new_profile_name += event.unicode
+
+                    if self.editing_enemy_health == True:
+                        if event.key == pygame.K_BACKSPACE:
+                            self.new_enemy_health = self.new_enemy_health[:-1]
+                        else:
+                            if len(self.new_enemy_health) < 16:
+                                self.new_enemy_health += event.unicode
                 
+                    if self.editing_enemy_speed == True:
+                        if event.key == pygame.K_BACKSPACE:
+                            self.new_enemy_speed = self.new_enemy_speed[:-1]
+                        else:
+                            if len(self.new_enemy_speed) < 16:
+                                self.new_enemy_speed += event.unicode
+
+                    if self.editing_enemy_attack == True:
+                        if event.key == pygame.K_BACKSPACE:
+                            self.new_enemy_attack = self.new_enemy_attack[:-1]
+                        else:
+                            if len(self.new_enemy_attack) < 16:
+                                self.new_enemy_attack += event.unicode
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.click = True
@@ -551,10 +603,129 @@ class MainMenu:
 
         if page_back.collidepoint(self.mx, self.my):
             if self.click:
-                if self.history_page != 1 and self.history_page > len_of_all / 7:
+                if self.history_page != 1 and self.history_page >= len_of_all / 7:
                     self.history_page -= 1
         
         if page_forwards.collidepoint(self.mx, self.my):
             if self.click:
                 if self.history_page < len_of_all / 7:
                     self.history_page += 1
+
+
+    def edit_enemies(self):
+        edit_enemies_left = 527.5
+        edit_enemies_top = 100
+        edit_enemies_width = 545
+        edit_enemies_length = 700
+        edit_enemies_rect = pygame.Rect(edit_enemies_left, edit_enemies_top, edit_enemies_width, edit_enemies_length)
+        pygame.draw.rect(self.screen, (50, 50, 50), edit_enemies_rect)
+
+        checkmark_rect = draw_checkmark_on_menu(self.screen, edit_enemies_rect)
+
+        if not edit_enemies_rect.collidepoint(self.mx, self.my) or checkmark_rect.collidepoint(self.mx, self.my):
+            if self.click:
+                self.load_edit_enemies = False
+
+        base_x = edit_enemies_left + 20
+        base_y = edit_enemies_top + 20
+
+        all_enemies = get_all_enemies()
+        for i in range(len(all_enemies)):
+            
+            enemy_image = all_enemies[i][-1]
+            if enemy_image[-1] == "_":
+                enemy_image = f'{enemy_image}D'
+
+            enemy_rect = pygame.Rect(base_x, base_y, 85, 85)
+            # Draws the obstacle images
+            draw_img_on_rect(self.screen, f'images/Enemies/{enemy_image}', base_x, base_y, 85, 85)
+
+            if enemy_rect.collidepoint(self.mx, self.my):
+                if self.click:
+                    self.load_enemy = True
+                    self.load_edit_enemies = False
+                    self.enemy_selected = all_enemies[i]
+                    self.new_enemy_health = str(self.enemy_selected[2])
+                    self.new_enemy_speed = str(self.enemy_selected[3])
+                    self.new_enemy_attack = str(self.enemy_selected[4])
+
+            base_x += 85 + 20
+
+            # 5 in a row
+            if (i+1) % 5 == 0:
+                base_x = edit_enemies_left + 20
+                base_y += 85 + 20
+
+    def edit_enemy(self):
+        # Name
+        name = self.enemy_selected[1]
+        # Image
+        enemy_img = self.enemy_selected[-1]
+    
+        popup_left = 550
+        popup_top = 100
+        popup_width = 500
+        popup_height = 700
+        popup = pygame.Rect(popup_left, popup_top, popup_width, popup_height)
+        pygame.draw.rect(self.screen, (40, 40, 40), popup)
+
+        # Inputfield for creating new profile
+        new_health_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 30, popup_width - 60, 50)
+        draw_text("Health", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_health_inputfield.left + 5, new_health_inputfield.top - 30)
+        pygame.draw.rect(self.screen, (255, 255, 255), new_health_inputfield)
+
+        new_speed_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 60, popup_width - 60, 50)
+        draw_text("Speed", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_speed_inputfield.left + 5, new_speed_inputfield.top - 30)
+        pygame.draw.rect(self.screen, (255, 255, 255), new_speed_inputfield)
+
+        new_attack_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 70 + 90, popup_width - 60, 50)
+        draw_text("Attack", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_attack_inputfield.left + 5, new_attack_inputfield.top - 30)
+        pygame.draw.rect(self.screen, (255, 255, 255), new_attack_inputfield)
+
+        draw_img_on_rect(self.screen, f'images/Enemies/{enemy_img}', popup_left + 122.5, popup_top + 30, 85 * 3, 85 * 3)
+        draw_text(name, pygame.font.SysFont(None, 50), (255, 255, 255), self.screen, popup_left + 5, popup_top + 10)
+
+        draw_text(self.new_enemy_health, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_health_inputfield.left + 5, new_health_inputfield.top + 10)
+        draw_text(self.new_enemy_speed, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_speed_inputfield.left + 5, new_speed_inputfield.top + 10)
+        draw_text(self.new_enemy_attack, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_attack_inputfield.left + 5, new_attack_inputfield.top + 10)
+
+        draw_text(self.error_msg, pygame.font.SysFont(None, 40), (255, 50, 50), self.screen, popup_left, popup_top + popup_height + 5)
+
+        checkmark_rect = draw_checkmark_on_menu(self.screen, popup)
+
+        # Activating input field
+        if new_health_inputfield.collidepoint(self.mx, self.my):
+            if self.click:
+                self.editing_enemy_health = True
+                self.editing_enemy_speed = False
+                self.editing_enemy_attack = False
+
+        elif new_speed_inputfield.collidepoint(self.mx, self.my):
+            if self.click:
+                self.editing_enemy_speed = True
+                self.editing_enemy_attack = False
+                self.editing_enemy_health = False
+
+        elif new_attack_inputfield.collidepoint(self.mx, self.my):
+            if self.click:
+                self.editing_enemy_attack = True
+                self.editing_enemy_speed = False
+                self.editing_enemy_health = False
+
+        elif self.click:
+            self.editing_enemy_health = False
+            self.editing_enemy_speed = False
+            self.editing_enemy_attack = False
+
+            if checkmark_rect.collidepoint(self.mx, self.my):
+                if re.match(r'^[0-9]+$', self.new_enemy_health) and re.match(r'^[0-9]+$', self.new_enemy_speed) and re.match(r'^[0-9]+$', self.new_enemy_attack):
+
+                    update_enemy(name, int(self.new_enemy_health), int(self.new_enemy_speed), int(self.new_enemy_attack))
+                    self.new_enemy_attack = ""
+                    self.new_enemy_health = ""
+                    self.new_enemy_speed = ""
+                    self.load_enemy = False
+                    self.enemy_selected = None
+                    self.error_msg = ""
+                else:
+                    self.error_msg = "Invalid symbols"

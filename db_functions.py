@@ -76,6 +76,21 @@ def get_enemy_with_title(title):
         cursor.close()
     return result
 
+def get_all_enemies():
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Enemy")
+        result = cursor.fetchall()
+        cursor.close()
+    return result
+
+def update_enemy(enemy_title, health, speed, attack):
+    with sqlite3.connect('towerdefense.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"UPDATE Enemy SET health = {health}, speed = {speed}, attack = {attack} WHERE title = '{enemy_title}'")
+        conn.commit()
+        cursor.close()
+
 def add_game_in_history(player_id, map_name, game_result, wave, towers_placed, seconds):
     with sqlite3.connect('towerdefense.db') as conn:
         cursor = conn.cursor()
