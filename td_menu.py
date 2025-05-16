@@ -55,7 +55,6 @@ class MainMenu:
 
     def main_loop(self):
         while self.running:
-            print(self.history_page)
             self.mx, self.my = pygame.mouse.get_pos()
             if self.menu_state == "main_menu":
 
@@ -603,7 +602,7 @@ class MainMenu:
 
         if page_back.collidepoint(self.mx, self.my):
             if self.click:
-                if self.history_page != 1 and self.history_page >= len_of_all / 7:
+                if self.history_page > 1:
                     self.history_page -= 1
         
         if page_forwards.collidepoint(self.mx, self.my):
