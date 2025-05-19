@@ -73,12 +73,13 @@ class MapCreator:
         # Tiles are 85x85
         self.tile_size = 85
 
+        self.last_hold_action = pygame.time.get_ticks()
+
         self.counter = 0
         self.td_map_creator_loop()
 
 
     def td_map_creator_loop(self):
-        last_hold_action = 0
         action_delay = 100
 
         while self.running:
@@ -238,22 +239,22 @@ class MapCreator:
             if self.map_selected != None:
                 if pygame.key.get_pressed()[pygame.K_LEFT]:
                     if len(self.map_selected.get_obstacles()) > 0:
-                        if now - last_hold_action > action_delay:
+                        if now - self.last_hold_action > action_delay:
                             self.map_selected.remove_obstacle()
-                            last_hold_action = now
+                            self.last_hold_action = now
 
                 if pygame.key.get_pressed()[pygame.K_RIGHT]:
                     if len(self.map_selected.get_removed_obstacles()) > 0:
-                        if now - last_hold_action > action_delay:
+                        if now - self.last_hold_action > action_delay:
                             self.map_selected.return_removed_obstacle()
-                            last_hold_action = now
+                            self.last_hold_action = now
 
 
             # For on hold mouse1 events, like interacting with tiles (Might want custom delay for some view modes)
             if pygame.mouse.get_pressed()[0]:
-                if now - last_hold_action > action_delay:
+                if now - self.last_hold_action > action_delay:
                     self.hold_m1 = True
-                    last_hold_action = now
+                    self.last_hold_action = now
                 else:
                     self.hold_m1 = False
             elif not pygame.mouse.get_pressed()[0]:
@@ -646,6 +647,8 @@ class MapCreator:
         # If Click outside of menu, close menu
         if not something_menu.collidepoint(self.mx, self.my) or checkmark_rect.collidepoint(self.mx, self.my):
             if self.click:
+                self.hold_m1 = False
+                self.last_hold_action = pygame.time.get_ticks()
                 self.load_obstacle_menu = False
                 self.load_tile_menu = False
                 self.load_map_menu = False
@@ -713,7 +716,12 @@ class MapCreator:
             if self.obstacle_placement_method == "Tile":
                 left, top = self.get_rect_param(x, y)
                 left = left - 20
-                top = top - self.tile_size - new_image_height/5
+
+                # TODO: Scuffed
+                if new_image_height >= 200:
+                    top = top - self.tile_size - new_image_height/5
+                elif new_image_height >= 120:
+                    top = top - 20
 
                 obstacle_already_exists = False
                 for obstacle in self.map_selected.get_obstacles():

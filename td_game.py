@@ -31,7 +31,7 @@ class TDGame:
 
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
-        self.game_waves = [Wave(50, 0, 300, 0), Wave(1000, 0, 1, 0)]
+        self.game_waves = [Wave(25, 0, 1000, 0), Wave(1000, 0, 1, 0)]
         self.current_wave = 0
 
         self.click = False
@@ -491,8 +491,10 @@ class TDGame:
                 if tower_already_there == False:
                     # Name, attack, range, x, y
                     self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "C_Stickman_", x, y, self.tower_selected[4]))
+                    # self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], 50, 300, "C_Stickman_", x, y, self.tower_selected[4]))
             else:
                 self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "C_Stickman_", x, y, self.tower_selected[4]))
+                # self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], 50, 300, "C_Stickman_", x, y, self.tower_selected[4]))
         
 
     def draw_towers(self):
