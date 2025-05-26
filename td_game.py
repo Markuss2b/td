@@ -31,7 +31,7 @@ class TDGame:
 
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
-        self.game_waves = [Wave(25, 0, 1000, 0), Wave(1000, 0, 1, 0)]
+        self.game_waves = [Wave(500, 0, 100, 0), Wave(1000, 0, 1, 0)]
         self.current_wave = 0
 
         self.click = False
