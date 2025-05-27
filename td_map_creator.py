@@ -164,8 +164,8 @@ class MapCreator:
 
             save_button = pygame.Rect(1360, 850, 120, 50)
             exit_button = pygame.Rect(1480, 850, 120, 50)
-            pygame.draw.rect(self.screen, (30, 120, 0), save_button)
-            pygame.draw.rect(self.screen, (175, 0, 0), exit_button)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/BTN_Save.png", save_button.left, save_button.top, save_button.width, save_button.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/BTN_Exit.png", exit_button.left, exit_button.top, exit_button.width, exit_button.height)
 
             select_map = pygame.Rect(1400, 90, 160, 50)
             draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_SelectMap_Unselected.png", select_map.left, select_map.top, select_map.width, select_map.height)

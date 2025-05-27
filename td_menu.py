@@ -66,15 +66,19 @@ class MainMenu:
                     self.create_new_profile()
                 elif self.load_select_map == True:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
                     self.select_map_menu()
                 elif self.load_custom_map == True:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
                     self.select_custom_made_maps()
                 elif self.load_premade_map == True:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
                     self.select_premade_maps()
                 elif self.load_history == True:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
                     self.history()
                 elif self.load_edit_enemies == True:
                     self.screen.fill((0,0,0))
@@ -84,34 +88,41 @@ class MainMenu:
                     self.edit_enemy()
                 else:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
 
                     if self.selected_profile != None:
-                        draw_text(f'Hello {self.selected_profile.get_name()}', self.font, (255,255,255), self.screen, 55, 70)
+                        draw_text(f'Hello {self.selected_profile.get_name()}', self.font, (255,255,255), self.screen, 80, 70)
 
-                    select_profile_button = pygame.Rect(50, 100, 150, 50)
-                    play_button = pygame.Rect(50, 200, 150, 50)
-                    map_creator_button = pygame.Rect(50, 300, 150, 50)
-                    history_button = pygame.Rect(50, 400, 150, 50)
-                    enemies_button = pygame.Rect(50, 500, 150, 50)
-                    exit_button = pygame.Rect(50, 600, 150, 50)
+                    select_profile_button = pygame.Rect(75, 100, 160, 55)
+                    play_button = pygame.Rect(75, 205, 160, 55)
+                    map_creator_button = pygame.Rect(75, 305, 160, 55)
+                    history_button = pygame.Rect(75, 405, 160, 55)
+                    enemies_button = pygame.Rect(75, 505, 160, 55)
+                    exit_button = pygame.Rect(75, 605, 160, 55)
 
-                    pygame.draw.rect(self.screen, (255, 255, 255), select_profile_button)
-                    draw_text(f'Select Profile', self.font, (0,0,0), self.screen, select_profile_button.left + 2, select_profile_button.top + 2)
+                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_SelectProfile.png", select_profile_button.left, select_profile_button.top, select_profile_button.width, select_profile_button.height)
+                    # pygame.draw.rect(self.screen, (255, 255, 255), select_profile_button)
+                    # draw_text(f'Select Profile', self.font, (0,0,0), self.screen, select_profile_button.left + 2, select_profile_button.top + 2)
 
-                    pygame.draw.rect(self.screen, (255, 255, 255), play_button)
-                    draw_text(f'Play', self.font, (0,0,0), self.screen, play_button.left + 2, play_button.top + 2)
+                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_Play.png", play_button.left, play_button.top, play_button.width, play_button.height)
+                    # pygame.draw.rect(self.screen, (255, 255, 255), play_button)
+                    # draw_text(f'Play', self.font, (0,0,0), self.screen, play_button.left + 2, play_button.top + 2)
 
-                    pygame.draw.rect(self.screen, (255, 255, 255), map_creator_button)
-                    draw_text(f'Map creator', self.font, (0,0,0), self.screen, map_creator_button.left + 2, map_creator_button.top + 2)
+                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_MapCreator.png", map_creator_button.left, map_creator_button.top, map_creator_button.width, map_creator_button.height)
+                    # pygame.draw.rect(self.screen, (255, 255, 255), map_creator_button)
+                    # draw_text(f'Map creator', self.font, (0,0,0), self.screen, map_creator_button.left + 2, map_creator_button.top + 2)
 
-                    pygame.draw.rect(self.screen, (255, 255, 255), history_button)
-                    draw_text(f'History', self.font, (0,0,0), self.screen, history_button.left + 2, history_button.top + 2)
+                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_History.png", history_button.left, history_button.top, history_button.width, history_button.height)
+                    # pygame.draw.rect(self.screen, (255, 255, 255), history_button)
+                    # draw_text(f'History', self.font, (0,0,0), self.screen, history_button.left + 2, history_button.top + 2)
 
-                    pygame.draw.rect(self.screen, (255, 255, 255), enemies_button)
-                    draw_text(f'Enemies', self.font, (0,0,0), self.screen, enemies_button.left + 2, enemies_button.top + 2)
+                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_Enemies.png", enemies_button.left, enemies_button.top, enemies_button.width, enemies_button.height)
+                    # pygame.draw.rect(self.screen, (255, 255, 255), enemies_button)
+                    # draw_text(f'Enemies', self.font, (0,0,0), self.screen, enemies_button.left + 2, enemies_button.top + 2)
 
-                    pygame.draw.rect(self.screen, (255, 255, 255), exit_button)
-                    draw_text(f'Exit', self.font, (0,0,0), self.screen, exit_button.left + 2, exit_button.top + 2)
+                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_Exit.png", exit_button.left, exit_button.top, exit_button.width, exit_button.height)
+                    # pygame.draw.rect(self.screen, (255, 255, 255), exit_button)
+                    # draw_text(f'Exit', self.font, (0,0,0), self.screen, exit_button.left + 2, exit_button.top + 2)
 
                     if select_profile_button.collidepoint(self.mx, self.my):
                         if self.click:
