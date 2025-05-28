@@ -465,16 +465,16 @@ class MainMenu:
         farmfield = pygame.Rect(map_menu_left + 40, map_menu_top + 80, 320, 180)
         draw_img_on_rect(self.screen, "images/PremadeMaps/Scenery2.png", farmfield.left, farmfield.top, farmfield.width, farmfield.height)
 
-        temp = pygame.Rect(map_menu_left + 40 + farmfield.width + 40, map_menu_top + 80, 320, 180)
-        pygame.draw.rect(self.screen, (175, 175, 175), temp)
+        farmfield2 = pygame.Rect(map_menu_left + 40 + farmfield.width + 40, map_menu_top + 80, 320, 180)
+        draw_img_on_rect(self.screen, "images/PremadeMaps/Map_HayField.png", farmfield2.left, farmfield2.top, farmfield2.width, farmfield2.height)
 
-        temp1 = pygame.Rect(map_menu_left + 40, map_menu_top + 80 + 180 + 40, 320, 180)
-        pygame.draw.rect(self.screen, (175, 175, 175), temp1)
+        pond = pygame.Rect(map_menu_left + 40, map_menu_top + 80 + 180 + 40, 320, 180)
+        draw_img_on_rect(self.screen, "images/PremadeMaps/Map_Pond.png", pond.left, pond.top, pond.width, pond.height)
                 
         temp2 = pygame.Rect(map_menu_left + 40 + farmfield.width + 40, map_menu_top + 80 + 180 + 40, 320, 180)
         pygame.draw.rect(self.screen, (175, 175, 175), temp2)
 
-        premade_map_rects = [[farmfield, "farmfield"], [temp, "1"], [temp1, "2"], [temp2, "3"]]
+        premade_map_rects = [[farmfield, "farmfield"], [farmfield2, "farmfield2"], [pond, "pond"], [temp2, "3"]]
                              
         for map_rect in premade_map_rects:
             if map_rect[0].collidepoint(self.mx, self.my):
@@ -486,11 +486,10 @@ class MainMenu:
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, map_menu)
 
-        # TODO: When more maps change this
-        if self.selected_premade_map == "farmfield":
+        if self.selected_premade_map == "farmfield" or self.selected_premade_map == "farmfield2" or self.selected_premade_map == "pond":
             if checkmark_rect.collidepoint(self.mx, self.my):
                 if self.click:
-                    self.map_selected = PremadeMap("farmfield", 16, 9)
+                    self.map_selected = PremadeMap(self.selected_premade_map, 16, 9)
                     self.map_selected.recreate_map_from_folder()
                     self.view_state.set_map_selected(self.map_selected)
 

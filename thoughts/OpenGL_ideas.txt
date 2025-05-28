@@ -1,9 +1,0 @@
-Map Creator
-- When selecting Tower availability view or Paths/Sequence view... Darken the Visual Map
-- When selecting pop ups... Darken everything around it
-
-Game
-- Lighting
-- Vibrant
-
-- Collision between bullets and enemies (simple squares most likely)

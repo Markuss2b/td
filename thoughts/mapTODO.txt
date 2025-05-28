@@ -1,7 +1,0 @@
-paths file
-- End step
-- End step cant be start step
-
-- Start can probably be moved after creating a valid paths
-maybe remove all path if start has been replaced
-or lock changing start if the sequence is bigger than 1
