@@ -332,9 +332,12 @@ class TDGame:
 
     def load_UI_textures(self):
         self.UI_textures["UI_SidePanel.png"] = load_texture(f'images/UI/MapCreator/UI_SidePanel.png') 
+        self.UI_textures["T_CharacterSelectionBackground.png"] = load_texture(f'images/UI/Game/T_CharacterSelectionBackground.png')
         self.UI_textures["PlayButton.png"] = load_texture(f'images/UI/Game/PlayButton.png')
         self.UI_textures["BTN_TrashButton_Selected.png"] = load_texture(f'images/UI/Game/BTN_TrashButton_Selected.png')
         self.UI_textures["BTN_TrashButton_Unselected.png"] = load_texture(f'images/UI/Game/BTN_TrashButton_Unselected.png')
+        self.UI_textures["BTN_Return.png"] = load_texture(f'images/UI/Game/BTN_Return.png')
+        self.UI_textures["BTN_SaveAndExit.png"] = load_texture(f'images/UI/Game/BTN_SaveAndExit.png')
         self.UI_textures["T_DestroyTower.png"] = load_texture(f'images/UI/Game/T_DestroyTowers.png')
         self.UI_textures["BTN_Back.png"] = load_texture(f'images/UI/Game/GameEnd/BTN_Back.png')
         self.UI_textures["BTN_Retry.png"] = load_texture(f'images/UI/Game/GameEnd/BTN_Retry.png')
@@ -371,24 +374,26 @@ class TDGame:
     def draw_UI(self):
         draw_quad_2(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"), self.shader, self.vbo, self.alpha)
 
+        draw_quad_2(1370, 40, 220, 460, self.UI_textures.get("T_CharacterSelectionBackground.png"), self.shader, self.vbo, self.alpha)
+
         select_magma_rect = pygame.Rect(1435, 60, 85, 85)
         draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo, self.alpha)
 
-        play_button_rect = pygame.Rect(1360, 749, 240, 131)
+        play_button_rect = pygame.Rect(1360, 520, 240, 131)
         draw_quad_2(play_button_rect.left, play_button_rect.top, play_button_rect.width, play_button_rect.height, self.UI_textures.get("PlayButton.png"), self.shader, self.vbo, self.alpha)
 
         if self.trash_selected == False:
             img = "BTN_TrashButton_Unselected.png"
         else:
             img = "BTN_TrashButton_Selected.png"
-        trash_button_rect = pygame.Rect(1360 + 120 - 35, 400, 70, 70)
+        trash_button_rect = pygame.Rect(1360 + 120 - 35, 660, 70, 70)
         draw_quad_2(trash_button_rect.left, trash_button_rect.top, trash_button_rect.width, trash_button_rect.height, self.UI_textures.get(img), self.shader, self.vbo, self.alpha)
 
-        return_to_menu_rect = pygame.Rect(1380, 880, 20, 20)
-        draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Next.png"), self.shader, self.vbo, self.alpha)
+        return_to_menu_rect = pygame.Rect(1360, 820, 240, 70)
+        draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Return.png"), self.shader, self.vbo, self.alpha)
 
-        save_and_exit_rect = pygame.Rect(1380, 700, 20, 20)
-        draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get("BTN_Back.png"), self.shader, self.vbo, self.alpha)
+        save_and_exit_rect = pygame.Rect(1360, 740, 240, 70)
+        draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get("BTN_SaveAndExit.png"), self.shader, self.vbo, self.alpha)
 
         self.handle_UI_buttons(select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect)
     
