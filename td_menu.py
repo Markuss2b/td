@@ -82,9 +82,11 @@ class MainMenu:
                     self.history()
                 elif self.load_edit_enemies == True:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
                     self.edit_enemies()
                 elif self.load_enemy == True:
                     self.screen.fill((0,0,0))
+                    draw_img_on_rect(self.screen, "images/MainMenu.png", 0, 0, 1600, 900)
                     self.edit_enemy()
                 else:
                     self.screen.fill((0,0,0))
@@ -156,6 +158,8 @@ class MainMenu:
                 # Inputs 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        self.load_history = False
+
                         if self.load_create_new_profile == True:
                             self.load_create_new_profile = False
                             self.load_select_profile = True
@@ -191,12 +195,12 @@ class MainMenu:
                             if len(self.new_enemy_health) < 16:
                                 self.new_enemy_health += event.unicode
                 
-                    if self.editing_enemy_speed == True:
-                        if event.key == pygame.K_BACKSPACE:
-                            self.new_enemy_speed = self.new_enemy_speed[:-1]
-                        else:
-                            if len(self.new_enemy_speed) < 16:
-                                self.new_enemy_speed += event.unicode
+                    # if self.editing_enemy_speed == True:
+                    #     if event.key == pygame.K_BACKSPACE:
+                    #         self.new_enemy_speed = self.new_enemy_speed[:-1]
+                    #     else:
+                    #         if len(self.new_enemy_speed) < 16:
+                    #             self.new_enemy_speed += event.unicode
 
                     if self.editing_enemy_attack == True:
                         if event.key == pygame.K_BACKSPACE:
@@ -387,7 +391,7 @@ class MainMenu:
                     self.error_msg = ""
                 elif self.new_profile_name.upper() in all_profile_names:
                     self.error_msg = "Name taken"
-                elif len(all_profile_names) > 16:
+                elif len(all_profile_names) >= 16:
                     self.error_msg = "No free slots"
                 elif not re.match(r'^[A-Za-z0-9]+$', self.new_profile_name):
                     self.error_msg = "Invalid symbols"
@@ -403,13 +407,13 @@ class MainMenu:
         select_map_width = 760
         select_map_height = 400
         select_map_menu = pygame.Rect(select_map_left, select_map_top, select_map_width, select_map_height)
-        pygame.draw.rect(self.screen, (40, 40, 40), select_map_menu)
+        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/Border.png", select_map_menu.left, select_map_menu.top, select_map_menu.width, select_map_menu.height)
 
         premade_map_rect = pygame.Rect(select_map_left + 40, select_map_top + 110, 320, 180)
         custom_map_rect = pygame.Rect(select_map_left + 40 + premade_map_rect.width + 40, select_map_top + 110, 320, 180)
 
-        pygame.draw.rect(self.screen, (255, 255, 255), premade_map_rect)
-        pygame.draw.rect(self.screen, (255, 255, 255), custom_map_rect)
+        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_PremadeMap.png", premade_map_rect.left, premade_map_rect.top, premade_map_rect.width, premade_map_rect.height)
+        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_CustomMap.png", custom_map_rect.left, custom_map_rect.top, custom_map_rect.width, custom_map_rect.height)
 
         if self.check_for_saved_games() == True:
             saved_map_rect = pygame.Rect(select_map_left + select_map_width / 2 - 15, select_map_top + select_map_height - 40, 30, 30)
@@ -455,7 +459,8 @@ class MainMenu:
         map_menu_width = 760
         map_menu_height = 600
         map_menu = pygame.Rect(map_menu_left, map_menu_top, map_menu_width, map_menu_height)
-        pygame.draw.rect(self.screen, (40, 40, 40), map_menu)
+        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/Border.png", map_menu.left, map_menu.top, map_menu.width, map_menu.height)
+        # pygame.draw.rect(self.screen, (40, 40, 40), map_menu)
 
         farmfield = pygame.Rect(map_menu_left + 40, map_menu_top + 80, 320, 180)
         draw_img_on_rect(self.screen, "images/PremadeMaps/Scenery2.png", farmfield.left, farmfield.top, farmfield.width, farmfield.height)
@@ -564,7 +569,8 @@ class MainMenu:
         history_width = 1000
         history_height = 550
         history_rect = pygame.Rect(history_left, history_top, history_width, history_height)
-        pygame.draw.rect(self.screen, (40, 40, 40), history_rect)
+        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/Border.png", history_rect.left, history_rect.top, history_rect.width, history_rect.height)
+        # pygame.draw.rect(self.screen, (40, 40, 40), history_rect)
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, history_rect)
 
@@ -684,19 +690,23 @@ class MainMenu:
         draw_text("Health", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_health_inputfield.left + 5, new_health_inputfield.top - 30)
         pygame.draw.rect(self.screen, (255, 255, 255), new_health_inputfield)
 
-        new_speed_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 60, popup_width - 60, 50)
-        draw_text("Speed", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_speed_inputfield.left + 5, new_speed_inputfield.top - 30)
-        pygame.draw.rect(self.screen, (255, 255, 255), new_speed_inputfield)
-
-        new_attack_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 70 + 90, popup_width - 60, 50)
+        new_attack_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 60, popup_width - 60, 50)
         draw_text("Attack", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_attack_inputfield.left + 5, new_attack_inputfield.top - 30)
         pygame.draw.rect(self.screen, (255, 255, 255), new_attack_inputfield)
+
+        # new_speed_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 60, popup_width - 60, 50)
+        # draw_text("Speed", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_speed_inputfield.left + 5, new_speed_inputfield.top - 30)
+        # pygame.draw.rect(self.screen, (255, 255, 255), new_speed_inputfield)
+
+        # new_attack_inputfield = pygame.Rect(popup_left + 30, popup_top + 30 + 85 * 3 + 30 + 70 + 70 + 90, popup_width - 60, 50)
+        # draw_text("Attack", pygame.font.SysFont(None, 35), (255, 255, 255), self.screen, new_attack_inputfield.left + 5, new_attack_inputfield.top - 30)
+        # pygame.draw.rect(self.screen, (255, 255, 255), new_attack_inputfield)
 
         draw_img_on_rect(self.screen, f'images/Enemies/{enemy_img}', popup_left + 122.5, popup_top + 30, 85 * 3, 85 * 3)
         draw_text(name, pygame.font.SysFont(None, 50), (255, 255, 255), self.screen, popup_left + 5, popup_top + 10)
 
         draw_text(self.new_enemy_health, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_health_inputfield.left + 5, new_health_inputfield.top + 10)
-        draw_text(self.new_enemy_speed, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_speed_inputfield.left + 5, new_speed_inputfield.top + 10)
+        # draw_text(self.new_enemy_speed, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_speed_inputfield.left + 5, new_speed_inputfield.top + 10)
         draw_text(self.new_enemy_attack, pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, new_attack_inputfield.left + 5, new_attack_inputfield.top + 10)
 
         draw_text(self.error_msg, pygame.font.SysFont(None, 40), (255, 50, 50), self.screen, popup_left, popup_top + popup_height + 5)
@@ -710,11 +720,11 @@ class MainMenu:
                 self.editing_enemy_speed = False
                 self.editing_enemy_attack = False
 
-        elif new_speed_inputfield.collidepoint(self.mx, self.my):
-            if self.click:
-                self.editing_enemy_speed = True
-                self.editing_enemy_attack = False
-                self.editing_enemy_health = False
+        # elif new_speed_inputfield.collidepoint(self.mx, self.my):
+        #     if self.click:
+        #         self.editing_enemy_speed = True
+        #         self.editing_enemy_attack = False
+        #         self.editing_enemy_health = False
 
         elif new_attack_inputfield.collidepoint(self.mx, self.my):
             if self.click:
@@ -730,7 +740,8 @@ class MainMenu:
             if checkmark_rect.collidepoint(self.mx, self.my):
                 if re.match(r'^[0-9]+$', self.new_enemy_health) and re.match(r'^[0-9]+$', self.new_enemy_speed) and re.match(r'^[0-9]+$', self.new_enemy_attack) and len(self.new_enemy_health) > 0 and len(self.new_enemy_speed) > 0 and len(self.new_enemy_attack) > 0:
 
-                    update_enemy(name, int(self.new_enemy_health), int(self.new_enemy_speed), int(self.new_enemy_attack))
+                    # update_enemy(name, int(self.new_enemy_health), int(self.new_enemy_speed), int(self.new_enemy_attack))
+                    update_enemy(name, int(self.new_enemy_health), 1, int(self.new_enemy_attack))
                     self.new_enemy_attack = ""
                     self.new_enemy_health = ""
                     self.new_enemy_speed = ""

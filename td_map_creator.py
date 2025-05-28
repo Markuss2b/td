@@ -200,7 +200,7 @@ class MapCreator:
             self.handle_buttons(select_map, save_button, exit_button, see_tiles, see_tower_avail, see_sequence, tile_map, open_tile_menu_button, open_obstacle_menu, see_obstacles, grid_button)
 
 
-            draw_text("CREATOR", self.font, (255, 255, 255), self.screen, 900, 20)
+            draw_text("CREATOR", self.font, (255, 255, 255), self.screen, 900, 16)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -250,7 +250,7 @@ class MapCreator:
                             self.last_hold_action = now
 
 
-            # For on hold mouse1 events, like interacting with tiles (Might want custom delay for some view modes)
+            # For on hold mouse1 events, like interacting with tiles
             if pygame.mouse.get_pressed()[0]:
                 if now - self.last_hold_action > action_delay:
                     self.hold_m1 = True

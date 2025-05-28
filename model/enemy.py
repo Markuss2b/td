@@ -20,7 +20,7 @@ class Enemy:
         self.direction = self.get_direction(self.x, self.y, self.sequence[1].x, self.sequence[1].y)
 
         # Every 5 steps turn to direction, every 10 steps reset to 0 (Moving through tiles)
-        self.step_in_tile = 24 / self.speed
+        self.step_in_tile = 20 / self.speed
 
         self.finished = False
         self.alive = True
@@ -62,7 +62,7 @@ class Enemy:
         # print(self.direction)
         self.check_health()
         if self.alive == True and self.finished == False:
-            if self.step_in_tile == 24 / self.speed:
+            if self.step_in_tile == 20 / self.speed:
                 if not (self.sequence[-1].x == self.x and self.sequence[-1].y == self.y):
                     self.direction = self.get_direction(self.x, self.y, self.sequence[1].x, self.sequence[1].y)
             elif self.step_in_tile == 40 / self.speed:
@@ -85,7 +85,7 @@ class Enemy:
             
             self.step_in_tile += 1
 
-            if self.sequence[-1].x == self.x and self.sequence[-1].y == self.y and self.step_in_tile == 10:
+            if self.sequence[-1].x == self.x and self.sequence[-1].y == self.y and self.step_in_tile == 20:
                     self.finished = True
 
     def get_direction(self, current_x, current_y, next_x, next_y):
