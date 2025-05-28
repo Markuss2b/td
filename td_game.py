@@ -31,7 +31,7 @@ class TDGame:
 
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
-        self.game_waves = [Wave(500, 0, 1, 0)]
+        self.game_waves = [Wave(500, 100, 20, 10)]
         self.current_wave = 0
 
         self.click = False
@@ -139,10 +139,9 @@ class TDGame:
 
         # Add delay to waves ?
         last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
-        self.game_waves[self.current_wave].create_simple_wave()
+        self.game_waves[self.current_wave].create_wave()
 
         while self.running:
-
             # Swapping waves / Game over
             if len(self.game_waves[self.current_wave].get_enemies()) == 0:
                 self.pause = True
@@ -155,7 +154,7 @@ class TDGame:
 
                 if self.current_wave < len(self.game_waves)-1:
                     self.current_wave += 1
-                    self.game_waves[self.current_wave].create_simple_wave()
+                    self.game_waves[self.current_wave].create_wave()
                     last_spawn_delay = self.game_waves[self.current_wave].get_spawn_delay()
 
                 if self.current_wave == len(self.game_waves)-1 and len(self.enemies_on_map) == 0 and self.pause == True:
@@ -535,6 +534,8 @@ class TDGame:
     def draw_enemies(self):
         # draw_quad_2(enemy.get_x_pix(), enemy.get_y_pix(), 85, 85, self.enemy_textures.get(enemy.get_img()), self.shader, self.vbo)
         self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("MagmaBall.png")).clear()
+        self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("FireBall.png")).clear()
+        self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("FireOrb.png")).clear()
         for enemy in self.enemies_on_map:
             left, top = enemy.get_x_pix(), enemy.get_y_pix()
             self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get(enemy.get_img())).append((left, top, self.tile_size, self.tile_size))

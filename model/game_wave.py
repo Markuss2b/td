@@ -103,6 +103,8 @@ class Wave:
             enemy = get_enemy_with_title("Fire orb")
         elif self.enemies[-1] == "simple":
             enemy = get_enemy_with_title("Magma ball")
+        elif self.enemies[-1] == "advanced":
+            enemy = get_enemy_with_title("Fire ball")
         
         title, health, speed, attack, img = enemy[1], enemy[2], enemy[3], enemy[4], enemy[5]
 

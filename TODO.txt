@@ -1,4 +1,4 @@
-REMOVE SPEED
+FIX SPEED
 
 ON CLICK BUTTONS (PATH)
 
@@ -21,3 +21,7 @@ add saved games in db ?
 create table for enemies for each profile
 
 speed might be fixable
+
+CHECK PAUSE TIMER
+
+maybe can fix wave idk

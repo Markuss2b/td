@@ -168,22 +168,22 @@ class MapCreator:
             draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/BTN_Exit.png", exit_button.left, exit_button.top, exit_button.width, exit_button.height)
 
             select_map = pygame.Rect(1400, 90, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_SelectMap_Unselected.png", select_map.left, select_map.top, select_map.width, select_map.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_SelectMap_Unselected.png", select_map.left, select_map.top, select_map.width, select_map.height)
 
             see_tiles = pygame.Rect(1400, 190, 160, 50)
             open_tile_menu_button = pygame.Rect(1400, 260, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_EditTiles_Unselected.png", see_tiles.left, see_tiles.top, see_tiles.width, see_tiles.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_SelectTile_Unselected.png", open_tile_menu_button.left, open_tile_menu_button.top, open_tile_menu_button.width, open_tile_menu_button.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditTiles_Unselected.png", see_tiles.left, see_tiles.top, see_tiles.width, see_tiles.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_SelectTile_Unselected.png", open_tile_menu_button.left, open_tile_menu_button.top, open_tile_menu_button.width, open_tile_menu_button.height)
 
             see_obstacles = pygame.Rect(1400, 360, 160, 50)
             open_obstacle_menu = pygame.Rect(1400, 430, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_EditObstacles_Unselected.png", see_obstacles.left, see_obstacles.top, see_obstacles.width, see_obstacles.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_SelectObstacle_Unselected.png", open_obstacle_menu.left, open_obstacle_menu.top, open_obstacle_menu.width, open_obstacle_menu.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditObstacles_Unselected.png", see_obstacles.left, see_obstacles.top, see_obstacles.width, see_obstacles.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_SelectObstacle_Unselected.png", open_obstacle_menu.left, open_obstacle_menu.top, open_obstacle_menu.width, open_obstacle_menu.height)
 
             see_tower_avail = pygame.Rect(1400, 530, 160, 50)
             see_sequence = pygame.Rect(1400, 600, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_EditTower_Unselected.png", see_tower_avail.left, see_tower_avail.top, see_tower_avail.width, see_tower_avail.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Chiller/BTN_EditPath_Unselected.png", see_sequence.left, see_sequence.top, see_sequence.width, see_sequence.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditTower_Unselected.png", see_tower_avail.left, see_tower_avail.top, see_tower_avail.width, see_tower_avail.height)
+            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditPath_Unselected.png", see_sequence.left, see_sequence.top, see_sequence.width, see_sequence.height)
 
             red_style_button = pygame.Rect(1400, 660, 70, 70)
             blue_style_button = pygame.Rect(1490, 660, 70, 70)

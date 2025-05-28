@@ -634,6 +634,7 @@ class MainMenu:
         edit_enemies_length = 700
         edit_enemies_rect = pygame.Rect(edit_enemies_left, edit_enemies_top, edit_enemies_width, edit_enemies_length)
         pygame.draw.rect(self.screen, (50, 50, 50), edit_enemies_rect)
+        # draw_img_on_rect(self.screen, "images/UI/T_CharacterSelectionBackground.png", edit_enemies_rect.left, edit_enemies_rect.top, edit_enemies_rect.width, edit_enemies_rect.height)
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, edit_enemies_rect)
 
