@@ -22,3 +22,12 @@ def draw_checkmark_on_menu(screen, menu_rect):
     draw_img_on_rect(screen, f'images/Assets/CheckMark.png', confirm_rect.left, confirm_rect.top, confirm_rect.width, confirm_rect.height)
 
     return confirm_rect
+
+def check_button_state(bttn_rect, mx, my, active, disabled):
+    if disabled == True:
+        return "Disabled"
+    if active == True:
+        return "Hovered"
+    if bttn_rect.collidepoint(mx, my):
+        return "Hovered"
+    return "Unselected"

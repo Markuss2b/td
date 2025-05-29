@@ -1,0 +1,6 @@
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: win-64
+# created-by: conda 24.9.2
+_anaconda_depends=2024.10=py312_mkl_0
+aiobotocore=2.12.3=py312haa95532_0

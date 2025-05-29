@@ -4,7 +4,7 @@ import re
 from OpenGL.GL import *
 from td_game import TDGame
 from td_map_creator import MapCreator
-from pygame_functions import draw_checkmark_on_menu, draw_img_on_rect, draw_text
+from pygame_functions import draw_checkmark_on_menu, draw_img_on_rect, draw_text, check_button_state
 from db_functions import *
 from model.profile import Profile
 from model.map.map import Map
@@ -102,27 +102,34 @@ class MainMenu:
                     enemies_button = pygame.Rect(75, 505, 160, 55)
                     exit_button = pygame.Rect(75, 605, 160, 55)
 
-                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_SelectProfile.png", select_profile_button.left, select_profile_button.top, select_profile_button.width, select_profile_button.height)
+                    type = check_button_state(select_profile_button, self.mx, self.my, False, False)
+                    draw_img_on_rect(self.screen, f"images/UI/MainMenu/BTN_SelectProfile_{type}.png", select_profile_button.left, select_profile_button.top, select_profile_button.width, select_profile_button.height)
                     # pygame.draw.rect(self.screen, (255, 255, 255), select_profile_button)
                     # draw_text(f'Select Profile', self.font, (0,0,0), self.screen, select_profile_button.left + 2, select_profile_button.top + 2)
 
-                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_Play.png", play_button.left, play_button.top, play_button.width, play_button.height)
+                    disabled = True if self.selected_profile == None else False
+                    type = check_button_state(play_button, self.mx, self.my, False, disabled)
+                    draw_img_on_rect(self.screen, f"images/UI/MainMenu/BTN_Play_{type}.png", play_button.left, play_button.top, play_button.width, play_button.height)
                     # pygame.draw.rect(self.screen, (255, 255, 255), play_button)
                     # draw_text(f'Play', self.font, (0,0,0), self.screen, play_button.left + 2, play_button.top + 2)
 
-                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_MapCreator.png", map_creator_button.left, map_creator_button.top, map_creator_button.width, map_creator_button.height)
+                    type = check_button_state(map_creator_button, self.mx, self.my, False, False)
+                    draw_img_on_rect(self.screen, f"images/UI/MainMenu/BTN_MapCreator_{type}.png", map_creator_button.left, map_creator_button.top, map_creator_button.width, map_creator_button.height)
                     # pygame.draw.rect(self.screen, (255, 255, 255), map_creator_button)
                     # draw_text(f'Map creator', self.font, (0,0,0), self.screen, map_creator_button.left + 2, map_creator_button.top + 2)
 
-                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_History.png", history_button.left, history_button.top, history_button.width, history_button.height)
+                    type = check_button_state(history_button, self.mx, self.my, False, disabled)
+                    draw_img_on_rect(self.screen, f"images/UI/MainMenu/BTN_History_{type}.png", history_button.left, history_button.top, history_button.width, history_button.height)
                     # pygame.draw.rect(self.screen, (255, 255, 255), history_button)
                     # draw_text(f'History', self.font, (0,0,0), self.screen, history_button.left + 2, history_button.top + 2)
 
-                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_Enemies.png", enemies_button.left, enemies_button.top, enemies_button.width, enemies_button.height)
+                    type = check_button_state(enemies_button, self.mx, self.my, False, False)
+                    draw_img_on_rect(self.screen, f"images/UI/MainMenu/BTN_Enemies_{type}.png", enemies_button.left, enemies_button.top, enemies_button.width, enemies_button.height)
                     # pygame.draw.rect(self.screen, (255, 255, 255), enemies_button)
                     # draw_text(f'Enemies', self.font, (0,0,0), self.screen, enemies_button.left + 2, enemies_button.top + 2)
 
-                    draw_img_on_rect(self.screen, "images/UI/MainMenu/BTN_Exit.png", exit_button.left, exit_button.top, exit_button.width, exit_button.height)
+                    type = check_button_state(exit_button, self.mx, self.my, False, False)
+                    draw_img_on_rect(self.screen, f"images/UI/MainMenu/BTN_Exit_{type}.png", exit_button.left, exit_button.top, exit_button.width, exit_button.height)
                     # pygame.draw.rect(self.screen, (255, 255, 255), exit_button)
                     # draw_text(f'Exit', self.font, (0,0,0), self.screen, exit_button.left + 2, exit_button.top + 2)
 
@@ -242,10 +249,13 @@ class MainMenu:
                 self.load_select_profile = False
 
         create_new_profile_button = pygame.Rect(profile_left + 30, profile_top + profile_height - 60, 150, 40)
-        pygame.draw.rect(self.screen, (0, 100, 0), create_new_profile_button)
+        type = check_button_state(create_new_profile_button, self.mx, self.my, False, False)
+        draw_img_on_rect(self.screen, f'images/UI/MainMenu/Profile/BTN_CreateProfile_{type}.png', create_new_profile_button.left, create_new_profile_button.top, create_new_profile_button.width, create_new_profile_button.height)
 
         enable_disable_delete_profile_button = pygame.Rect(profile_left + profile_width - 150 - 30, profile_top + profile_height - 60, 150, 40)
+        type = check_button_state(enable_disable_delete_profile_button, self.mx, self.my, self.can_delete_profile, False)
         pygame.draw.rect(self.screen, (100, 0, 0), enable_disable_delete_profile_button)
+        draw_img_on_rect(self.screen, f'images/UI/MainMenu/Profile/BTN_EnableDelete_{type}.png', enable_disable_delete_profile_button.left, enable_disable_delete_profile_button.top, enable_disable_delete_profile_button.width, enable_disable_delete_profile_button.height)
 
         self.handle_profile_buttons(create_new_profile_button, enable_disable_delete_profile_button)
 
@@ -667,6 +677,8 @@ class MainMenu:
             draw_img_on_rect(self.screen, f'images/Enemies/{enemy_image}', base_x, base_y, 85, 85)
 
             if enemy_rect.collidepoint(self.mx, self.my):
+                draw_img_on_rect(self.screen, f'images/Assets/select.png', enemy_rect.left, enemy_rect.top, enemy_rect.width, enemy_rect.height)
+
                 if self.click:
                     self.load_enemy = True
                     self.load_edit_enemies = False

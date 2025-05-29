@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 import shutil
-from pygame_functions import draw_text, draw_checkmark_on_menu, draw_img_on_rect, draw_transparent_img
+from pygame_functions import draw_text, draw_checkmark_on_menu, draw_img_on_rect, draw_transparent_img, check_button_state
 from model.map.map import Map, Location, Obstacle
 from model.map.tile_type_enum import get_tile_types
 
@@ -131,7 +131,11 @@ class MapCreator:
                 # Draws sequence blocks(=Amount of Paths) at the top
                 for i in range(len(self.map_selected.get_all_paths())):
                     seq = pygame.Rect(40 + i * 70, 0, 60, 30)
-                    pygame.draw.rect(self.screen, (180, 0, 0), seq)
+                    if i == 0 and self.selected_sequence == "first_path" or self.selected_sequence == self.path_names[i-1] and i != 0:
+                        pygame.draw.rect(self.screen, (255, 15, 0), seq)
+                    else:
+                        pygame.draw.rect(self.screen, (180, 0, 0), seq)
+
                     draw_text(f'PATH {i}', pygame.font.SysFont(None, 20), (0, 0, 0), self.screen, seq.left + 3, seq.top + 9)
                     seq_rec.append(seq)
 
@@ -178,29 +182,49 @@ class MapCreator:
 
             grid_button = pygame.Rect(1330, 30, 30, 30)
             pygame.draw.rect(self.screen, (75, 75, 75), grid_button)
+            draw_text("#", pygame.font.SysFont(None, 30), (255, 255, 255), self.screen, grid_button.left + 9, grid_button.top + 5)
 
             save_button = pygame.Rect(1360, 850, 120, 50)
+            type = check_button_state(save_button, self.mx, self.my, False, False)  
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/BTN_Save_{type}.png', save_button.left, save_button.top, save_button.width, save_button.height)
+
             exit_button = pygame.Rect(1480, 850, 120, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/BTN_Save.png", save_button.left, save_button.top, save_button.width, save_button.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/BTN_Exit.png", exit_button.left, exit_button.top, exit_button.width, exit_button.height)
+            type = check_button_state(exit_button, self.mx, self.my, False, False)  
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/BTN_Exit_{type}.png', exit_button.left, exit_button.top, exit_button.width, exit_button.height)
 
             select_map = pygame.Rect(1400, 90, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_SelectMap_Unselected.png", select_map.left, select_map.top, select_map.width, select_map.height)
+            type = check_button_state(select_map, self.mx, self.my, self.load_map_menu, False)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_SelectMap_{type}.png', select_map.left, select_map.top, select_map.width, select_map.height)
 
             see_tiles = pygame.Rect(1400, 190, 160, 50)
+            selected = True if self.selected_view_mode == "Tiles" else False
+            type = check_button_state(see_tiles, self.mx, self.my, selected, False)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_EditTiles_{type}.png', see_tiles.left, see_tiles.top, see_tiles.width, see_tiles.height)
+
             open_tile_menu_button = pygame.Rect(1400, 260, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditTiles_Unselected.png", see_tiles.left, see_tiles.top, see_tiles.width, see_tiles.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_SelectTile_Unselected.png", open_tile_menu_button.left, open_tile_menu_button.top, open_tile_menu_button.width, open_tile_menu_button.height)
+            disabled = True if self.selected_view_mode == "Obstacles" or self.selected_view_mode == "Tower" or self.selected_view_mode == "Sequence" else False
+            type = check_button_state(open_tile_menu_button, self.mx, self.my, self.load_tile_menu, disabled)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_SelectTile_{type}.png', open_tile_menu_button.left, open_tile_menu_button.top, open_tile_menu_button.width, open_tile_menu_button.height)
 
             see_obstacles = pygame.Rect(1400, 360, 160, 50)
+            selected = True if self.selected_view_mode == "Obstacles" else False
+            type = check_button_state(see_obstacles, self.mx, self.my, selected, False)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_EditObstacles_{type}.png', see_obstacles.left, see_obstacles.top, see_obstacles.width, see_obstacles.height)
+            
             open_obstacle_menu = pygame.Rect(1400, 430, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditObstacles_Unselected.png", see_obstacles.left, see_obstacles.top, see_obstacles.width, see_obstacles.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_SelectObstacle_Unselected.png", open_obstacle_menu.left, open_obstacle_menu.top, open_obstacle_menu.width, open_obstacle_menu.height)
+            disabled = True if self.selected_view_mode == "Tiles" or self.selected_view_mode == "Tower" or self.selected_view_mode == "Sequence" else False
+            type = check_button_state(open_obstacle_menu, self.mx, self.my, self.load_obstacle_menu, disabled)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_SelectObstacle_{type}.png', open_obstacle_menu.left, open_obstacle_menu.top, open_obstacle_menu.width, open_obstacle_menu.height)
 
             see_tower_avail = pygame.Rect(1400, 530, 160, 50)
+            selected = True if self.selected_view_mode == "Tower" else False
+            type = check_button_state(see_tower_avail, self.mx, self.my, selected, False)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_EditTower_{type}.png', see_tower_avail.left, see_tower_avail.top, see_tower_avail.width, see_tower_avail.height)
+            
             see_sequence = pygame.Rect(1400, 600, 160, 50)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditTower_Unselected.png", see_tower_avail.left, see_tower_avail.top, see_tower_avail.width, see_tower_avail.height)
-            draw_img_on_rect(self.screen, "images/UI/MapCreator/Buttons/Plate/BTN_EditPath_Unselected.png", see_sequence.left, see_sequence.top, see_sequence.width, see_sequence.height)
+            selected = True if self.selected_view_mode == "Sequence" else False
+            type = check_button_state(see_sequence, self.mx, self.my, selected, False)
+            draw_img_on_rect(self.screen, f'images/UI/MapCreator/Buttons/Plate/BTN_EditPath_{type}.png', see_sequence.left, see_sequence.top, see_sequence.width, see_sequence.height)
 
             red_style_button = pygame.Rect(1400, 660, 70, 70)
             blue_style_button = pygame.Rect(1490, 660, 70, 70)
@@ -525,7 +549,12 @@ class MapCreator:
 
         # Create buttons
         add_new_map_rect = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 220, map_menu_width - 60, 50)
-        pygame.draw.rect(self.screen, (200, 200, 200), add_new_map_rect)
+
+        if add_new_map_rect.collidepoint(self.mx, self.my):
+            pygame.draw.rect(self.screen, (200, 200, 200), add_new_map_rect)
+        else:
+            pygame.draw.rect(self.screen, (100, 100, 100), add_new_map_rect)
+
         draw_text("CREATE MAP", pygame.font.SysFont(None, 50), (0, 0, 0), self.screen, add_new_map_rect.left + 3, add_new_map_rect.top + 10)
 
         new_map_inputfield = pygame.Rect(map_menu_left + 30, map_menu_top + map_menu_length - 150, map_menu_width - 60, 50)
@@ -880,3 +909,4 @@ class MapCreator:
         obstacles = self.map_selected.get_obstacles()
         sorted_obstacles = sorted(obstacles , key=lambda obstacle: obstacle.get_top())
         return sorted_obstacles
+    

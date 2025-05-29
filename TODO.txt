@@ -19,3 +19,13 @@ maybe can fix wave idk
 PLACING TOWERS PIC IS NOT IN DOCUMENT
 
 fix paths
+
+MENU HOVER, DISABLE BUTTONS
+
+
+FIX PATHS IN MAP CREATOR CANT DELETE IF SAVED
+
+FIX OBSTACLES ROCK/TREE
+
+
+if enemy profile db made then add disable enemies in main menu
