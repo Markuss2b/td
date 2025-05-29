@@ -226,6 +226,10 @@ class TDGame:
                     if event.button == 1:
                         self.click = True
 
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.tower_selected = None
+
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -352,6 +356,12 @@ class TDGame:
         self.UI_textures["T_YouWon.png"] = load_texture(f'images/UI/Game/GameEnd/T_YouWon.png')
         self.UI_textures["T_GameEndBackground.png"] = load_texture(f'images/UI/Game/GameEnd/T_GameEndBackground.png')
         self.UI_textures["BTN_Next.png"] = load_texture(f'images/UI/Game/GameEnd/BTN_Next.png')
+        self.UI_textures["T_TopBorder_Green.png"] = load_texture(f'images/UI/Game/T_TopBorder_Green.png')
+        self.UI_textures["T_BottomBorder_Green.png"] = load_texture(f'images/UI/Game/T_BottomBorder_Green.png')
+        self.UI_textures["T_TopBorder_Red.png"] = load_texture(f'images/UI/Game/T_TopBorder_Red.png')
+        self.UI_textures["T_BottomBorder_Red.png"] = load_texture(f'images/UI/Game/T_BottomBorder_Red.png')
+        self.UI_textures["T_Background4.png"] = load_texture(f'images/UI/T_Background4.png')
+        self.UI_textures["select.png"] = load_texture(f'images/Assets/select.png')
 
     # TODO:
     def load_bullet_textures(self):
@@ -384,13 +394,22 @@ class TDGame:
 
         draw_quad_2(1370, 40, 220, 460, self.UI_textures.get("T_CharacterSelectionBackground.png"), self.shader, self.vbo, self.alpha)
 
-        if self.pause == True:
-            pass
+        if self.pause == True and self.health > 0:
+            img = "Green"
         else:
-            pass
+            img = "Red"
+        draw_quad_2(0, 30, 1360, 50, self.UI_textures.get(f'T_TopBorder_{img}.png'), self.shader, self.vbo, self.alpha)
+        draw_quad_2(0, 845, 1360, 55, self.UI_textures.get(f'T_BottomBorder_{img}.png'), self.shader, self.vbo, self.alpha)
 
-        select_magma_rect = pygame.Rect(1435, 60, 85, 85)
-        draw_quad_2(select_magma_rect.left, select_magma_rect.top, select_magma_rect.width, select_magma_rect.height, self.enemy_textures.get("MagmaBall.png"), self.shader, self.vbo, self.alpha)
+        select_balloon_rect = pygame.Rect(1456, 60, 50, 50)
+        draw_quad_2(select_balloon_rect.left, select_balloon_rect.top, select_balloon_rect.width, select_balloon_rect.height, self.bullet_textures.get("Balloon.png"), self.shader, self.vbo, self.alpha)
+        
+        stickman_border = pygame.Rect(1440, 120, 85, 85)
+        draw_quad_2(stickman_border.left, stickman_border.top, stickman_border.width, stickman_border.height, self.UI_textures.get("T_Background4.png"), self.shader, self.vbo, self.alpha)
+        stickman_rect = pygame.Rect(1440, 120, 85, 85)
+        draw_quad_2(stickman_rect.left, stickman_rect.top, stickman_rect.width, stickman_rect.height, self.tower_textures.get("C_Stickman_D.png"), self.shader, self.vbo, self.alpha)
+        if self.tower_selected != None:
+            draw_quad_2(stickman_rect.left + 3, stickman_rect.top + 5, stickman_rect.width - 6, stickman_rect.height - 10, self.UI_textures.get("select.png"), self.shader, self.vbo, self.alpha)
 
         play_button_rect = pygame.Rect(1360, 520, 240, 131)
         active = False if self.pause == True else True
@@ -403,7 +422,7 @@ class TDGame:
         img = f"BTN_TrashButton_{type}.png"
         draw_quad_2(trash_button_rect.left, trash_button_rect.top, trash_button_rect.width, trash_button_rect.height, self.UI_textures.get(img), self.shader, self.vbo, self.alpha)
 
-        destroy_towers_rect = pygame.Rect(1360 + 15, 660, 70, 40)
+        destroy_towers_rect = pygame.Rect(1360 + 10, 673, 70, 40)
         draw_quad_2(destroy_towers_rect.left, destroy_towers_rect.top, destroy_towers_rect.width, destroy_towers_rect.height, self.UI_textures.get("T_DestroyTowers.png"), self.shader, self.vbo, self.alpha)
 
         return_to_menu_rect = pygame.Rect(1360, 820, 240, 70)
@@ -417,11 +436,11 @@ class TDGame:
         img = f"BTN_SaveAndExit_{type}.png"
         draw_quad_2(save_and_exit_rect.left, save_and_exit_rect.top, save_and_exit_rect.width, save_and_exit_rect.height, self.UI_textures.get(img), self.shader, self.vbo, self.alpha)
 
-        self.handle_UI_buttons(select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect)
+        self.handle_UI_buttons(stickman_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect)
     
 
-    def handle_UI_buttons(self, select_magma_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect):
-        if select_magma_rect.collidepoint(self.mx, self.my):
+    def handle_UI_buttons(self, stickman_rect, play_button_rect, return_to_menu_rect, save_and_exit_rect, trash_button_rect):
+        if stickman_rect.collidepoint(self.mx, self.my):
             if self.click:
 
                 # TODO: towers
@@ -458,6 +477,7 @@ class TDGame:
         if trash_button_rect.collidepoint(self.mx, self.my):
             if self.click:
                 if self.trash_selected == False:
+                    self.tower_selected = None
                     self.trash_selected = True
                 else:
                     self.trash_selected = False
@@ -586,11 +606,11 @@ class TDGame:
 
 
     def draw_bullets(self):
-        self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("MagmaBall.png")).clear()
+        self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("Balloon.png")).clear()
         for bull in self.bullets_on_map:
             bull_left, bull_top, bull_width, bull_height = bull.get_rect()
             #FIXME:
-            self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("MagmaBall.png")).append((bull_left, bull_top, bull_width, bull_height))
+            self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get("Balloon.png")).append((bull_left, bull_top, bull_width, bull_height))
             # self.texture_ids_with_quads.get("BULLET").get(self.bullet_textures.get(bull.get_img())).append((bull_left, bull_top, bull_width, bull_height))
 
     def move_bullets(self):

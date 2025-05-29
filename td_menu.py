@@ -478,7 +478,7 @@ class MainMenu:
         map_menu_width = 760
         map_menu_height = 600
         map_menu = pygame.Rect(map_menu_left, map_menu_top, map_menu_width, map_menu_height)
-        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/Border.png", map_menu.left, map_menu.top, map_menu.width, map_menu.height)
+        draw_img_on_rect(self.screen, "images/UI/T_Background4.png", map_menu.left, map_menu.top, map_menu.width, map_menu.height)
         # pygame.draw.rect(self.screen, (40, 40, 40), map_menu)
 
         farmfield = pygame.Rect(map_menu_left + 40, map_menu_top + 80, 320, 180)
@@ -593,7 +593,7 @@ class MainMenu:
         history_width = 1000
         history_height = 550
         history_rect = pygame.Rect(history_left, history_top, history_width, history_height)
-        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/Border.png", history_rect.left, history_rect.top, history_rect.width, history_rect.height)
+        draw_img_on_rect(self.screen, "images/UI/T_Background4.png", history_rect.left, history_rect.top, history_rect.width, history_rect.height)
         # pygame.draw.rect(self.screen, (40, 40, 40), history_rect)
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, history_rect)
@@ -658,7 +658,7 @@ class MainMenu:
         edit_enemies_width = 545
         edit_enemies_length = 700
         edit_enemies_rect = pygame.Rect(edit_enemies_left, edit_enemies_top, edit_enemies_width, edit_enemies_length)
-        pygame.draw.rect(self.screen, (50, 50, 50), edit_enemies_rect)
+        draw_img_on_rect(self.screen, "images/UI/T_Background4.png", edit_enemies_left, edit_enemies_top, edit_enemies_width, edit_enemies_length)
         # draw_img_on_rect(self.screen, "images/UI/T_CharacterSelectionBackground.png", edit_enemies_rect.left, edit_enemies_rect.top, edit_enemies_rect.width, edit_enemies_rect.height)
 
         checkmark_rect = draw_checkmark_on_menu(self.screen, edit_enemies_rect)

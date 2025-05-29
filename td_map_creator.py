@@ -490,7 +490,7 @@ class MapCreator:
         map_menu_width = 300
         map_menu_length = 720
         map_menu = pygame.Rect(map_menu_left, map_menu_top, map_menu_width, map_menu_length)
-        pygame.draw.rect(self.screen, (0, 0, 0), map_menu)
+        draw_img_on_rect(self.screen, "images/UI/T_Background4.png", map_menu_left, map_menu_top, map_menu_width, map_menu_length)
 
         base_x = map_menu_left + 20
         base_y = map_menu_top + 10
@@ -596,7 +596,7 @@ class MapCreator:
         tile_menu_width = 545
         tile_menu_length = 700
         tile_menu = pygame.Rect(tile_menu_left, tile_menu_top, tile_menu_width, tile_menu_length)
-        pygame.draw.rect(self.screen, (0, 0, 0), tile_menu)
+        draw_img_on_rect(self.screen, "images/UI/T_Background4.png", tile_menu_left, tile_menu_top, tile_menu_width, tile_menu_length)
 
         all_tile_type_rect = []
 
@@ -637,7 +637,7 @@ class MapCreator:
         obstacle_menu_width = 545
         obstacle_menu_length = 700
         obstacle_menu = pygame.Rect(obstacle_menu_left, obstacle_menu_top, obstacle_menu_width, obstacle_menu_length)
-        pygame.draw.rect(self.screen, (50, 50, 50), obstacle_menu)
+        draw_img_on_rect(self.screen, "images/UI/T_Background4.png", obstacle_menu_left, obstacle_menu_top, obstacle_menu_width, obstacle_menu_length)
 
         all_obstacle_rect = []
         base_x = obstacle_menu_left + 20
@@ -892,6 +892,7 @@ class MapCreator:
         page_forwards = pygame.Rect(example_rect.left + 30, example_rect.top - 90, 20, 20)
 
         pygame.draw.rect(self.screen, (255, 255, 255), page_back)
+        draw_img_on_rect
         pygame.draw.rect(self.screen, (255, 255, 255), page_forwards)
 
         if page_back.collidepoint(self.mx, self.my):
