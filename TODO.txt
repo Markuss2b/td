@@ -6,14 +6,6 @@ HEALTH BAR TOP
 
 INPUT FIELDS
 
-1 PATH TILE CRASH
-
-IMPROVE SELECTION OF SELFMADE  MAPS IN GAME SCREEN
-
-DELETE SELECTED PROFILE BUG 
-
-fix game history shows ID instead of Count
-
 check saved games how the time works
 
 add saved games in db ?
@@ -22,6 +14,8 @@ create table for enemies for each profile
 
 speed might be fixable
 
-CHECK PAUSE TIMER
-
 maybe can fix wave idk
+
+PLACING TOWERS PIC IS NOT IN DOCUMENT
+
+fix paths

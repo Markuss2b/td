@@ -31,7 +31,8 @@ class TDGame:
 
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
-        self.game_waves = [Wave(500, 100, 20, 10)]
+        # self.game_waves = [Wave(500, 100, 20, 10)]
+        self.game_waves = [Wave(500, 3, 0, 0)]
         self.current_wave = 0
 
         self.click = False
@@ -143,7 +144,7 @@ class TDGame:
 
         while self.running:
             # Swapping waves / Game over
-            if len(self.game_waves[self.current_wave].get_enemies()) == 0:
+            if len(self.game_waves[self.current_wave].get_enemies()) == 0 and len(self.enemies_on_map) == 0:
                 self.pause = True
 
                 if len(self.sequences) > 1:
@@ -220,10 +221,6 @@ class TDGame:
                     self.view_state.set_quit(True)
                 
                 # Inputs 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        running = False
-                
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.click = True
@@ -237,7 +234,12 @@ class TDGame:
 
             if self.map_selected.get_map_type() == "Map":
                 self.draw_map()
-                self.draw_obstacles()
+
+                if self.game_end != True:
+                    self.draw_obstacles()
+                else:
+                    self.remove_obstacles()
+
             elif self.map_selected.get_map_type() == "PremadeMap":
                 self.draw_premade_map()
 
@@ -338,7 +340,7 @@ class TDGame:
         self.UI_textures["BTN_TrashButton_Unselected.png"] = load_texture(f'images/UI/Game/BTN_TrashButton_Unselected.png')
         self.UI_textures["BTN_Return.png"] = load_texture(f'images/UI/Game/BTN_Return.png')
         self.UI_textures["BTN_SaveAndExit.png"] = load_texture(f'images/UI/Game/BTN_SaveAndExit.png')
-        self.UI_textures["T_DestroyTower.png"] = load_texture(f'images/UI/Game/T_DestroyTowers.png')
+        self.UI_textures["T_DestroyTowers.png"] = load_texture(f'images/UI/Game/T_DestroyTowers.png')
         self.UI_textures["BTN_Back.png"] = load_texture(f'images/UI/Game/GameEnd/BTN_Back.png')
         self.UI_textures["BTN_Retry.png"] = load_texture(f'images/UI/Game/GameEnd/BTN_Retry.png')
         self.UI_textures["T_YouLost.png"] = load_texture(f'images/UI/Game/GameEnd/T_YouLost.png')
@@ -371,6 +373,7 @@ class TDGame:
         self.texture_ids_with_quads["OBSTACLES"] = { self.obstacle_textures.get(k):[] for k in self.obstacle_textures }
 
     
+    # Inefficient drawing
     def draw_UI(self):
         draw_quad_2(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"), self.shader, self.vbo, self.alpha)
 
@@ -388,6 +391,9 @@ class TDGame:
             img = "BTN_TrashButton_Selected.png"
         trash_button_rect = pygame.Rect(1360 + 120 - 35, 660, 70, 70)
         draw_quad_2(trash_button_rect.left, trash_button_rect.top, trash_button_rect.width, trash_button_rect.height, self.UI_textures.get(img), self.shader, self.vbo, self.alpha)
+
+        destroy_towers_rect = pygame.Rect(1360 + 15, 660, 70, 40)
+        draw_quad_2(destroy_towers_rect.left, destroy_towers_rect.top, destroy_towers_rect.width, destroy_towers_rect.height, self.UI_textures.get("T_DestroyTowers.png"), self.shader, self.vbo, self.alpha)
 
         return_to_menu_rect = pygame.Rect(1360, 820, 240, 70)
         draw_quad_2(return_to_menu_rect.left, return_to_menu_rect.top, return_to_menu_rect.width, return_to_menu_rect.height, self.UI_textures.get("BTN_Return.png"), self.shader, self.vbo, self.alpha)
@@ -470,6 +476,12 @@ class TDGame:
             # draw_quad(obstacle.get_left(), obstacle.get_top(), obstacle.get_width(), obstacle.get_height(), self.obstacle_textures.get(obstacle.get_name()))
 
         self.static_obstacles = True
+
+
+    def remove_obstacles(self):
+        obstacles = self.sort_obstacles_from_top_descending()
+        for obstacle in obstacles:
+            self.texture_ids_with_quads.get("OBSTACLES").get(self.obstacle_textures.get(obstacle.get_name())).clear()
 
 
     def draw_premade_map(self):

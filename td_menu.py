@@ -159,6 +159,7 @@ class MainMenu:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.load_history = False
+                        self.can_delete_profile = False
 
                         if self.load_create_new_profile == True:
                             self.load_create_new_profile = False
@@ -258,6 +259,9 @@ class MainMenu:
             if self.click:
                 self.load_create_new_profile = True
                 self.load_select_profile = False
+
+                # Remove this = Big problem
+                self.can_delete_profile = False
 
         if enable_disable_delete_profile_button.collidepoint(self.mx, self.my):
             if self.click:
@@ -416,8 +420,8 @@ class MainMenu:
         draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_CustomMap.png", custom_map_rect.left, custom_map_rect.top, custom_map_rect.width, custom_map_rect.height)
 
         if self.check_for_saved_games() == True:
-            saved_map_rect = pygame.Rect(select_map_left + select_map_width / 2 - 15, select_map_top + select_map_height - 40, 30, 30)
-            pygame.draw.rect(self.screen, (255, 0, 0), saved_map_rect)
+            saved_map_rect = pygame.Rect(select_map_left + select_map_width / 2 - 145, select_map_top + select_map_height - 90, 290, 50)
+            draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_Continue.png", saved_map_rect.left, saved_map_rect.top, saved_map_rect.width, saved_map_rect.height)
 
             if saved_map_rect.collidepoint(self.mx, self.my):
                 if self.click:
@@ -428,8 +432,8 @@ class MainMenu:
                         health = int(f.readline().replace("\n", ""))
                         towers = f.readlines()
                     
-                    if map_name == "farmfield":
-                        self.map_selected = PremadeMap("farmfield", 16, 9)
+                    if map_name == "farmfield" or map_name == "farmfield2" or map_name == "pond":
+                        self.map_selected = PremadeMap(map_name, 16, 9)
                         self.map_selected.recreate_map_from_folder()
                     else:
                         self.map_selected = Map(map_name, 0, 0)
@@ -501,6 +505,15 @@ class MainMenu:
     def select_custom_made_maps(self):
         custom_maps = os.listdir("all_maps")
 
+        for temp_map_name in custom_maps:
+            temp_map = Map(temp_map_name, 16, 9)
+            temp_map.recreate_map_from_folder()
+
+            for temp_path in temp_map.get_all_paths():
+                if len(temp_path.get_sequence()) <= 1:
+                    custom_maps.remove(temp_map_name)
+                    break
+
         map_menu_left = 650
         map_menu_top = 100
         map_menu_width = 300
@@ -540,18 +553,15 @@ class MainMenu:
                     self.map_selected = Map(custom_maps[i], 0, 0)
                     self.map_selected.recreate_map_from_folder()
 
-                    self.view_state.set_map_selected(self.map_selected)
-                    self.view_state.set_state("game")
-                    self.running = False
-
         checkmark_rect = draw_checkmark_on_menu(self.screen, map_menu)
         
 
         if self.map_selected != None:
             if checkmark_rect.collidepoint(self.mx, self.my):
                 if self.click:
+                    self.view_state.set_map_selected(self.map_selected)
                     self.view_state.set_state("game")
-                    # TDGame(self.clock, self.screen, self.selected_profile, self.map_selected)
+                    self.running = False
 
 
     def check_for_saved_games(self):
@@ -598,7 +608,7 @@ class MainMenu:
                     break
                 elif i+1 > (self.history_page - 1) * 7:
                     game = all_games[i]
-                    draw_text(str(game[0]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 60, base_y + 60)
+                    draw_text(str(i+1), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 60, base_y + 60)
                     draw_text(str(game[2]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 130 + 90, base_y + 60)
                     draw_text(str(game[3]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 260 + 120, base_y + 60)
                     draw_text(str(game[4]), pygame.font.SysFont(None, 30), (255,255,255), self.screen, history_left + 390 + 150, base_y + 60)

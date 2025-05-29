@@ -31,6 +31,8 @@ class MapCreator:
         # Boolean for selecting tiles and obstacles in menu
         self.load_tile_menu = False
         self.load_obstacle_menu = False
+
+        self.load_map_error_msg = False
         
         # Function in tile_type_enum. Returns Dict  Example={"Grass": ["Grass1", "Grass2"]}
         self.all_tile_types = get_tile_types()
@@ -101,8 +103,20 @@ class MapCreator:
             main_map_rect = pygame.Rect(0, 80, 1360, 765)
             pygame.draw.rect(self.screen, (25, 25, 25), main_map_rect)
 
-            # Stops Map Creator crashing when map is no selected
+            # Stops Map Creator crashing when map is not selected
             if self.map_selected != None:
+
+                # Tell user that a map cannot be played without proper paths
+                playable_map = True
+                for single_path in self.map_selected.get_all_paths():
+                    if len(single_path.get_sequence()) <= 1:
+                        playable_map = False
+                        self.load_map_error_msg = True
+                        break
+
+                if playable_map == True:
+                    self.load_map_error_msg = False
+               
                 self.draw_tile_img()
 
                 if self.load_obstacle_menu == False:
@@ -155,6 +169,9 @@ class MapCreator:
             map_bot_border = pygame.Rect(0, 845, 1360, 55)
             pygame.draw.rect(self.screen, (0, 0, 0), map_top_border)
             pygame.draw.rect(self.screen, (0, 0, 0), map_bot_border)
+
+            if self.load_map_error_msg == True:
+                draw_text("ALL PATHS MUST BE ATLEAST 2 SQUARES BIG", pygame.font.SysFont(None, 30), (255, 0, 0), self.screen, 30, map_top_border.top + map_top_border.height / 2 - 8)
 
             map_creator_ui = pygame.Rect(1360, 30, 240, 870)
             draw_img_on_rect(self.screen, "images/UI/MapCreator/UI_SidePanel.png", map_creator_ui.left, map_creator_ui.top, map_creator_ui.width, map_creator_ui.height)
@@ -286,8 +303,8 @@ class MapCreator:
             # Stops Save button from crashing before loading a map
             if self.map_selected != None:
                 if save_button.collidepoint(self.mx, self.my):
-                    if self.click:
-                        self.map_selected.save_map()
+                    if self.click:    
+                        self.map_selected.save_map() 
 
             if exit_button.collidepoint(self.mx, self.my):
                 if self.click:
