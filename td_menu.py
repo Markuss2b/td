@@ -426,12 +426,17 @@ class MainMenu:
         premade_map_rect = pygame.Rect(select_map_left + 40, select_map_top + 110, 320, 180)
         custom_map_rect = pygame.Rect(select_map_left + 40 + premade_map_rect.width + 40, select_map_top + 110, 320, 180)
 
-        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_PremadeMap.png", premade_map_rect.left, premade_map_rect.top, premade_map_rect.width, premade_map_rect.height)
-        draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_CustomMap.png", custom_map_rect.left, custom_map_rect.top, custom_map_rect.width, custom_map_rect.height)
+        type = check_button_state(premade_map_rect, self.mx, self.my, False, False)
+        draw_img_on_rect(self.screen, f"images/UI/MainMenu/SelectMap/BTN_PremadeMap_{type}.png", premade_map_rect.left, premade_map_rect.top, premade_map_rect.width, premade_map_rect.height)
+
+        type = check_button_state(custom_map_rect, self.mx, self.my, False, False)
+        draw_img_on_rect(self.screen, f"images/UI/MainMenu/SelectMap/BTN_CustomMap_{type}.png", custom_map_rect.left, custom_map_rect.top, custom_map_rect.width, custom_map_rect.height)
 
         if self.check_for_saved_games() == True:
             saved_map_rect = pygame.Rect(select_map_left + select_map_width / 2 - 145, select_map_top + select_map_height - 90, 290, 50)
-            draw_img_on_rect(self.screen, "images/UI/MainMenu/SelectMap/BTN_Continue.png", saved_map_rect.left, saved_map_rect.top, saved_map_rect.width, saved_map_rect.height)
+
+            type = check_button_state(saved_map_rect, self.mx, self.my, False, False)
+            draw_img_on_rect(self.screen, f"images/UI/MainMenu/SelectMap/BTN_Continue_{type}.png", saved_map_rect.left, saved_map_rect.top, saved_map_rect.width, saved_map_rect.height)
 
             if saved_map_rect.collidepoint(self.mx, self.my):
                 if self.click:
