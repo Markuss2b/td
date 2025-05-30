@@ -72,7 +72,6 @@ class Map:
             potential_path = next((path for path in self.paths if path.name == path_name), None)
             self.paths.remove(potential_path)
         except Exception:
-            print(f'all_maps/{self.name}/paths/{path_name}.txt')
             print("No path found")    
 
 

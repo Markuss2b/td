@@ -1,31 +1,11 @@
 FIX SPEED
-
-ON CLICK BUTTONS (PATH)
-
-HEALTH BAR TOP
-
-INPUT FIELDS
+INPUT FIELDS pasta bolognese
 
 check saved games how the time works
 
-add saved games in db ?
-
 create table for enemies for each profile
-
-speed might be fixable
+if enemy profile db made then add disable enemies in main menu
 
 maybe can fix wave idk
 
-PLACING TOWERS PIC IS NOT IN DOCUMENT
-
-fix paths
-
-MENU HOVER, DISABLE BUTTONS
-
-
-FIX PATHS IN MAP CREATOR CANT DELETE IF SAVED
-
 FIX OBSTACLES ROCK/TREE
-
-Pages
-if enemy profile db made then add disable enemies in main menu
