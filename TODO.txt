@@ -27,5 +27,5 @@ FIX PATHS IN MAP CREATOR CANT DELETE IF SAVED
 
 FIX OBSTACLES ROCK/TREE
 
-
+Pages
 if enemy profile db made then add disable enemies in main menu

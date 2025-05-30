@@ -33,7 +33,7 @@ class TDGame:
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
         # self.game_waves = [Wave(500, 100, 20, 10)]
-        self.game_waves = [Wave(500, 3, 0, 0)]
+        self.game_waves = [Wave(200, 1000, 0, 0), Wave(200, 20, 5, 0), Wave(500, 10, 5, 3), Wave(500, 15, 5, 5)]
         self.current_wave = 0
 
         self.click = False
@@ -83,7 +83,7 @@ class TDGame:
 
         self.bullets_on_map = []
 
-        self.health = 20
+        self.health = 50
         self.pause = True
         self.game_end = False
         self.result = ""
@@ -337,6 +337,7 @@ class TDGame:
     def load_assets_textures(self):
         pass
 
+    # FIXME: UNORGANIZED
     def load_UI_textures(self):
         self.UI_textures["UI_SidePanel.png"] = load_texture(f'images/UI/MapCreator/UI_SidePanel.png') 
         self.UI_textures["T_CharacterSelectionBackground.png"] = load_texture(f'images/UI/Game/T_CharacterSelectionBackground.png')
@@ -362,6 +363,8 @@ class TDGame:
         self.UI_textures["T_BottomBorder_Red.png"] = load_texture(f'images/UI/Game/T_BottomBorder_Red.png')
         self.UI_textures["T_Background4.png"] = load_texture(f'images/UI/T_Background4.png')
         self.UI_textures["select.png"] = load_texture(f'images/Assets/select.png')
+        self.UI_textures["redpixel.png"] = load_texture(f'images/redpixel.png')
+        self.UI_textures["blackpixel.png"] = load_texture(f'images/blackpixel.png')
 
     # TODO:
     def load_bullet_textures(self):
@@ -390,6 +393,12 @@ class TDGame:
     
     # Inefficient drawing
     def draw_UI(self):
+
+        if self.health > 0:
+            draw_quad_2(0, 0, 800 - 16 * self.health, 30, self.UI_textures.get("blackpixel.png"), self.shader, self.vbo, self.alpha)
+            draw_quad_2(800 - 16 * self.health, 0, 32 * self.health, 30, self.UI_textures.get("redpixel.png"), self.shader, self.vbo, self.alpha)
+            draw_quad_2(800 + 16 * self.health, 0, 800 - 16 * self.health, 30, self.UI_textures.get("blackpixel.png"), self.shader, self.vbo, self.alpha)
+
         draw_quad_2(1360, 30, 240, 870, self.UI_textures.get("UI_SidePanel.png"), self.shader, self.vbo, self.alpha)
 
         draw_quad_2(1370, 40, 220, 460, self.UI_textures.get("T_CharacterSelectionBackground.png"), self.shader, self.vbo, self.alpha)
