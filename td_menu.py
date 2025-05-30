@@ -638,8 +638,13 @@ class MainMenu:
         page_back = pygame.Rect(example_rect.left, example_rect.top - 30, 20, 20)
         page_forwards = pygame.Rect(example_rect.left + 30, example_rect.top - 30, 20, 20)
 
-        pygame.draw.rect(self.screen, (255, 255, 255), page_back)
-        pygame.draw.rect(self.screen, (255, 255, 255), page_forwards)
+        disabled = False if self.history_page > 1 else True
+        type = check_button_state(page_back, -1, -1, False, disabled)
+        draw_img_on_rect(self.screen, f'images/UI/Page/BTN_Back_{type}.png', page_back.left, page_back.top, page_back.width, page_back.height)
+
+        disabled = False if self.history_page < len_of_all / 7 else True
+        type = check_button_state(page_forwards, -1, -1, False, disabled)
+        draw_img_on_rect(self.screen, f'images/UI/Page/BTN_Forward_{type}.png', page_forwards.left, page_forwards.top, page_forwards.width, page_forwards.height)
 
         if page_back.collidepoint(self.mx, self.my):
             if self.click:

@@ -33,7 +33,7 @@ class TDGame:
         self.selected_sequence = 0
         # self.game_waves = [Wave(1000, 0, 10, 0), Wave(1000, 0, 20, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0), Wave(500, 0, 1, 0)]
         # self.game_waves = [Wave(500, 100, 20, 10)]
-        self.game_waves = [Wave(200, 1000, 0, 0), Wave(200, 20, 5, 0), Wave(500, 10, 5, 3), Wave(500, 15, 5, 5)]
+        self.game_waves = [Wave(200, 10, 0, 0), Wave(350, 20, 5, 0), Wave(500, 10, 5, 3), Wave(500, 15, 5, 5), Wave(150, 200, 0, 0), Wave(100, 1, 0, 0)]
         self.current_wave = 0
 
         self.click = False
@@ -551,10 +551,10 @@ class TDGame:
 
                 if tower_already_there == False:
                     # Name, attack, range, x, y
-                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "C_Stickman_", x, y, self.tower_selected[4]))
+                    self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 600, "C_Stickman_", x, y, self.tower_selected[4]))
                     # self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], 50, 300, "C_Stickman_", x, y, self.tower_selected[4]))
             else:
-                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 300, "C_Stickman_", x, y, self.tower_selected[4]))
+                self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], self.tower_selected[3], 600, "C_Stickman_", x, y, self.tower_selected[4]))
                 # self.towers_on_map.append(Tower(self.tower_selected[1], self.tower_selected[2], 50, 300, "C_Stickman_", x, y, self.tower_selected[4]))
         
 
@@ -595,7 +595,7 @@ class TDGame:
     # Why did i have to make a list inside of a dict inside of a dict
     def draw_enemies(self):
         # draw_quad_2(enemy.get_x_pix(), enemy.get_y_pix(), 85, 85, self.enemy_textures.get(enemy.get_img()), self.shader, self.vbo)
-        self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("MagmaBall.png")).clear()
+        self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("MagmaBall_HD.png")).clear()
         self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("FireBall.png")).clear()
         self.texture_ids_with_quads.get("ENEMY").get(self.enemy_textures.get("FireOrb.png")).clear()
         for enemy in self.enemies_on_map:
