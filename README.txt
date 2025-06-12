@@ -1,4 +1,5 @@
-# Sqlite3 vajadzētu būt ar Python
+# Download Sqlite3
+https://sqlite.org/download.html
 
 # Pygame
 pip install pygame
