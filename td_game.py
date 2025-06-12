@@ -144,6 +144,7 @@ class TDGame:
         self.game_waves[self.current_wave].create_wave()
 
         while self.running:
+            print(self.texture_ids_with_quads)
             # Swapping waves / Game over
             if len(self.game_waves[self.current_wave].get_enemies()) == 0 and len(self.enemies_on_map) == 0:
                 self.pause = True
@@ -249,13 +250,14 @@ class TDGame:
                 self.draw_premade_map()
 
             # Always draw
-            self.draw_UI()
             self.draw_towers()
 
             start = time.time()
             draw_quads_2(self.texture_ids_with_quads, self.shader, self.vbo, self.alpha)
             end = time.time()
             # print(f'Time: {start-end}')
+
+            self.draw_UI()
 
             # TODO: MOVEMENT
             now = pygame.time.get_ticks()
@@ -277,16 +279,16 @@ class TDGame:
                         self.enemies_on_map.append(self.game_waves[self.current_wave].spawn_enemy(copy.copy(self.sequences[self.selected_sequence])))
 
             # Placing Tower
-            if self.tower_selected != None:
-                if self.click:
-                    x, y = self.get_xy_from_cords(self.mx, self.my)
+            if self.click:
+                x, y = self.get_xy_from_cords(self.mx, self.my)
 
-                    if x >= 0 and x <= 15 and y >= 0 and y <= 8:
+                if x >= 0 and x <= 15 and y >= 0 and y <= 8:
 
-                        if self.trash_selected == False:
+                    if self.trash_selected == False:
+                        if self.tower_selected != None:
                             self.place_tower(x, y)
-                        else:
-                            self.remove_tower(x, y)
+                    else:
+                        self.remove_tower(x, y)
 
             # Shooting
             self.towers_fire()

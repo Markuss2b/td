@@ -1,0 +1,12 @@
+pond
+0
+50
+Stickman,10,0
+Stickman,8,0
+Stickman,5,0
+Stickman,3,0
+Stickman,3,1
+Stickman,1,2
+Stickman,1,3
+Stickman,1,5
+Stickman,4,3
